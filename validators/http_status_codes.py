@@ -19,7 +19,7 @@ ASSIGNED_HTTP_STATUS_CODES = set(chain(
 
 def validate_http_status(value: int) -> int:
     if value not in ASSIGNED_HTTP_STATUS_CODES:
-        warnings.warn(f"Status code {value} is unassigned or invalid.", UserWarning)
+        warnings.warn(UserWarning(f"Status code {value} is unassigned or invalid."))
     return value
 
 HTTPStatusCode = Annotated[
