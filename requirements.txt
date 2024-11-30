@@ -2,3 +2,4 @@ pydantic
 pyyaml
 pytest
 mutmut
+hypothesis
