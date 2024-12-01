@@ -1,4 +1,4 @@
-from validators import http_status_codes as hsc
+from specs.validators import http_status_codes as hsc
 
 from hypothesis.strategies import integers, sampled_from, from_type
 from hypothesis import given
