@@ -1,13 +1,12 @@
-import pytest
-from pydantic import ValidationError
 from validators import http_status_codes as hsc
-from pydantic import BaseModel
-from hypothesis import given
-from hypothesis.strategies import integers, sampled_from, from_type
-from itertools import chain
-import warnings
 
-warnings.simplefilter("always")
+from hypothesis.strategies import integers, sampled_from, from_type
+from hypothesis import given
+
+from pydantic import BaseModel, ValidationError
+
+import warnings
+import pytest
 
 class MyModel(BaseModel):
     status_code: hsc.HTTPStatusCode
@@ -23,9 +22,22 @@ def everything_except(excluded_types):
     )
 
 @given(sampled_from(list(hsc.ASSIGNED_HTTP_STATUS_CODES)))
+def test_warning_condition_for_assigned_codes(status_code):
+    assert status_code in hsc.ASSIGNED_HTTP_STATUS_CODES  # Verify our test data
+    assert not (status_code not in hsc.ASSIGNED_HTTP_STATUS_CODES)  # Explicitly verify the warning condition is False
+    
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        model = MyModel(status_code=status_code)
+
+@given(sampled_from(list(hsc.ASSIGNED_HTTP_STATUS_CODES)))
 def test_assigned_status_code(status_code):
-    model = MyModel(status_code=status_code)
-    assert model.status_code == status_code
+    with warnings.catch_warnings() as record:
+        warnings.simplefilter("error")  # This will make the test fail if any warning occurs
+        warnings.simplefilter("always") # Make sure we catch all warnings
+        model = MyModel(status_code=status_code)
+        # If we get here, no warning was raised
+        assert model.status_code == status_code
 
 @given(sampled_from(list(UNASSIGNED_HTTP_STATUS_CODES)))
 def test_unassigned_status_codes(status_code):
