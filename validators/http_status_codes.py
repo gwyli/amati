@@ -1,7 +1,7 @@
-from http import HTTPStatus
 from pydantic import Field, AfterValidator
 from typing import Annotated
 from itertools import chain
+
 import warnings
 
 ASSIGNED_HTTP_STATUS_CODES = set(chain(
@@ -15,7 +15,7 @@ ASSIGNED_HTTP_STATUS_CODES = set(chain(
     [431, 451],
     range(500, 508),
     range(510, 511)
-))
+    ))
 
 def _validate_http_status(value: int) -> int:
     if value not in ASSIGNED_HTTP_STATUS_CODES:
@@ -26,4 +26,4 @@ HTTPStatusCode = Annotated[
     int,
     Field(strict=True, ge=100, le=599),
     AfterValidator(_validate_http_status)
-]
+    ]
