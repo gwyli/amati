@@ -1,7 +1,9 @@
 from specs.validators import http_status_codes as hsc
 
-from hypothesis.strategies import integers, sampled_from, from_type
+from hypothesis.strategies import integers, sampled_from
 from hypothesis import given
+
+from tests.helpers import helpers
 
 from pydantic import BaseModel, ValidationError
 
@@ -13,13 +15,6 @@ class MyModel(BaseModel):
 
 
 UNASSIGNED_HTTP_STATUS_CODES = set(range(100, 599)) - hsc.ASSIGNED_HTTP_STATUS_CODES
-
-def everything_except(excluded_types):
-    return (
-        from_type(type)
-        .flatmap(from_type)
-        .filter(lambda x: not isinstance(x, excluded_types))
-    )
 
 @given(sampled_from(list(hsc.ASSIGNED_HTTP_STATUS_CODES)))
 def test_warning_condition_for_assigned_codes(status_code):
@@ -55,7 +50,7 @@ def test_invalid_status_code_above_range(status_code):
     with pytest.raises(ValidationError):
         MyModel(status_code=status_code)
 
-@given(everything_except(int))
+@given(helpers.everything_except(int))
 def test_everything_except_integers(status_code):
     with pytest.raises(ValidationError):
         MyModel(status_code=status_code)
