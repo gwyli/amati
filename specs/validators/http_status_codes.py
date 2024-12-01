@@ -1,4 +1,4 @@
-from pydantic import Field, AfterValidator
+from pydantic import Field, AfterValidator, PositiveInt
 from typing import Annotated
 from itertools import chain
 
@@ -17,7 +17,7 @@ ASSIGNED_HTTP_STATUS_CODES = set(chain(
     range(510, 511)
     ))
 
-def _validate_http_status(value: int) -> int:
+def _validate_http_status(value: PositiveInt) -> PositiveInt:
     if value not in ASSIGNED_HTTP_STATUS_CODES:
         warnings.warn(UserWarning(f"Status code {value} is unassigned or invalid."))
     return value
