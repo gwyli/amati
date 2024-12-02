@@ -17,6 +17,7 @@ requires-python = ">=3.13"
 
 dev = [
     "pytest>=7.0",
+    "pytest-cov",
     "mutmut>=2.4.3",
     "hypothesis>=6.122.0",
 ]
