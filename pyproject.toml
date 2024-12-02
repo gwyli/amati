@@ -21,6 +21,10 @@ dev = [
     "hypothesis>=6.122.0",
 ]
 
+build = [
+    "requests"
+]
+
 [tool.setuptools]
 packages = ["specs"]
 
