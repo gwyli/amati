@@ -15,13 +15,9 @@ def test_valid_http_verbs(verb):
     model = HTTPVerbModel(verb=verb)
     assert model.verb == verb
 
-@given(st.text())
+@given(st.text().filter(lambda x: x not in hv.HTTP_VERBS))
 def test_random_strings(verb):
-    if verb in hv.HTTP_VERBS:
-        model = HTTPVerbModel(verb=verb)
-        assert model.verb == verb
-    else:
-        with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError):
             HTTPVerbModel(verb=verb)
 
 @given(helpers.everything_except(str))
