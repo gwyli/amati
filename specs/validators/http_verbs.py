@@ -5,7 +5,7 @@ HTTP_VERBS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "CONNE
 
 def _validate_after(value: str) -> str:
     if value not in HTTP_VERBS:
-        raise ValueError(f"HTTP verb {value} is not a valid HTTP verb.")
+        raise ValueError(f"{value} is not a valid HTTP verb.")
     return value
 
 HTTPVerb = Annotated[

@@ -27,5 +27,3 @@ HTTPStatusCode = Annotated[
     Field(strict=True, ge=100, le=599),
     AfterValidator(_validate_after)
     ]
-
-Field()
