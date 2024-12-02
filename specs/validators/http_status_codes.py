@@ -17,13 +17,15 @@ ASSIGNED_HTTP_STATUS_CODES = set(chain(
     range(510, 511)
     ))
 
-def _validate_http_status(value: PositiveInt) -> PositiveInt:
+def _validate_after(value: PositiveInt) -> PositiveInt:
     if value not in ASSIGNED_HTTP_STATUS_CODES:
         warnings.warn(UserWarning(f"Status code {value} is unassigned or invalid."))
     return value
 
 HTTPStatusCode = Annotated[
-    int,
+    PositiveInt,
     Field(strict=True, ge=100, le=599),
-    AfterValidator(_validate_http_status)
+    AfterValidator(_validate_after)
     ]
+
+Field()

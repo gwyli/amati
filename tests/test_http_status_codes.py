@@ -24,6 +24,7 @@ def test_warning_condition_for_assigned_codes(status_code):
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         model = MyModel(status_code=status_code)
+        assert model.status_code == status_code
 
 @given(sampled_from(list(hsc.ASSIGNED_HTTP_STATUS_CODES)))
 def test_assigned_status_code(status_code):

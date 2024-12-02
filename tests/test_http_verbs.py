@@ -3,6 +3,8 @@ from hypothesis import given, strategies as st
 
 from specs.validators import http_verbs as hv
 
+from tests.helpers import helpers
+
 import pytest
 
 class HTTPVerbModel(BaseModel):
@@ -22,3 +24,7 @@ def test_random_strings(verb):
         with pytest.raises(ValidationError):
             HTTPVerbModel(verb=verb)
 
+@given(helpers.everything_except(str))
+def test_everything_else(verb):
+    with pytest.raises(ValidationError):
+        HTTPVerbModel(verb=verb)
