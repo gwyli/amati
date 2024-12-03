@@ -49,7 +49,7 @@ class LicenceObject(BaseModel):
         return v
     
     @field_validator("url")
-    def check_url(cls, v: Optional[AnyUrl]) -> AnyUrl | None:
+    def check_url(cls, v: Optional[AnyUrl]) -> Optional[AnyUrl]:
         if v is None: return None
         if v == []: return None
     
