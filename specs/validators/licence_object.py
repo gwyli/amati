@@ -13,7 +13,7 @@ with open(config.ROOT_DIR / 'data/spdx-licences.json') as f:
     data = json.loads(f.read())
 
 # `seeAlso` is the list of URLs associated with each licence
-VALID_LICENCES = {licence['licenseId'] : [AnyUrl(url) for url in licence['seeAlso']] 
+VALID_LICENCES = {licence['licenseId'] : [AnyUrl(url) for url in licence['seeAlso']]
                   for licence in data['licenses']}
 VALID_URLS = [AnyUrl(url) for urls in VALID_LICENCES.values() for url in urls]
 
@@ -42,14 +42,14 @@ class LicenceObject(BaseModel):
     url: Optional[AnyUrl] = None
 
     @field_validator("identifier")
-    def check_identifier(cls, v: str) -> str:
+    def check_identifier(cls, v: Optional[str]) -> Optional[str]:
         if v is None: return None
         if v not in VALID_LICENCES:
             raise ValueError(f"{v} is not a valid SPDX licence.")
         return v
     
     @field_validator("url")
-    def check_url(cls, v: AnyUrl) -> AnyUrl:
+    def check_url(cls, v: Optional[AnyUrl]) -> AnyUrl | None:
         if v is None: return None
         if v == []: return None
     
