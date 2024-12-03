@@ -3,17 +3,19 @@ from pydantic import BaseModel, AnyUrl, Field, field_validator, model_validator
 from typing import Optional
 from typing_extensions import Self
 
-from specs import helpers
+import config
 from specs.warnings import InconsistencyWarning
 
 import warnings
 import json
 
-with open(helpers.ROOT_DIR / 'data/spdx-licences.json') as f:
+with open(config.ROOT_DIR / 'data/spdx-licences.json') as f:
     data = json.loads(f.read())
 
-# `seeAlso` is a list of URLs associated with the licence
-VALID_LICENCES = {licence['licenseId'] : licence['seeAlso'] for licence in data['licenses']}
+# `seeAlso` is the list of URLs associated with each licence
+VALID_LICENCES = {licence['licenseId'] : [AnyUrl(url) for url in licence['seeAlso']] 
+                  for licence in data['licenses']}
+VALID_URLS = [AnyUrl(url) for urls in VALID_LICENCES.values() for url in urls]
 
 
 class LicenceObject(BaseModel):
@@ -46,14 +48,25 @@ class LicenceObject(BaseModel):
             raise ValueError(f"{v} is not a valid SPDX licence.")
         return v
     
+    @field_validator("url")
+    def check_url(cls, v: AnyUrl) -> AnyUrl:
+        if v is None: return None
+        if v == []: return None
+    
+        if v in VALID_URLS: 
+            return v
+        else:
+            warnings.warn(f"{v} is not associated with any identifier.", InconsistencyWarning)
+    
     @model_validator(mode="after")
     def check_url_associated_with_identifier(self: Self) -> Self:
-        if self.identifier is not None and self.url is not None:
-            if self.url not in VALID_LICENCES[self.identifier]:
-                warnings.warn(f"URL {self.url} is not associated with the identifier {self.identifier}.", InconsistencyWarning)
-        elif self.url is not None:
-            for value in VALID_LICENCES.values():
-                if self.url in value:
-                    return self
-            warnings.warn(f"URL {self.url} is not associated with any identifier.", InconsistencyWarning)
+
+        if self.url is None: return self
+
+        if self.identifier is not None:
+            # The list of URLs associated with the licence is not empty
+            if VALID_LICENCES[self.identifier]:
+                if self.url not in VALID_LICENCES[self.identifier]:
+                    warnings.warn(f"{self.url} is not associated with the identifier {self.identifier}.", InconsistencyWarning)
+        
         return self
