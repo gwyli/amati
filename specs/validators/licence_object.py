@@ -3,13 +3,15 @@ from pydantic import BaseModel, AnyUrl, Field, field_validator, model_validator
 from typing import Optional
 from typing_extensions import Self
 
-import config
 from specs.warnings import InconsistencyWarning
 
+import pathlib
 import warnings
 import json
 
-with open(config.ROOT_DIR / 'data/spdx-licences.json') as f:
+DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / 'data'
+
+with open(DATA_DIRECTORY / 'spdx-licences.json') as f:
     data = json.loads(f.read())
 
 # `seeAlso` is the list of URLs associated with each licence
