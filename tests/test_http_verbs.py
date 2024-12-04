@@ -1,26 +1,27 @@
 from pydantic import BaseModel, ValidationError
 from hypothesis import given, strategies as st
 
-from specs.validators import http_verbs as hv
+from specs.validators.http_verbs import HTTPVerb, HTTP_VERBS
 
 from tests.helpers import helpers
 
 import pytest
 
-class HTTPVerbModel(BaseModel):
-    verb: hv.HTTPVerb
+class Model(BaseModel):
+    value: HTTPVerb
 
-@pytest.mark.parametrize("verb", hv.HTTP_VERBS)
-def test_valid_http_verbs(verb):
-    model = HTTPVerbModel(verb=verb)
-    assert model.verb == verb
 
-@given(st.text().filter(lambda x: x not in hv.HTTP_VERBS))
-def test_random_strings(verb):
+@pytest.mark.parametrize("verb", HTTP_VERBS)
+def test_valid_http_verbs(verb: str):
+    model = Model(value=verb)
+    assert model.value == verb
+
+@given(st.text().filter(lambda x: x not in HTTP_VERBS))
+def test_random_strings(verb: str):
     with pytest.raises(ValidationError):
-            HTTPVerbModel(verb=verb)
+        Model(value=verb)
 
 @given(helpers.everything_except(str))
-def test_everything_else(verb):
+def test_everything_else(verb: str):
     with pytest.raises(ValidationError):
-        HTTPVerbModel(verb=verb)
+        Model(value=verb)
