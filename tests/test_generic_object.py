@@ -2,7 +2,6 @@ from specs.validators.generic import GenericObject
 
 from hypothesis import given, strategies as st
 from typing import Any
-from pydantic import ValidationError
 
 import pytest
 

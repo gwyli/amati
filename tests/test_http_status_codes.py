@@ -1,16 +1,17 @@
 from specs.validators.http_status_codes import HTTPStatusCode, ASSIGNED_HTTP_STATUS_CODES
+from specs.validators.generic import GenericObject
 
 from hypothesis.strategies import integers, sampled_from
 from hypothesis import given
 
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from tests.helpers import helpers
 
 import warnings
 import pytest
 
-class Model(BaseModel):
+class Model(GenericObject):
     value: HTTPStatusCode
 
 

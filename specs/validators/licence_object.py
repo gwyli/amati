@@ -1,9 +1,10 @@
-from pydantic import BaseModel, AnyUrl, Field, field_validator, model_validator
+from pydantic import AnyUrl, Field, field_validator, model_validator
 
 from typing import Optional
 from typing_extensions import Self
 
 from specs.warnings import InconsistencyWarning
+from specs.validators.generic import GenericObject
 
 import pathlib
 import warnings
@@ -20,7 +21,7 @@ VALID_LICENCES = {licence['licenseId'] : [AnyUrl(url) for url in licence['seeAls
 VALID_URLS = [AnyUrl(url) for urls in VALID_LICENCES.values() for url in urls]
 
 
-class LicenceObject(BaseModel):
+class LicenceObject(GenericObject):
     """
     A model representing the Open API Specification licence object:
      https://spec.openapis.org/oas/latest.html#license-object

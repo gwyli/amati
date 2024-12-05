@@ -1,13 +1,14 @@
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from hypothesis import given, strategies as st
 
 from specs.validators.http_verbs import HTTPVerb, HTTP_VERBS
+from specs.validators.generic import GenericObject
 
 from tests.helpers import helpers
 
 import pytest
 
-class Model(BaseModel):
+class Model(GenericObject):
     value: HTTPVerb
 
 

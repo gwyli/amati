@@ -2,19 +2,20 @@
 # as a placeholder to demonstrate that the strategy taken in this project
 # theoretically works
 
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from specs.validators.licence_object import LicenceObject
 from specs.validators.http_status_codes import HTTPStatusCode
 from specs.validators.http_verbs import HTTPVerb
+from specs.validators.generic import GenericObject
 import yaml
 import pytest
 import json
 
-class HTTP(BaseModel):
+class HTTP(GenericObject):
     verb: HTTPVerb
     status: HTTPStatusCode
 
-class Everything(BaseModel):
+class Everything(GenericObject):
     licence: LicenceObject
     http: HTTP
 
