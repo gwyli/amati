@@ -1,0 +1,7 @@
+licence:
+  name: MIT
+  identifier: Apache
+  url: https://opensource.org/license/mit/
+http:
+  verb: GET
+  status: 200
