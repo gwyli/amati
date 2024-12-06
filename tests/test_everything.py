@@ -4,7 +4,7 @@
 
 from pydantic import ValidationError
 from specs.validators.licence_object import LicenceObject
-from specs.validators.http_status_codes import HTTPStatusCode
+from specs.validators.http_status_codes import HTTPStatusCode, HTTPStatusCodeX
 from specs.validators.http_verbs import HTTPVerb
 from specs.validators.generic import GenericObject
 import yaml
@@ -13,10 +13,11 @@ import json
 
 class HTTP(GenericObject):
     verb: HTTPVerb
-    status: HTTPStatusCode
+    status: HTTPStatusCode | HTTPStatusCodeX
 
 class Everything(GenericObject):
     licence: LicenceObject
+    http: HTTP
     http: HTTP
 
 def test_everything_works():

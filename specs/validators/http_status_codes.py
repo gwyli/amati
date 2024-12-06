@@ -1,8 +1,12 @@
-from pydantic import Field, AfterValidator, PositiveInt
+import warnings
+
 from typing import Annotated
 from itertools import chain
 
-import warnings
+from pydantic import Field, AfterValidator, PositiveInt
+
+
+
 
 ASSIGNED_HTTP_STATUS_CODES = set(chain(
     [100, 101, 102, 103, 104],
@@ -26,4 +30,9 @@ HTTPStatusCode = Annotated[
     PositiveInt,
     Field(strict=True, ge=100, le=599),
     AfterValidator(_validate_after)
+    ]
+
+HTTPStatusCodeX = Annotated[
+    str,
+    Field(strict=True, pattern='^[1-5]XX$')
     ]
