@@ -8,8 +8,8 @@ from hypothesis import given, strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
-from specs.validators.licence_object import LicenceObject, VALID_LICENCES, VALID_URLS
-from specs.warnings import InconsistencyWarning
+from amati.validators.licence_object import LicenceObject, VALID_LICENCES, VALID_URLS
+from amati.warnings import InconsistencyWarning
 
 from tests.helpers import helpers
 

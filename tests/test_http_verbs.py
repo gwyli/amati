@@ -7,8 +7,8 @@ import pytest
 from hypothesis import given, strategies as st
 from pydantic import ValidationError
 
-from specs.validators.generic import GenericObject
-from specs.validators.http_verbs import HTTPVerb, HTTP_VERBS
+from amati.validators.generic import GenericObject
+from amati.validators.http_verbs import HTTPVerb, HTTP_VERBS
 
 from tests.helpers import helpers
 

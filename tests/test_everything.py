@@ -10,10 +10,10 @@ import yaml
 
 from pydantic import ValidationError
 
-from specs.validators.generic import GenericObject
-from specs.validators.http_status_codes import HTTPStatusCode, HTTPStatusCodeX
-from specs.validators.http_verbs import HTTPVerb
-from specs.validators.licence_object import LicenceObject
+from amati.validators.generic import GenericObject
+from amati.validators.http_status_codes import HTTPStatusCode, HTTPStatusCodeX
+from amati.validators.http_verbs import HTTPVerb
+from amati.validators.licence_object import LicenceObject
 
 
 class HTTP(GenericObject):

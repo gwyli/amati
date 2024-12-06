@@ -9,7 +9,7 @@ if __name__ == "__main__":
     data = json.dumps(response.json())
 
     
-    write_to = pathlib.Path(__file__).parent.parent.resolve() / 'specs/data/spdx-licences.json'  
+    write_to = pathlib.Path(__file__).parent.parent.resolve() / 'amati/data/spdx-licences.json'  
 
     with write_to.open("w") as f:
         f.write(data)

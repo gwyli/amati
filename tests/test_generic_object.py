@@ -8,7 +8,7 @@ import pytest
 
 from hypothesis import given, strategies as st
 
-from specs.validators.generic import GenericObject
+from amati.validators.generic import GenericObject
 
 
 class Model(GenericObject):

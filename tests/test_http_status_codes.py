@@ -10,8 +10,8 @@ from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
 from pydantic import ValidationError
 
-from specs.validators.generic import GenericObject
-from specs.validators.http_status_codes import HTTPStatusCode, ASSIGNED_HTTP_STATUS_CODES
+from amati.validators.generic import GenericObject
+from amati.validators.http_status_codes import HTTPStatusCode, ASSIGNED_HTTP_STATUS_CODES
 
 from tests.helpers import helpers
 
