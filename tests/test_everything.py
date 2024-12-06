@@ -1,33 +1,43 @@
-# This will change significantly over time, and currently only serves
-# as a placeholder to demonstrate that the strategy taken in this project
-# theoretically works
+"""
+This will change significantly over time, and currently only serves
+as a placeholder to demonstrate that the strategy taken in this project
+theoretically works
+"""
 
-from pydantic import BaseModel, ValidationError
-from specs.validators.licence_object import LicenceObject
-from specs.validators.http_status_codes import HTTPStatusCode
-from specs.validators.http_verbs import HTTPVerb
-import yaml
-import pytest
 import json
+import pytest
+import yaml
 
-class HTTP(BaseModel):
+from pydantic import ValidationError
+
+from specs.validators.generic import GenericObject
+from specs.validators.http_status_codes import HTTPStatusCode, HTTPStatusCodeX
+from specs.validators.http_verbs import HTTPVerb
+from specs.validators.licence_object import LicenceObject
+
+
+class HTTP(GenericObject):
     verb: HTTPVerb
-    status: HTTPStatusCode
+    status: HTTPStatusCode | HTTPStatusCodeX
 
-class Everything(BaseModel):
+
+class Everything(GenericObject):
     licence: LicenceObject
     http: HTTP
+    http: HTTP
+
 
 def test_everything_works():
-    with open('tests/data/good_spec.yaml') as f:
+    with open('tests/data/good_spec.yaml', 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
-    
+
     model = Everything(**data)
     assert json.loads(model.model_dump_json()) == data
 
+
 def test_everything_fails():
-    with open('tests/data/bad_spec.yaml') as f:
+    with open('tests/data/bad_spec.yaml', 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
-    
+
     with pytest.raises(ValidationError):
         Everything(**data)

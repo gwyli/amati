@@ -1,4 +1,4 @@
-# Spec Validator
+# OASis
 
 A programme designed to validate that a file conforms to [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.1.html) (OAS).
 
@@ -16,9 +16,11 @@ This project uses:
 
 * [Pytest](https://docs.pytest.org/en/stable/) as a testing framework
 * [PyLance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance) on strict mode for type checking
+* [Pylint](https://www.pylint.org/) as a linter, using a modified version from [Google's style guide](https://google.github.io/styleguide/pyguide.html)
 * [Hypothesis](https://hypothesis.readthedocs.io/en/latest/index.html) for test data generation
 * [mutmut](https://mutmut.readthedocs.io/en/latest/index.html) for mutation testing
 * [Coverage](https://coverage.readthedocs.io/en/7.6.8/) on both the tests and code for test coverage
+* [authpep8](https://pypi.org/project/autopep8/) for automated formatting
 
 It's expected that there are no errors, no surviving mutants and 100% of the code is reached and executed.
 
