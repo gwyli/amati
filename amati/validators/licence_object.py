@@ -12,8 +12,8 @@ import warnings
 
 from pydantic import AnyUrl, Field, field_validator, model_validator
 
-from specs.validators.generic import GenericObject
-from specs.warnings import InconsistencyWarning
+from amati.validators.generic import GenericObject
+from amati.warnings import InconsistencyWarning
 
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / 'data'
