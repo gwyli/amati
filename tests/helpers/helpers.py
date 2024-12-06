@@ -22,7 +22,7 @@ def everything_except(excluded_types: ExcludedTypes) -> st.SearchStrategy[Any]:
 
 def text_excluding_empty_string() -> st.SearchStrategy[str]:
     """Return a Hypothesis strategy for generating non-empty strings."""
-    
+
     return st.text().filter(lambda x: x != '')
 
 
