@@ -1,3 +1,8 @@
+"""
+Tempoarily, we will use this file to define custom validators for the HTTP verbs.
+This is not needed as part of the OAS spec as they are defined as keys.
+"""
+
 from typing import Annotated
 
 from pydantic import AfterValidator, Field

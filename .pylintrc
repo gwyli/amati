@@ -87,7 +87,6 @@ disable=R,
         long-suffix,
         map-builtin-not-iterating,
         misplaced-comparison-constant,
-        missing-function-docstring,
         metaclass-assignment,
         next-method-called,
         next-method-defined,
@@ -109,7 +108,6 @@ disable=R,
         raw_input-builtin,
         rdiv-method,
         reduce-builtin,
-        relative-import,
         reload-builtin,
         round-builtin,
         setslice-method,
@@ -154,7 +152,7 @@ evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / stateme
 [BASIC]
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=main,_
+good-names=main,_,JSON
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=
@@ -236,7 +234,7 @@ generated-members=
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=80
+max-line-length=100
 
 # TODO(https://github.com/pylint-dev/pylint/issues/3352): Direct pylint to exempt
 # lines made too long by directives to pytype.
@@ -362,7 +360,7 @@ int-import-graph=
 
 # Force import order to recognize a module as part of the standard
 # compatibility libraries.
-known-standard-library=
+known-standard-library=typing_extensions
 
 # Force import order to recognize a module as part of a third party library.
 known-third-party=enchant, absl
