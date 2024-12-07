@@ -5,12 +5,13 @@ Tests amati/validators/contact_object.py
 from hypothesis import given, strategies as st
 from hypothesis.provisional import urls
 
-from amati.validators.contact_object import ContactObject, email_address
+from amati.validators.contact_object import ContactObject, Email
 from amati.validators.generic import GenericObject
 
 
 class EmailModel(GenericObject):
-    email: email_address
+    email: Email
+
 
 @given(st.emails())
 def test_email_valid(email: str):

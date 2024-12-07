@@ -24,7 +24,7 @@ def _validate_after_email(value: str) -> str:
     return rfc5322.Rule('address').parse_all(value).value
 
 
-email_address = Annotated[
+Email = Annotated[
     Optional[str],
     AfterValidator(_validate_after_email)
 ]
@@ -32,4 +32,4 @@ email_address = Annotated[
 class ContactObject(GenericObject):
     name: str
     url: AnyUrl
-    email: email
+    email: Email
