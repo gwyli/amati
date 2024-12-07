@@ -3,14 +3,15 @@ requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "spec-validator"
+name = "amati"
 version = "0.1.0"
 description = "Your project description"
-authors = [{name = "Ben Alexander", email = "spec-validator@ben-alexander.com"},]
+authors = [{name = "Ben Alexander", email = "amati@ben-alexander.com"},]
 
 dependencies = [
     "pydantic>=2.10.2",
-    "pyyaml"
+    "pyyaml",
+    "abnf>=2.3.0"
 ]
 requires-python = ">=3.13"
 
@@ -30,7 +31,7 @@ build = [
 ]
 
 [tool.setuptools]
-packages = ["specs"]
+packages = ["amati"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
