@@ -11,14 +11,14 @@ import yaml
 from pydantic import ValidationError
 
 from amati.validators.generic import GenericObject
-from amati.validators.http_status_codes import HTTPStatusCode, HTTPStatusCodeX
+from amati.validators.http_status_codes import HTTPStatusCode
 from amati.validators.http_verbs import HTTPVerb
 from amati.validators.licence_object import LicenceObject
 
 
 class HTTP(GenericObject):
     verb: HTTPVerb
-    status: HTTPStatusCode | HTTPStatusCodeX
+    status: HTTPStatusCode
 
 
 class Everything(GenericObject):
