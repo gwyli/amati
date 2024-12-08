@@ -19,6 +19,7 @@ Where the specification conforms, but relies on implementation-defined behavior 
 This project uses:
 
 * [Pytest](https://docs.pytest.org/en/stable/) as a testing framework
+* [Hammett](https://pypi.org/project/hammett/) as a test runner as Pytest struggles to deal with email testing
 * [PyLance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance) on strict mode for type checking
 * [Pylint](https://www.pylint.org/) as a linter, using a modified version from [Google's style guide](https://google.github.io/styleguide/pyguide.html)
 * [Hypothesis](https://hypothesis.readthedocs.io/en/latest/index.html) for test data generation

@@ -23,7 +23,8 @@ dev = [
     "mutmut>=2.4.3",
     "hypothesis>=6.122.0",
     "autopep8",
-    "pylint"
+    "pylint",
+    "hammett"
 ]
 
 build = [

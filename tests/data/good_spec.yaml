@@ -1,7 +1,13 @@
-licence:
-  name: MIT
-  identifier: MIT
-  url: https://opensource.org/license/mit/
+info:
+  title: Example API
+  termsOfService: https://example.com/terms
+  contact: 
+    email: support@example.com
+  license:
+    name: MIT
+    identifier: MIT
+    url: https://opensource.org/license/mit/
+  version: 1.0.0
 http:
   verb: GET
   status: 200

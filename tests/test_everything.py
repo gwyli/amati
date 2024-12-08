@@ -13,7 +13,7 @@ from pydantic import ValidationError
 from amati.validators.generic import GenericObject
 from amati.validators.http_status_codes import HTTPStatusCode
 from amati.validators.http_verbs import HTTPVerb
-from amati.validators.licence_object import LicenceObject
+from amati.validators.info_object import InfoObject
 
 
 class HTTP(GenericObject):
@@ -22,7 +22,7 @@ class HTTP(GenericObject):
 
 
 class Everything(GenericObject):
-    licence: LicenceObject
+    info: InfoObject
     http: HTTP
     http: HTTP
 
@@ -32,7 +32,7 @@ def test_everything_works():
         data = yaml.safe_load(f)
 
     model = Everything(**data)
-    assert json.loads(model.model_dump_json()) == data
+    assert json.loads(model.model_dump_json(exclude_unset=True)) == data
 
 
 def test_everything_fails():
