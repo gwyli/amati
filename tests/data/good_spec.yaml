@@ -1,3 +1,4 @@
+openapi: 3.1.1
 info:
   title: Example API
   termsOfService: https://example.com/terms
@@ -8,9 +9,3 @@ info:
     identifier: MIT
     url: https://opensource.org/license/mit/
   version: 1.0.0
-http:
-  verb: GET
-  status: 200
-http:
-  verb: POST
-  status: 3XX
