@@ -1,5 +1,5 @@
 """
-Tests specs/validation/licence_object.py
+Tests amati/validation/licence_object.py
 """
 
 import pytest

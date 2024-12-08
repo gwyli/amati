@@ -1,5 +1,5 @@
 """
-Tests specs/validators/http_status_codes.py
+Tests amati/validators/http_status_codes.py
 """
 
 import warnings

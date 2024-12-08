@@ -1,5 +1,5 @@
 """
-Tests specs/validators/generic.py
+Tests amati/validators/generic.py
 """
 
 from typing import Any
