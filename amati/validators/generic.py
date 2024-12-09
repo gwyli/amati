@@ -9,8 +9,7 @@ from typing import Self, Union
 
 from pydantic import BaseModel
 
-from amati.logging import LogMixin, Log
-
+from amati.logging import Log, LogMixin
 
 # Define JSON
 JSONPrimitive = Union[str, int, float, bool, NoneType]

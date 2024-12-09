@@ -3,7 +3,6 @@ Tests amati/validators/contact_object.py
 """
 
 import pytest
-
 from abnf import ParseError
 from hypothesis import given, strategies as st
 from hypothesis.provisional import urls

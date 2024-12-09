@@ -3,15 +3,16 @@ Tests amati/validators/openapi_object.py
 """
 
 import json
+
 import pytest
 import yaml
-
 from hypothesis import given, strategies as st
 from pydantic import ValidationError
 
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
-from amati.validators.openapi_object import OpenAPIObject, OpenAPI, OPENAPI_VERSIONS
+from amati.validators.openapi_object import (OPENAPI_VERSIONS, OpenAPI,
+                                             OpenAPIObject)
 
 
 class Model(GenericObject):

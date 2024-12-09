@@ -6,7 +6,7 @@ https://spec.openapis.org/oas/latest.html#contact-object
 from typing import Annotated, Optional
 
 from abnf.grammars import rfc5322
-from pydantic import AnyUrl, AfterValidator
+from pydantic import AfterValidator, AnyUrl
 
 from amati.validators.generic import GenericObject
 

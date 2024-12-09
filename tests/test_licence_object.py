@@ -3,17 +3,16 @@ Tests amati/validation/licence_object.py
 """
 
 import pytest
-
 from hypothesis import given, strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
-from amati.validators.licence_object import LicenceObject, SPDXIdentifier, SPDXURL, VALID_LICENCES, VALID_URLS
-
+from amati.validators.licence_object import (SPDXURL, VALID_LICENCES,
+                                             VALID_URLS, LicenceObject,
+                                             SPDXIdentifier)
 from tests.helpers import helpers
-
 
 VALID_IDENTIFIERS = list(VALID_LICENCES.keys())
 

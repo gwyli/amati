@@ -5,9 +5,9 @@ Validates the OpenAPI Object - §4.8.1:
 
 from typing import Annotated
 
-from pydantic import Field, AfterValidator
+from pydantic import AfterValidator, Field
 
-from amati.logging import LogMixin, Log
+from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 from amati.validators.info_object import InfoObject
 

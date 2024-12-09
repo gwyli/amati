@@ -2,7 +2,7 @@
 Tests amati/warnings.py
 """
 
-from amati.logging import LogMixin, Log
+from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 
 

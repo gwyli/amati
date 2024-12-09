@@ -3,15 +3,14 @@ Tests amati/validators/http_status_codes.py
 """
 
 import pytest
-
 from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
 from pydantic import ValidationError
 
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
-from amati.validators.http_status_codes import HTTPStatusCode, ASSIGNED_HTTP_STATUS_CODES
-
+from amati.validators.http_status_codes import (ASSIGNED_HTTP_STATUS_CODES,
+                                                HTTPStatusCode)
 from tests.helpers import helpers
 
 

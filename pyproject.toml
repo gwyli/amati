@@ -39,3 +39,11 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+[tool.isort]
+src_paths = ["amati", "tests"]
+sections=["FUTURE","STDLIB","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
+known_first_party=["amati"]
+known_third_party=["pytest","pydantic","yaml","abnf"]
+combine_as_imports=true
+only_sections=true

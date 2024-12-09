@@ -9,6 +9,7 @@ from amati.validators.contact_object import ContactObject
 from amati.validators.generic import GenericObject
 from amati.validators.licence_object import LicenceObject
 
+
 class InfoObject(GenericObject):
     title: str
     summary: Optional[str] = None

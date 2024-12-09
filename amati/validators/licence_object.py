@@ -3,17 +3,15 @@ Validates the Open API Specification licence object - §4.8.4:
 https://spec.openapis.org/oas/latest.html#license-object
 """
 
-from typing import Optional, Annotated
-from typing_extensions import Self
-
 import json
 import pathlib
+from typing import Annotated, Optional
 
-from pydantic import AnyUrl, Field, model_validator, AfterValidator
+from pydantic import AfterValidator, AnyUrl, Field, model_validator
+from typing_extensions import Self
 
+from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
-from amati.logging import LogMixin, Log
-
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / 'data'
 

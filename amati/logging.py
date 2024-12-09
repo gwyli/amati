@@ -4,7 +4,7 @@ Logging utilities for Amati.
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import ClassVar, List, Optional, Type, Generator
+from typing import ClassVar, Generator, List, Optional, Type
 
 from pydantic import AnyUrl
 

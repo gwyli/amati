@@ -13,10 +13,9 @@ https://spec.openapis.org/oas/latest.html#patterned-fields-0
 from itertools import chain
 from typing import Annotated
 
-from pydantic import Field, AfterValidator, PositiveInt
+from pydantic import AfterValidator, Field, PositiveInt
 
-from amati.logging import LogMixin, Log
-
+from amati.logging import Log, LogMixin
 
 ASSIGNED_HTTP_STATUS_CODES = set(chain(
     [100, 101, 102, 103, 104],
