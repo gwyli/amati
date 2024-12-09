@@ -10,12 +10,12 @@ https://spec.openapis.org/oas/latest.html#patterned-fields-0
 
 """
 
-import warnings
-
 from itertools import chain
 from typing import Annotated
 
 from pydantic import Field, AfterValidator, PositiveInt
+
+from amati.logging import LogMixin, Log
 
 
 ASSIGNED_HTTP_STATUS_CODES = set(chain(
@@ -47,7 +47,7 @@ def _validate_after(value: PositiveInt) -> PositiveInt:
     """
 
     if value not in ASSIGNED_HTTP_STATUS_CODES:
-        warnings.warn(UserWarning(f"Status code {value} is unassigned or invalid."))
+        LogMixin.log(Log(f'Status code {value} is unassigned or invalid..', Warning))
 
     return value
 

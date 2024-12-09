@@ -9,6 +9,7 @@ import yaml
 from hypothesis import given, strategies as st
 from pydantic import ValidationError
 
+from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 from amati.validators.openapi_object import OpenAPIObject, OpenAPI, OPENAPI_VERSIONS
 
@@ -35,8 +36,9 @@ def test_invalid_openapi_object():
 
 @given(st.text().filter(lambda x: x not in OPENAPI_VERSIONS))
 def test_invalid_openapi_version(value: str):
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         Model(value=value)
+        assert LogMixin.logs
 
 
 @given(st.sampled_from(OPENAPI_VERSIONS))

@@ -8,9 +8,9 @@ from hypothesis import given, strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
+from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 from amati.validators.licence_object import LicenceObject, SPDXIdentifier, SPDXURL, VALID_LICENCES, VALID_URLS
-from amati.warnings import InconsistencyWarning
 
 from tests.helpers import helpers
 
@@ -35,8 +35,9 @@ def test_spdx_identifier_valid(identifier: str):
 
 @given(st.text())
 def test_spdx_identifier_invalid(identifier: str):
-    with pytest.raises(ValueError):
+    with LogMixin.context():
         IdentifierModel(identifier=identifier)
+        assert LogMixin.logs
 
 
 @given(st.sampled_from(VALID_URLS))
@@ -47,8 +48,9 @@ def test_spdx_url_valid(url: str):
 
 @given(urls())
 def test_spdx_url_invalid(url: str):
-    with pytest.warns(InconsistencyWarning):
+    with LogMixin.context():
         URLModel(url=url) # type: ignore
+        assert LogMixin.logs
 
 
 @given(helpers.text_excluding_empty_string(), st.sampled_from(VALID_IDENTIFIERS))
@@ -60,9 +62,9 @@ def test_all_variables_correct(name: str, identifier: str):
 
 @given(helpers.text_excluding_empty_string(), INVALID_IDENTIFIERS, INVALID_URLS)
 def test_all_variables_random(name: str, identifier: str, url: str):
-    with pytest.raises(ValidationError):
-        with pytest.warns(InconsistencyWarning):
-            LicenceObject(name=name, identifier=identifier, url=url) # type: ignore
+    with LogMixin.context():
+        LicenceObject(name=name, identifier=identifier, url=url) # type: ignore
+        assert LogMixin.logs
 
 
 @given(st.just('')) # This is the only case where name is empty
@@ -89,8 +91,9 @@ def test_valid_identifier_invalid_url(name: str, identifier: str, url: str):
     if url in VALID_LICENCES[identifier]: return
     if not VALID_LICENCES[identifier]: return
 
-    with pytest.warns(InconsistencyWarning):
+    with LogMixin.context():
         LicenceObject(name=name, identifier=identifier, url=url) # type: ignore
+        assert LogMixin.logs
 
 
 @given(helpers.text_excluding_empty_string(), st.none(), st.none())

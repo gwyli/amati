@@ -1,2 +1,0 @@
-class InconsistencyWarning(UserWarning):
-    pass

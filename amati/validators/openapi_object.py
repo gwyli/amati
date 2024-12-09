@@ -7,6 +7,7 @@ from typing import Annotated
 
 from pydantic import Field, AfterValidator
 
+from amati.logging import LogMixin, Log
 from amati.validators.generic import GenericObject
 from amati.validators.info_object import InfoObject
 
@@ -15,7 +16,7 @@ OPENAPI_VERSIONS = ['1.0', '1.1', '1.2', '2.0', '3.0', '3.0.1', '3.0.2', '3.0.3'
 
 def _validate_after_openapi(value: str) -> str:
     if value not in OPENAPI_VERSIONS:
-        raise ValueError(f"{value} is not a valid OpenAPI version.")
+        LogMixin.log(Log(f"{value} is not a valid OpenAPI version.", ValueError))
     return value
 
 OpenAPI = Annotated[

@@ -4,10 +4,9 @@ Tests amati/validators/generic.py
 
 from typing import Any
 
-import pytest
-
 from hypothesis import given, strategies as st
 
+from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 
 
@@ -20,8 +19,9 @@ def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObje
     if 'value' not in data.keys():
         data['value'] = data_strategy.draw(st.text())
 
-    with pytest.raises(ValueError):
+    with LogMixin.context():
         Model(**data)
+        assert LogMixin.logs
 
 
 @given(st.dictionaries(keys=st.just('value'), values=st.text()).filter(lambda x: x != {}))

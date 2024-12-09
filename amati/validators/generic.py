@@ -5,9 +5,11 @@ Should be used as the base class for all classes in the project.
 """
 
 from types import NoneType
-from typing import Union, Self
+from typing import Self, Union
 
 from pydantic import BaseModel
+
+from amati.logging import LogMixin, Log
 
 
 # Define JSON
@@ -20,7 +22,7 @@ JSONValue = Union[JSONPrimitive, JSONArray, JSONObject]
 JSON = JSONValue
 
 
-class GenericObject(BaseModel):
+class GenericObject(LogMixin, BaseModel):
     """
     A generic model to overwrite provide extra functionality 
     to pydantic.BaseModel.
@@ -30,7 +32,6 @@ class GenericObject(BaseModel):
 
         for key in data:
             if key not in self.model_fields:
-                raise ValueError(
-                    f"{key} is not a valid field for this object.")
+                LogMixin.log(Log(f'{key} is not a valid field for this object.', ValueError))
 
         super().__init__(**data)

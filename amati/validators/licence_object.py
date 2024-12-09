@@ -8,12 +8,11 @@ from typing_extensions import Self
 
 import json
 import pathlib
-import warnings
 
 from pydantic import AnyUrl, Field, model_validator, AfterValidator
 
 from amati.validators.generic import GenericObject
-from amati.warnings import InconsistencyWarning
+from amati.logging import LogMixin, Log
 
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / 'data'
@@ -43,7 +42,7 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
     """
     if value is None: return None
     if value not in VALID_LICENCES: 
-        raise ValueError(f"{value} is not a valid SPDX licence.")
+        LogMixin.log(Log(f'{value} is not a valid SPDX licence identifier.', Warning))
 
     return value
 
@@ -71,7 +70,9 @@ def _validate_after_spdx_url(value: Optional[AnyUrl]) -> Optional[AnyUrl]:
     if value is None: return None
     if str(value) in VALID_URLS: return value
 
-    warnings.warn(f'{value} is not associated with any identifier.', InconsistencyWarning)
+    LogMixin.log(Log(f'{value} is not associated with any identifier.', Warning))
+
+    return value
 
 
 SPDXURL = Annotated[
@@ -112,14 +113,13 @@ class LicenceObject(GenericObject):
         Warns:
             InconsistencyWarning: If the URL doesn't match the specified identifier
         """
-        if self.url is None: return self
+        if self.url is None or self.identifier is None:
+            return self
 
-        if self.identifier is not None:
+        if self.identifier in VALID_LICENCES:
             # The list of URLs associated with the licence is not empty
             if VALID_LICENCES[self.identifier]:
                 if str(self.url) not in VALID_LICENCES[self.identifier]:
-                    warnings.warn(
-                        f'{self.url} is not associated with the identifier {self.identifier}',
-                        InconsistencyWarning)
+                    LogMixin.log(Log(f'{self.url} is not associated with the identifier {self.identifier}', Warning))
 
         return self
