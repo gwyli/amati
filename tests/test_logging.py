@@ -1,5 +1,5 @@
 """
-Tests amati/warnings.py
+Tests amati/logging.py
 """
 
 from amati.logging import Log, LogMixin

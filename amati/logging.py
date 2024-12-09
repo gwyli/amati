@@ -21,14 +21,14 @@ class LogMixin(object):
     """
     A mixin class that provides logging functionality.
 
-    This class maintains a list of Log messages and provides methods to
-    manage and interact with these logs.
+    This class maintains a list of Log messages that are added.
+    It is NOT thread-safe. State is maintained at a global level.
     """
     logs: ClassVar[List[Log]] = []
 
     @classmethod
-    def log(cls, message: Log) -> List[Log]:
-        """Add a new log message to the logs list.
+    def log(cls, message: Log) -> None:
+        """Add a new message to the logs list.
 
         Args:
             message: A Log object containing the message to be logged.
@@ -37,12 +37,6 @@ class LogMixin(object):
             The current list of logs after adding the new message.
         """
         cls.logs.append(message)
-        return cls.logs
-
-    @classmethod
-    def clear(cls) -> None:
-        """Clear all stored logs."""
-        cls.logs.clear()
 
     @classmethod
     @contextmanager
@@ -53,9 +47,9 @@ class LogMixin(object):
             The current list of logs.
 
         Notes:
-            Automatically resets the logs when exiting the context.
+            Automatically clears the logs when exiting the context.
         """
         try:
             yield cls.logs
         finally:
-            cls.clear()
+            cls.logs.clear()
