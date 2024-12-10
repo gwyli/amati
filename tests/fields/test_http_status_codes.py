@@ -1,5 +1,5 @@
 """
-Tests amati/validators/http_status_codes.py
+Tests amati/fields/http_status_codes.py
 """
 
 import pytest
@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
-from amati.validators.http_status_codes import (ASSIGNED_HTTP_STATUS_CODES,
+from amati.fields.http_status_codes import (ASSIGNED_HTTP_STATUS_CODES,
                                                 HTTPStatusCode)
 from tests.helpers import helpers
 
