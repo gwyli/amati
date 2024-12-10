@@ -4,7 +4,7 @@ Tests amati/validators/contact_object.py
 
 import pytest
 from abnf import ParseError
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 from hypothesis.provisional import urls
 
 from amati.validators.contact_object import ContactObject, Email
@@ -15,7 +15,13 @@ class EmailModel(GenericObject):
     email: Email
 
 
+# I believe that there's an issue with the Hypothesis domain strategy
+# as emails() and urls() unreliably exceeds deadlines. In this file there
+# are several deadline extensions to prevent these failures.
+
+
 @given(st.emails())
+@settings(deadline=300)
 def test_email_valid(email: str):
     EmailModel(email=email)
 
@@ -40,5 +46,6 @@ def test_email_invalid(email: str):
 
 
 @given(st.text(), urls(), st.emails())
+@settings(deadline=400)
 def test_contact_object(name: str, url: str, email: str):
     ContactObject(name=name, url=url, email=email) # type: ignore

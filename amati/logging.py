@@ -6,15 +6,17 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import ClassVar, Generator, List, Optional, Type
 
-from pydantic import AnyUrl
+
+from amati.validators.reference_object import Reference
 
 LogType = Exception | Warning
+
 
 @dataclass(frozen=True)
 class Log:
     message: str
     type: Type[LogType]
-    reference: Optional[AnyUrl] = None
+    reference: Optional[Reference] = None
 
 
 class LogMixin(object):

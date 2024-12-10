@@ -5,11 +5,12 @@ Should be used as the base class for all classes in the project.
 """
 
 from types import NoneType
-from typing import Self, Union
+from typing import ClassVar, Optional, Self, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
 from amati.logging import Log, LogMixin
+from amati.validators.reference_object import Reference
 
 # Define JSON
 JSONPrimitive = Union[str, int, float, bool, NoneType]
@@ -26,6 +27,8 @@ class GenericObject(LogMixin, BaseModel):
     A generic model to overwrite provide extra functionality 
     to pydantic.BaseModel.
     """
+
+    _reference: ClassVar[Optional[Reference]] = PrivateAttr()
 
     def __init__(self: Self, **data: JSON):
 

@@ -1,13 +1,8 @@
 """
-Validates the HTTP codes from the OAS spec: 
-https://spec.openapis.org/oas/latest.html#http-status-codes.
+Validates the HTTP codes from the OAS spec. These are ultimately taken from
+the IANA registry.
 
-These are ultimately taken from the IANA registry:
-https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-
-Note that the codes are also used in Patterned fields - §4.8.16.2:
-https://spec.openapis.org/oas/latest.html#patterned-fields-0
-
+Note that the codes are also used in the OAS Patterned fields - §4.8.16.2:
 """
 
 from itertools import chain
@@ -16,6 +11,28 @@ from typing import Annotated
 from pydantic import AfterValidator, Field, PositiveInt
 
 from amati.logging import Log, LogMixin
+from amati.validators import title
+from amati.validators.reference_object import Reference, ReferenceModel
+
+
+oas_reference: Reference = ReferenceModel(
+    title=title,
+    url = 'https://spec.openapis.org/oas/latest.html#http-status-codes',
+    section='HTTP Status Codes'
+)
+
+iana_reference: Reference = ReferenceModel(
+    title='Hypertext Transfer Protocol (HTTP) Status Code Registry',
+    url='https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml'
+)
+
+oas_patterened_reference: Reference = ReferenceModel(
+    title=title,
+    url='https://spec.openapis.org/oas/latest.html#patterned-fields-0',
+    section='Patterned Fields'
+)
+
+references: Reference = [oas_reference, iana_reference, oas_patterened_reference]
 
 ASSIGNED_HTTP_STATUS_CODES = set(chain(
     [100, 101, 102, 103, 104],
@@ -46,7 +63,7 @@ def _validate_after(value: PositiveInt) -> PositiveInt:
     """
 
     if value not in ASSIGNED_HTTP_STATUS_CODES:
-        LogMixin.log(Log(f'Status code {value} is unassigned or invalid..', Warning))
+        LogMixin.log(Log(f'Status code {value} is unassigned or invalid..', Warning, references))
 
     return value
 

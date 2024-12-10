@@ -1,17 +1,32 @@
 """
-Validates the Open API Specification licence object - §4.8.4: 
-https://spec.openapis.org/oas/latest.html#license-object
+Validates the Open API Specification licence object - §4.8.4.
 """
 
 import json
 import pathlib
 from typing import Annotated, Optional
-
-from pydantic import AfterValidator, AnyUrl, Field, model_validator
 from typing_extensions import Self
 
+from pydantic import AfterValidator, AnyUrl, Field, model_validator
+
+from amati.validators import title
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
+from amati.validators.reference_object import Reference, ReferenceModel
+
+oas_reference: Reference = ReferenceModel(
+    title=title,
+    url='https://spec.openapis.org/oas/v3.1.1.html#license-object',
+    section='License Object'
+)
+
+spdx_reference: Reference = ReferenceModel(
+    title='SPDX License List',
+    url='https://spdx.org/licenses/',
+)
+
+references: Reference = [oas_reference, spdx_reference]
+
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / 'data'
 
@@ -40,7 +55,7 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
     """
     if value is None: return None
     if value not in VALID_LICENCES: 
-        LogMixin.log(Log(f'{value} is not a valid SPDX licence identifier.', Warning))
+        LogMixin.log(Log(f'{value} is not a valid SPDX licence identifier.', Warning, spdx_reference))
 
     return value
 
@@ -68,7 +83,7 @@ def _validate_after_spdx_url(value: Optional[AnyUrl]) -> Optional[AnyUrl]:
     if value is None: return None
     if str(value) in VALID_URLS: return value
 
-    LogMixin.log(Log(f'{value} is not associated with any identifier.', Warning))
+    LogMixin.log(Log(f'{value} is not associated with any identifier.', Warning, spdx_reference))
 
     return value
 
@@ -81,10 +96,9 @@ SPDXURL = Annotated[
 
 class LicenceObject(GenericObject):
     """
-    A model representing the Open API Specification licence object:
-     https://spec.openapis.org/oas/latest.html#license-object
+    A model representing the Open API Specification licence object
      
-    OAS uses the SPDX licence list: https://spdx.org/licenses/
+    OAS uses the SPDX licence list
 
     Args:
         name: The name of the licence
@@ -96,6 +110,7 @@ class LicenceObject(GenericObject):
     # What difference does Optional make here?
     identifier: SPDXIdentifier = None
     url: SPDXURL = None
+    _reference: Reference = references # type: ignore
 
     @model_validator(mode='after')
     def check_url_associated_with_identifier(self: Self) -> Self:
@@ -107,17 +122,16 @@ class LicenceObject(GenericObject):
 
         Returns:
             The validated licence object
-
-        Warns:
-            InconsistencyWarning: If the URL doesn't match the specified identifier
         """
-        if self.url is None or self.identifier is None:
+        if self.url is None:
             return self
 
-        if self.identifier in VALID_LICENCES:
-            # The list of URLs associated with the licence is not empty
-            if VALID_LICENCES[self.identifier]:
-                if str(self.url) not in VALID_LICENCES[self.identifier]:
-                    LogMixin.log(Log(f'{self.url} is not associated with the identifier {self.identifier}', Warning))
+        # Checked in the type AfterValidator, not necessary to raise a warning here.
+        # only done to avoid an unnecessary KeyError
+        if self.identifier not in VALID_LICENCES:
+            return self
+
+        if str(self.url) not in VALID_LICENCES[self.identifier]:
+            LogMixin.log(Log(f'{self.url} is not associated with the identifier {self.identifier}', Warning, self._reference))
 
         return self
