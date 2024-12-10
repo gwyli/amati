@@ -5,6 +5,7 @@ from pydantic import AnyUrl, Field, model_validator
 
 from amati.logging import Log, LogMixin
 from amati.fields.email import Email
+from amati.fields.openapi_versions import OpenAPI
 from amati.fields.spdx_licences import SPDXIdentifier, SPDXURL, VALID_LICENCES
 from amati.validators.reference_object import Reference, ReferenceModel
 from amati.validators.generic import GenericObject
@@ -84,3 +85,12 @@ class InfoObject(GenericObject):
         url='https://spec.openapis.org/oas/latest.html#info-object',
         section='Info Object'
     )
+
+class OpenAPIObject(GenericObject):
+    openapi: OpenAPI
+    info: InfoObject
+    _reference: ReferenceModel( # type: ignore
+        title=TITLE,
+        url='https://spec.openapis.org/oas/latest.html#openapi-object',
+        section='OpenAPI Object'
+        )
