@@ -6,9 +6,10 @@ from pydantic import AnyUrl, Field, model_validator
 from amati.logging import Log, LogMixin
 from amati.fields.email import Email
 from amati.fields.spdx_licences import SPDXIdentifier, SPDXURL, VALID_LICENCES
-from amati.validators import title
 from amati.validators.reference_object import Reference, ReferenceModel
 from amati.validators.generic import GenericObject
+
+TITLE = 'OpenAPI Specification v3.1.1'
 
 
 class ContactObject(GenericObject):
@@ -19,21 +20,17 @@ class ContactObject(GenericObject):
     url: Optional[AnyUrl] = None
     email: Optional[Email] = None
     _reference: Reference =  ReferenceModel( # type: ignore
-        title=title,
+        title=TITLE,
         url='https://spec.openapis.org/oas/latest.html#contact-object',
         section='Contact Object'
         )
-    
+
+
 class LicenceObject(GenericObject):
     """
-    A model representing the Open API Specification licence object
+    A model representing the Open API Specification licence object §4.8.4
      
-    OAS uses the SPDX licence list
-
-    Args:
-        name: The name of the licence
-        identifier: The SPDX identifier of the licence
-        url: The URL associated with the licence
+    OAS uses the SPDX licence list.
     """
 
     name: str = Field(min_length=1)
@@ -41,7 +38,7 @@ class LicenceObject(GenericObject):
     identifier: SPDXIdentifier = None
     url: SPDXURL = None
     _reference: Reference = ReferenceModel( # type: ignore
-        title=title,
+        title=TITLE,
         url='https://spec.openapis.org/oas/v3.1.1.html#license-object',
         section='License Object'
         ) 
@@ -70,3 +67,20 @@ class LicenceObject(GenericObject):
 
         return self
 
+
+class InfoObject(GenericObject):
+    """
+    Validates the Open API Specification info object - §4.8.2:
+    """
+    title: str
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    termsOfService: Optional[str] = None
+    contact: Optional[ContactObject] = None
+    license: Optional[LicenceObject] = None
+    version: str
+    _reference: Reference =  ReferenceModel( # type: ignore
+        title=TITLE,
+        url='https://spec.openapis.org/oas/latest.html#info-object',
+        section='Info Object'
+    )

@@ -1,1 +1,1 @@
-title='OpenAPI Specification v3.1.1'
+title = 'OpenAPI Specification v3.1.1'

@@ -10,7 +10,7 @@ from pydantic import AfterValidator, Field
 from amati.logging import Log, LogMixin
 from amati.validators import title
 from amati.validators.generic import GenericObject
-from amati.validators.info_object import InfoObject
+from amati.validators.oas311 import InfoObject
 from amati.validators.reference_object import Reference, ReferenceModel
 
 reference: Reference = ReferenceModel(

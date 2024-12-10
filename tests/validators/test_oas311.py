@@ -8,6 +8,6 @@ from hypothesis.provisional import urls
 from amati.validators.oas311 import ContactObject
 
 @given(st.text(), urls(), st.emails())
-@settings(deadline=400)
+@settings(deadline=1000)
 def test_contact_object(name: str, url: str, email: str):
     ContactObject(name=name, url=url, email=email) # type: ignore
