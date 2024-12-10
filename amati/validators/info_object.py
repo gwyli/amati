@@ -5,7 +5,7 @@ Validates the Open API Specification info object - §4.8.2:
 from typing import Optional
 
 from amati.validators import title
-from amati.validators.contact_object import ContactObject
+from amati.validators.oas311 import ContactObject
 from amati.validators.generic import GenericObject
 from amati.validators.licence_object import LicenceObject
 from amati.validators.reference_object import Reference, ReferenceModel

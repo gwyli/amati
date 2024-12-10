@@ -1,13 +1,12 @@
 """
-Tests amati/validators/contact_object.py
+Tests amati/fields/email.py
 """
 
 import pytest
 from abnf import ParseError
 from hypothesis import given, settings, strategies as st
-from hypothesis.provisional import urls
 
-from amati.validators.contact_object import ContactObject, Email
+from amati.fields.email import Email
 from amati.validators.generic import GenericObject
 
 
@@ -43,9 +42,3 @@ def strings_except_emails(draw: st.DrawFn) -> str:
 def test_email_invalid(email: str):
     with pytest.raises(ParseError):
         EmailModel(email=email)
-
-
-@given(st.text(), urls(), st.emails())
-@settings(deadline=400)
-def test_contact_object(name: str, url: str, email: str):
-    ContactObject(name=name, url=url, email=email) # type: ignore
