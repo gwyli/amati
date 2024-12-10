@@ -8,48 +8,15 @@ from hypothesis.provisional import urls
 from pydantic import ValidationError
 
 from amati.logging import LogMixin
-from amati.validators.generic import GenericObject
-from amati.validators.licence_object import (SPDXURL, VALID_LICENCES,
-                                             VALID_URLS, LicenceObject,
-                                             SPDXIdentifier)
+from amati.fields.spdx_licences import VALID_LICENCES, VALID_URLS
+from amati.validators.oas311 import LicenceObject
 from tests.helpers import helpers
+
 
 VALID_IDENTIFIERS = list(VALID_LICENCES.keys())
 
 INVALID_URLS = urls().filter(lambda x: x not in VALID_URLS)
 INVALID_IDENTIFIERS = st.text().filter(lambda x: x not in VALID_IDENTIFIERS)
-
-
-class IdentifierModel(GenericObject):
-    identifier: SPDXIdentifier
-
-class URLModel(GenericObject):
-    url: SPDXURL
-
-
-@given(st.sampled_from(VALID_IDENTIFIERS))
-def test_spdx_identifier_valid(identifier: str):
-    IdentifierModel(identifier=identifier)
-
-
-@given(st.text())
-def test_spdx_identifier_invalid(identifier: str):
-    with LogMixin.context():
-        IdentifierModel(identifier=identifier)
-        assert LogMixin.logs
-
-
-@given(st.sampled_from(VALID_URLS))
-def test_spdx_url_valid(url: str):
-    # Expecting that the URL is passed as a string from JSON
-    URLModel(url=url) # type: ignore
-
-
-@given(urls())
-def test_spdx_url_invalid(url: str):
-    with LogMixin.context():
-        URLModel(url=url) # type: ignore
-        assert LogMixin.logs
 
 
 @given(helpers.text_excluding_empty_string(), st.sampled_from(VALID_IDENTIFIERS))
