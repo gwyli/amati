@@ -69,9 +69,9 @@ class LicenceObject(GenericObject):
 
         if str(self.url) not in VALID_LICENCES[self.identifier]:
             LogMixin.log(
-                Log(f'{self.url} is not associated with the identifier {self.identifier}',
-                    Warning, 
-                    self._reference)
+                Log(message=f'{self.url} is not associated with the identifier {self.identifier}',
+                    type=Warning, 
+                    reference=self._reference)
                 )
 
         return self

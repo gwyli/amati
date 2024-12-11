@@ -26,8 +26,8 @@ class GenericObject(LogMixin, BaseModel):
         for key in data:
             if key not in self.model_fields:
                 LogMixin.log(
-                    Log(f'{key} is not a valid field for this {self.__repr_name__()}.',
-                        ValueError)
+                    Log(message=f'{key} is not a valid field for this {self.__repr_name__()}.',
+                        type=ValueError)
                     )
 
         super().__init__(**data)

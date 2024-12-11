@@ -51,7 +51,7 @@ def _validate_after(value: PositiveInt) -> PositiveInt:
 
     if value not in ASSIGNED_HTTP_STATUS_CODES:
         message = f'Status code {value} is unassigned or invalid.'
-        LogMixin.log(Log(message, Warning, reference))
+        LogMixin.log(Log(message=message, type=Warning, reference=reference))
 
     return value
 

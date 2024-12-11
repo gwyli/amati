@@ -17,7 +17,7 @@ def _validate_after_url(value: Optional[str|AnyUrl]) -> Optional[str|AnyUrl]:
         value: The URL to validate
     """
     if value is None: return None
-    
+
     if isinstance(value, AnyUrl): return value
 
     return str(AnyUrl(value))
@@ -31,7 +31,8 @@ class ReferenceModel(BaseModel):
                        Field(default=None, description='Section of the referenced content')
     ] = None
     url: Annotated[Optional[str],
-                   Field(default=None, description='URL of the specific web page where the referenced content can be found'),
+                   Field(default=None, 
+                         description='URL where the referenced content can be found'),
                    AfterValidator(_validate_after_url)
                    ]
 

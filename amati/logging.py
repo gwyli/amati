@@ -3,17 +3,16 @@ Logging utilities for Amati.
 """
 
 from contextlib import contextmanager
-from dataclasses import dataclass
 from typing import ClassVar, Generator, List, Optional, Type
 
+from pydantic import BaseModel
 
 from amati.validators.reference_object import Reference
 
 LogType = Exception | Warning
 
 
-@dataclass(frozen=True)
-class Log:
+class Log(BaseModel):
     message: str
     type: Type[LogType]
     reference: Optional[Reference] = None

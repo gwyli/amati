@@ -47,7 +47,7 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
     if value is None: return None
     if value not in VALID_LICENCES: 
         message = f'{value} is not a valid SPDX licence identifier.'
-        LogMixin.log(Log(message, Warning, reference))
+        LogMixin.log(Log(message=message, type=Warning, reference=reference))
 
     return value
 
@@ -76,7 +76,7 @@ def _validate_after_spdx_url(value: Optional[AnyUrl]) -> Optional[AnyUrl]:
     if str(value) in VALID_URLS: return value
 
     message = f'{value} is not associated with any identifier.'
-    LogMixin.log(Log(message, Warning, reference))
+    LogMixin.log(Log(message=message, type=Warning, reference=reference))
 
     return value
 
