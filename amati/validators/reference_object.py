@@ -9,7 +9,7 @@ from typing import Annotated, Optional, Sequence, Union
 from pydantic import AfterValidator, AnyUrl, BaseModel, Field
 
 
-def _validate_after_url(value: Optional[str]) -> Optional[str]:
+def _validate_after_url(value: Optional[str|AnyUrl]) -> Optional[str|AnyUrl]:
     """
     Validate that the URL is a valid URL.
 
@@ -17,6 +17,8 @@ def _validate_after_url(value: Optional[str]) -> Optional[str]:
         value: The URL to validate
     """
     if value is None: return None
+    
+    if isinstance(value, AnyUrl): return value
 
     return str(AnyUrl(value))
 
