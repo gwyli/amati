@@ -15,12 +15,13 @@ reference: Reference = ReferenceModel(
     section='OpenAPI Specification '
 )
 
-OPENAPI_VERSIONS = ['1.0', '1.1', '1.2', '2.0', '3.0', '3.0.1', '3.0.2', '3.0.3', '3.1', '3.1.1']
+OPENAPI_VERSIONS = ['3.0', '3.0.1', '3.0.2', '3.0.3', '3.0.4', '3.1', '3.1.1']
 
 
 def _validate_after_openapi(value: str) -> str:
     if value not in OPENAPI_VERSIONS:
-        LogMixin.log(Log(f"{value} is not a valid OpenAPI version.", ValueError, reference))
+        message = f'{value} is not a valid OpenAPI version.'
+        LogMixin.log(Log(message, ValueError, reference))
     return value
 
 OpenAPI = Annotated[

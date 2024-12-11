@@ -1,5 +1,6 @@
 """
-Validates the Open API Specification licence object - §4.8.4.
+Validates the idenfitier and licences from the System Package Data 
+Exchange (SPDX) licence list.
 """
 
 import json
@@ -12,7 +13,7 @@ from amati.logging import Log, LogMixin
 from amati.validators.reference_object import Reference, ReferenceModel
 
 
-spdx_reference: Reference = ReferenceModel(
+reference: Reference = ReferenceModel(
     title='SPDX License List',
     url='https://spdx.org/licenses/',
 )
@@ -45,7 +46,8 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
     """
     if value is None: return None
     if value not in VALID_LICENCES: 
-        LogMixin.log(Log(f'{value} is not a valid SPDX licence identifier.', Warning, spdx_reference))
+        message = f'{value} is not a valid SPDX licence identifier.'
+        LogMixin.log(Log(message, Warning, reference))
 
     return value
 
@@ -73,7 +75,8 @@ def _validate_after_spdx_url(value: Optional[AnyUrl]) -> Optional[AnyUrl]:
     if value is None: return None
     if str(value) in VALID_URLS: return value
 
-    LogMixin.log(Log(f'{value} is not associated with any identifier.', Warning, spdx_reference))
+    message = f'{value} is not associated with any identifier.'
+    LogMixin.log(Log(message, Warning, reference))
 
     return value
 

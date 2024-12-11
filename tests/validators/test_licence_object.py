@@ -1,5 +1,5 @@
 """
-Tests amati/validation/licence_object.py
+Tests amati/validators/oas311.py - LicenceObject
 """
 
 import pytest
@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from amati.logging import LogMixin
 from amati.fields.spdx_licences import VALID_LICENCES, VALID_URLS
 from amati.validators.oas311 import LicenceObject
-from tests.helpers import helpers
+from tests import helpers
 
 
 VALID_IDENTIFIERS = list(VALID_LICENCES.keys())

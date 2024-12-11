@@ -11,7 +11,7 @@ from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 from amati.fields.http_status_codes import (ASSIGNED_HTTP_STATUS_CODES,
                                                 HTTPStatusCode)
-from tests.helpers import helpers
+from tests import helpers
 
 
 class Model(GenericObject):

@@ -1,3 +1,7 @@
+"""
+Validates the OpenAPI Specification version 3.1.1
+"""
+
 from typing import Optional
 from typing_extensions import Self
 
@@ -42,7 +46,7 @@ class LicenceObject(GenericObject):
         title=TITLE,
         url='https://spec.openapis.org/oas/v3.1.1.html#license-object',
         section='License Object'
-        ) 
+        )
 
     @model_validator(mode='after')
     def check_url_associated_with_identifier(self: Self) -> Self:
@@ -64,7 +68,11 @@ class LicenceObject(GenericObject):
             return self
 
         if str(self.url) not in VALID_LICENCES[self.identifier]:
-            LogMixin.log(Log(f'{self.url} is not associated with the identifier {self.identifier}', Warning, self._reference))
+            LogMixin.log(
+                Log(f'{self.url} is not associated with the identifier {self.identifier}',
+                    Warning, 
+                    self._reference)
+                )
 
         return self
 

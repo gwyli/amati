@@ -1,5 +1,5 @@
 """
-Tests amati/validators/openapi_object.py
+Tests amati/fields/openapi_versions.py
 """
 
 from hypothesis import given, strategies as st
