@@ -70,7 +70,7 @@ class LicenceObject(GenericObject):
         if str(self.url) not in VALID_LICENCES[self.identifier]:
             LogMixin.log(
                 Log(message=f'{self.url} is not associated with the identifier {self.identifier}',
-                    type=Warning, 
+                    type=Warning,
                     reference=self._reference)
                 )
 
@@ -102,3 +102,33 @@ class OpenAPIObject(GenericObject):
         url='https://spec.openapis.org/oas/latest.html#openapi-object',
         section='OpenAPI Object'
         )
+
+
+class ServerVariableObject(GenericObject):
+    enum: Optional[list[str]] = Field(None, min_length=1)
+    default: str = Field(min_length=1)
+    description: Optional[str] = None
+    _reference: Reference = ReferenceModel( # type: ignore
+        title=TITLE,
+        url='https://spec.openapis.org/oas/v3.1.1.html#server-variable-object',
+        section='Server Variable Object'
+        )
+
+    @model_validator(mode='after')
+    def check_enum_default(self: Self) -> Self:
+        """
+        Validate that the default value is in the enum list.
+
+        Returns:
+            The validated server variable object
+        """
+        if self.enum is None: return self
+
+        if self.default not in self.enum:
+            LogMixin.log(
+                Log(message=f'The default value {self.default} is not in the enum list {self.enum}',
+                    type=ValueError,
+                    reference=self._reference)
+                )
+
+        return self
