@@ -39,6 +39,8 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+pythonpath = ["."]
+
 
 [tool.isort]
 src_paths = ["amati", "tests"]
