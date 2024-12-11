@@ -29,7 +29,7 @@ def test_all_variables_correct(name: str, identifier: str):
 @given(helpers.text_excluding_empty_string(), INVALID_IDENTIFIERS, INVALID_URLS)
 def test_all_variables_random(name: str, identifier: str, url: str):
     with LogMixin.context():
-        LicenceObject(name=name, identifier=identifier, url=url) # type: ignore
+        LicenceObject(name=name, identifier=identifier, url=url)
         assert LogMixin.logs
 
 
@@ -58,13 +58,13 @@ def test_valid_identifier_invalid_url(name: str, identifier: str, url: str):
     if not VALID_LICENCES[identifier]: return
 
     with LogMixin.context():
-        LicenceObject(name=name, identifier=identifier, url=url) # type: ignore
+        LicenceObject(name=name, identifier=identifier, url=url)
         assert LogMixin.logs
 
 
 @given(helpers.text_excluding_empty_string(), st.none(), st.none())
 def test_identifier_url_none(name: str, identifier: str, url: str):
-    LicenceObject(name=name, identifier=identifier, url=url) # type: ignore
+    LicenceObject(name=name, identifier=identifier, url=url)
 
 
 @given(helpers.text_excluding_empty_string())

@@ -36,11 +36,11 @@ def test_spdx_identifier_invalid(identifier: str):
 @given(st.sampled_from(VALID_URLS))
 def test_spdx_url_valid(url: str):
     # Expecting that the URL is passed as a string from JSON
-    URLModel(url=url) # type: ignore
+    URLModel(url=url)
 
 
 @given(urls())
 def test_spdx_url_invalid(url: str):
     with LogMixin.context():
-        URLModel(url=url) # type: ignore
+        URLModel(url=url)
         assert LogMixin.logs

@@ -45,6 +45,7 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
         ValueError: If the identifier is not a valid SPDX licence
     """
     if value is None: return None
+    
     if value not in VALID_LICENCES: 
         message = f'{value} is not a valid SPDX licence identifier.'
         LogMixin.log(Log(message=message, type=Warning, reference=reference))
@@ -58,7 +59,7 @@ SPDXIdentifier = Annotated[
 ]
 
 
-def _validate_after_spdx_url(value: Optional[AnyUrl]) -> Optional[AnyUrl]:
+def _validate_after_spdx_url(value: Optional[AnyUrl|str]) -> Optional[AnyUrl]:
     """
     Validate that the licence URL exists in the list of known SPDX licence URLs.
     Not that the URL is associated with the specific identifier.
@@ -73,17 +74,15 @@ def _validate_after_spdx_url(value: Optional[AnyUrl]) -> Optional[AnyUrl]:
         InconsistencyWarning: If the URL is not associated with any known licence.
     """
     if value is None: return None
-    if str(value) in VALID_URLS: return value
+    if str(value) in VALID_URLS: return AnyUrl(value)
 
     message = f'{value} is not associated with any identifier.'
     LogMixin.log(Log(message=message, type=Warning, reference=reference))
 
-    return value
+    return AnyUrl(value)
 
 
 SPDXURL = Annotated[
-    Optional[AnyUrl],
+    Optional[AnyUrl|str],
     AfterValidator(_validate_after_spdx_url)
 ]
-
-
