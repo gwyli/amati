@@ -31,6 +31,9 @@ def test_unassigned_status_codes(status_code: int):
     with LogMixin.context():
         Model(value=status_code)
         assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == Warning
+        assert LogMixin.logs[0].reference is not None
 
 
 @given(integers(max_value=99))

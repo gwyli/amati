@@ -18,6 +18,9 @@ def test_invalid_openapi_version(value: str):
     with LogMixin.context():
         Model(value=value)
         assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0].reference is not None
 
 
 @given(st.sampled_from(OPENAPI_VERSIONS))

@@ -60,6 +60,8 @@ def test_valid_identifier_invalid_url(name: str, identifier: str, url: str):
     with LogMixin.context():
         LicenceObject(name=name, identifier=identifier, url=url)
         assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == Warning
 
 
 @given(helpers.text_excluding_empty_string(), st.none(), st.none())

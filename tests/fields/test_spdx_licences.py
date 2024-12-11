@@ -31,6 +31,9 @@ def test_spdx_identifier_invalid(identifier: str):
     with LogMixin.context():
         IdentifierModel(identifier=identifier)
         assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == Warning
+        assert LogMixin.logs[0].reference is not None
 
 
 @given(st.sampled_from(VALID_URLS))
@@ -44,3 +47,6 @@ def test_spdx_url_invalid(url: str):
     with LogMixin.context():
         URLModel(url=url)
         assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == Warning
+        assert LogMixin.logs[0].reference is not None
