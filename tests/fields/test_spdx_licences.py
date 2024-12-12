@@ -2,6 +2,7 @@
 Tests amati/fields/spdx_licences.py
 """
 
+import pytest
 from hypothesis import given, strategies as st
 from hypothesis.provisional import urls
 
@@ -50,3 +51,11 @@ def test_spdx_url_invalid(url: str):
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == Warning
         assert LogMixin.logs[0].reference is not None
+
+
+def test_url_none():
+    URLModel(url=None)
+    with LogMixin.context():
+        with pytest.raises(AttributeError):
+            assert URLModel.url is None
+        assert not LogMixin.logs

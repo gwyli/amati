@@ -45,8 +45,8 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
         ValueError: If the identifier is not a valid SPDX licence
     """
     if value is None: return None
-    
-    if value not in VALID_LICENCES: 
+
+    if value not in VALID_LICENCES:
         message = f'{value} is not a valid SPDX licence identifier.'
         LogMixin.log(Log(message=message, type=Warning, reference=reference))
 

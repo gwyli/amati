@@ -25,7 +25,6 @@ def test_all_variables_correct(name: str, identifier: str):
     LicenceObject(name=name, identifier=identifier, url=url)
 
 
-
 @given(helpers.text_excluding_empty_string(), INVALID_IDENTIFIERS, INVALID_URLS)
 def test_all_variables_random(name: str, identifier: str, url: str):
     with LogMixin.context():

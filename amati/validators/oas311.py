@@ -94,6 +94,7 @@ class InfoObject(GenericObject):
         section='Info Object'
     )
 
+
 class OpenAPIObject(GenericObject):
     openapi: OpenAPI
     info: InfoObject

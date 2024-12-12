@@ -40,7 +40,7 @@ def invalid_server_variable(draw: st.DrawFn) -> tuple[list[str], str]:
     default: str = draw(st.text().filter(lambda x: x not in enum and x != ''))
     return enum, default
 
-        
+
 @given(invalid_server_variable())
 def test_invalid_default(xserver_variable: tuple[list[str], str]):
     enum, default = xserver_variable
