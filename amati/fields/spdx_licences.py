@@ -7,8 +7,9 @@ import json
 import pathlib
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, AnyUrl
+from pydantic import AfterValidator
 
+from amati.fields.url import URL
 from amati.logging import Log, LogMixin
 from amati.validators.reference_object import Reference, ReferenceModel
 
@@ -59,7 +60,7 @@ SPDXIdentifier = Annotated[
 ]
 
 
-def _validate_after_spdx_url(value: Optional[AnyUrl|str]) -> Optional[AnyUrl]:
+def _validate_after_spdx_url(value: Optional[URL|str]) -> Optional[URL]:
     """
     Validate that the licence URL exists in the list of known SPDX licence URLs.
     Not that the URL is associated with the specific identifier.
@@ -74,15 +75,15 @@ def _validate_after_spdx_url(value: Optional[AnyUrl|str]) -> Optional[AnyUrl]:
         InconsistencyWarning: If the URL is not associated with any known licence.
     """
     if value is None: return None
-    if str(value) in VALID_URLS: return AnyUrl(value)
+    if str(value) in VALID_URLS: return value
 
     message = f'{value} is not associated with any identifier.'
     LogMixin.log(Log(message=message, type=Warning, reference=reference))
 
-    return AnyUrl(value)
+    return value
 
 
 SPDXURL = Annotated[
-    Optional[AnyUrl|str],
+    Optional[URL|str],
     AfterValidator(_validate_after_spdx_url)
 ]

@@ -5,10 +5,11 @@ Validates the OpenAPI Specification version 3.1.1
 from typing import Optional
 from typing_extensions import Self
 
-from pydantic import AnyUrl, Field, model_validator
+from pydantic import Field, model_validator
 
 from amati.logging import Log, LogMixin
 from amati.fields.email import Email
+from amati.fields.url import URL
 from amati.fields.openapi_versions import OpenAPI
 from amati.fields.spdx_licences import SPDXIdentifier, SPDXURL, VALID_LICENCES
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -22,11 +23,11 @@ class ContactObject(GenericObject):
     Validates the Open API Specification contact object - §4.8.3
     """
     name: Optional[str] = None
-    url: Optional[AnyUrl] = None
+    url: Optional[URL] = None
     email: Optional[Email] = None
     _reference: Reference =  ReferenceModel( # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/latest.html#contact-object',
+        url='https://spec.openapis.org/oas/3.1.1.html#contact-object',
         section='Contact Object'
         )
 
@@ -88,24 +89,30 @@ class InfoObject(GenericObject):
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
-    _reference: Reference =  ReferenceModel( # type: ignore
+    _reference: Reference = ReferenceModel( # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/latest.html#info-object',
+        url='https://spec.openapis.org/oas/3.1.1.html#info-object',
         section='Info Object'
     )
 
 
 class OpenAPIObject(GenericObject):
+    """
+    Validates the Open API Specification object - §4.1
+    """
     openapi: OpenAPI
     info: InfoObject
     _reference: ReferenceModel( # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/latest.html#openapi-object',
+        url='https://spec.openapis.org/oas/3.1.1.html#openapi-object',
         section='OpenAPI Object'
         )
 
 
 class ServerVariableObject(GenericObject):
+    """
+    Validates the Open API Specification server variable object - §4.8.6
+    """
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
     description: Optional[str] = None
@@ -133,3 +140,17 @@ class ServerVariableObject(GenericObject):
                 )
 
         return self
+
+
+class ServerObject(GenericObject):
+    """
+    Validates the Open API Specification server object - §4.8.5
+    """
+    url: URL
+    description: Optional[str] = None
+    variables: Optional[dict[str, ServerVariableObject]] = None
+    _reference: Reference = ReferenceModel( # type: ignore
+        title=TITLE,
+        url='https://spec.openapis.org/oas/v3.1.1.html#server-object',
+        section='Server Object'
+        )

@@ -1,4 +1,4 @@
-# Amati
+# amati
 
 A programme designed to validate that a file conforms to [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.1.html) (OAS).
 
@@ -6,7 +6,7 @@ Currently a proof of concept.
 
 ## Name
 
-Amati means to observe in Malay, especially with attention to detail. It's also one of the plurals of beloved or favourite in Italian.
+amati means to observe in Malay, especially with attention to detail. It's also one of the plurals of beloved or favourite in Italian.
 
 ## Architecture
 
