@@ -1,3 +1,8 @@
+"""
+Helper functions for tests, e.g. create a search strategy for all all data
+types but one.
+"""
+
 import random
 from typing import Any, Optional, Sequence, Tuple, Type, Union
 
