@@ -17,6 +17,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
+        require_serial: true
         args:
           [
             "-rn", # Only display messages

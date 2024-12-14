@@ -49,3 +49,6 @@ known_first_party=["amati"]
 known_third_party=["pytest","pydantic","yaml","abnf"]
 extra_standard_library=["typing_extensions"]
 profile="black"
+
+[tool.coverage.run]
+relative_files=true
