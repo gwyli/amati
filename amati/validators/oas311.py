@@ -10,7 +10,7 @@ from pydantic import Field, model_validator
 from amati.fields.email import Email
 from amati.fields.openapi_versions import OpenAPI
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.url import URL
+from amati.fields.url import URL, URLWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -100,20 +100,6 @@ class InfoObject(GenericObject):
     )
 
 
-class OpenAPIObject(GenericObject):
-    """
-    Validates the Open API Specification object - §4.1
-    """
-
-    openapi: OpenAPI
-    info: InfoObject
-    _reference: ReferenceModel(  # type: ignore
-        title=TITLE,
-        url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
-        section="OpenAPI Object",
-    )
-
-
 class ServerVariableObject(GenericObject):
     """
     Validates the Open API Specification server variable object - §4.8.6
@@ -156,11 +142,26 @@ class ServerObject(GenericObject):
     Validates the Open API Specification server object - §4.8.5
     """
 
-    url: URL
+    url: URLWithVariables | URL
     description: Optional[str] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
     _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
         section="Server Object",
+    )
+
+
+class OpenAPIObject(GenericObject):
+    """
+    Validates the Open API Specification object - §4.1
+    """
+
+    openapi: OpenAPI
+    info: InfoObject
+    servers: list[ServerObject] = []
+    _reference: Reference = ReferenceModel(  # type: ignore
+        title=TITLE,
+        url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
+        section="OpenAPI Object",
     )
