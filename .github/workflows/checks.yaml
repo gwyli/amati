@@ -1,0 +1,41 @@
+name: Checks
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -e ".[dev]"
+      - name: Formatting
+        uses: psf/black@stable
+        with:
+          use_pyproject: true
+      - name: Import sorting
+        uses: isort/isort-action@v1
+      - name: Linting
+        run: |
+          source .venv/bin/activate
+          pylint $(git ls-files '*.py')
+      - name: Testing
+        run: |
+          source .venv/bin/activate
+          pytest --cov

@@ -27,7 +27,7 @@ class GenericObject(LogMixin, BaseModel):
             if key not in self.model_fields:
                 LogMixin.log(
                     Log(
-                        message=f"{key} is not a valid field for this {self.__repr_name__()}.",
+                        message=f"{key} is not a valid field for this {self.__repr_name__()}.", # pylint: disable=line-too-long
                         type=ValueError,
                     )
                 )

@@ -3,9 +3,9 @@ Validates the OpenAPI Specification version 3.1.1
 """
 
 from typing import Optional
+from typing_extensions import Self
 
 from pydantic import Field, model_validator
-from typing_extensions import Self
 
 from amati.fields.email import Email
 from amati.fields.openapi_versions import OpenAPI
@@ -72,7 +72,7 @@ class LicenceObject(GenericObject):
         if str(self.url) not in VALID_LICENCES[self.identifier]:
             LogMixin.log(
                 Log(
-                    message=f"{self.url} is not associated with the identifier {self.identifier}",
+                    message=f"{self.url} is not associated with the identifier {self.identifier}", # pylint: disable=line-too-long
                     type=Warning,
                     reference=self._reference,
                 )
@@ -89,7 +89,7 @@ class InfoObject(GenericObject):
     title: str
     summary: Optional[str] = None
     description: Optional[str] = None
-    termsOfService: Optional[str] = None
+    termsOfService: Optional[str] = None  # pylint: disable=invalid-name
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
@@ -142,7 +142,7 @@ class ServerVariableObject(GenericObject):
         if self.default not in self.enum:
             LogMixin.log(
                 Log(
-                    message=f"The default value {self.default} is not in the enum list {self.enum}",
+                    message=f"The default value {self.default} is not in the enum list {self.enum}", # pylint: disable=line-too-long
                     type=ValueError,
                     reference=self._reference,
                 )
