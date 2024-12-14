@@ -25,6 +25,7 @@ class LogMixin(object):
     This class maintains a list of Log messages that are added.
     It is NOT thread-safe. State is maintained at a global level.
     """
+
     logs: ClassVar[List[Log]] = []
 
     @classmethod

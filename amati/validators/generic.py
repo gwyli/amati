@@ -15,7 +15,7 @@ from amati.validators.reference_object import Reference
 
 class GenericObject(LogMixin, BaseModel):
     """
-    A generic model to overwrite provide extra functionality 
+    A generic model to overwrite provide extra functionality
     to pydantic.BaseModel.
     """
 
@@ -26,8 +26,10 @@ class GenericObject(LogMixin, BaseModel):
         for key in data:
             if key not in self.model_fields:
                 LogMixin.log(
-                    Log(message=f'{key} is not a valid field for this {self.__repr_name__()}.',
-                        type=ValueError)
+                    Log(
+                        message=f"{key} is not a valid field for this {self.__repr_name__()}.",  # pylint: disable=line-too-long
+                        type=ValueError,
                     )
+                )
 
         super().__init__(**data)

@@ -5,36 +5,38 @@ Validates the OpenAPI Specification version 3.1.1
 from typing import Optional
 from typing_extensions import Self
 
-from pydantic import AnyUrl, Field, model_validator
+from pydantic import Field, model_validator
 
-from amati.logging import Log, LogMixin
 from amati.fields.email import Email
 from amati.fields.openapi_versions import OpenAPI
-from amati.fields.spdx_licences import SPDXIdentifier, SPDXURL, VALID_LICENCES
-from amati.validators.reference_object import Reference, ReferenceModel
+from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
+from amati.fields.url import URL
+from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
+from amati.validators.reference_object import Reference, ReferenceModel
 
-TITLE = 'OpenAPI Specification v3.1.1'
+TITLE = "OpenAPI Specification v3.1.1"
 
 
 class ContactObject(GenericObject):
     """
     Validates the Open API Specification contact object - §4.8.3
     """
+
     name: Optional[str] = None
-    url: Optional[AnyUrl] = None
+    url: Optional[URL] = None
     email: Optional[Email] = None
-    _reference: Reference =  ReferenceModel( # type: ignore
+    _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/latest.html#contact-object',
-        section='Contact Object'
-        )
+        url="https://spec.openapis.org/oas/3.1.1.html#contact-object",
+        section="Contact Object",
+    )
 
 
 class LicenceObject(GenericObject):
     """
     A model representing the Open API Specification licence object §4.8.4
-     
+
     OAS uses the SPDX licence list.
     """
 
@@ -42,18 +44,18 @@ class LicenceObject(GenericObject):
     # What difference does Optional make here?
     identifier: SPDXIdentifier = None
     url: SPDXURL = None
-    _reference: Reference = ReferenceModel( # type: ignore
+    _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/v3.1.1.html#license-object',
-        section='License Object'
-        )
+        url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
+        section="License Object",
+    )
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_url_associated_with_identifier(self: Self) -> Self:
         """
         Validate that the URL matches the provided licence identifier.
 
-        This validator checks if the URL is listed among the known URLs for the 
+        This validator checks if the URL is listed among the known URLs for the
         specified licence identifier.
 
         Returns:
@@ -69,10 +71,12 @@ class LicenceObject(GenericObject):
 
         if str(self.url) not in VALID_LICENCES[self.identifier]:
             LogMixin.log(
-                Log(message=f'{self.url} is not associated with the identifier {self.identifier}',
+                Log(
+                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
                     type=Warning,
-                    reference=self._reference)
+                    reference=self._reference,
                 )
+            )
 
         return self
 
@@ -81,41 +85,50 @@ class InfoObject(GenericObject):
     """
     Validates the Open API Specification info object - §4.8.2:
     """
+
     title: str
     summary: Optional[str] = None
     description: Optional[str] = None
-    termsOfService: Optional[str] = None
+    termsOfService: Optional[str] = None  # pylint: disable=invalid-name
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
-    _reference: Reference =  ReferenceModel( # type: ignore
+    _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/latest.html#info-object',
-        section='Info Object'
+        url="https://spec.openapis.org/oas/3.1.1.html#info-object",
+        section="Info Object",
     )
 
 
 class OpenAPIObject(GenericObject):
+    """
+    Validates the Open API Specification object - §4.1
+    """
+
     openapi: OpenAPI
     info: InfoObject
-    _reference: ReferenceModel( # type: ignore
+    _reference: ReferenceModel(  # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/latest.html#openapi-object',
-        section='OpenAPI Object'
-        )
+        url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
+        section="OpenAPI Object",
+    )
 
 
 class ServerVariableObject(GenericObject):
+    """
+    Validates the Open API Specification server variable object - §4.8.6
+    """
+
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
     description: Optional[str] = None
-    _reference: Reference = ReferenceModel( # type: ignore
+    _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
-        url='https://spec.openapis.org/oas/v3.1.1.html#server-variable-object',
-        section='Server Variable Object'
-        )
+        url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
+        section="Server Variable Object",
+    )
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_enum_default(self: Self) -> Self:
         """
         Validate that the default value is in the enum list.
@@ -123,13 +136,31 @@ class ServerVariableObject(GenericObject):
         Returns:
             The validated server variable object
         """
-        if self.enum is None: return self
+        if self.enum is None:
+            return self
 
         if self.default not in self.enum:
             LogMixin.log(
-                Log(message=f'The default value {self.default} is not in the enum list {self.enum}',
+                Log(
+                    message=f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
                     type=ValueError,
-                    reference=self._reference)
+                    reference=self._reference,
                 )
+            )
 
         return self
+
+
+class ServerObject(GenericObject):
+    """
+    Validates the Open API Specification server object - §4.8.5
+    """
+
+    url: URL
+    description: Optional[str] = None
+    variables: Optional[dict[str, ServerVariableObject]] = None
+    _reference: Reference = ReferenceModel(  # type: ignore
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
+        section="Server Object",
+    )

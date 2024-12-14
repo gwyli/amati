@@ -22,9 +22,11 @@ dev = [
     "pytest-cov",
     "mutmut>=2.4.3",
     "hypothesis>=6.122.0",
-    "autopep8",
+    "black>=24.8.0",
+    "pre-commit",
     "pylint",
-    "hammett"
+    "hammett",
+    "isort"
 ]
 
 build = [
@@ -41,11 +43,12 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpath = ["."]
 
-
 [tool.isort]
 src_paths = ["amati", "tests"]
-sections=["FUTURE","STDLIB","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
 known_first_party=["amati"]
 known_third_party=["pytest","pydantic","yaml","abnf"]
-combine_as_imports=true
-only_sections=true
+extra_standard_library=["typing_extensions"]
+profile="black"
+
+[tool.coverage.run]
+relative_files=true
