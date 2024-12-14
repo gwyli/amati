@@ -79,4 +79,7 @@ def test_url_with_variables_invalid():
         URLWithVariablesModel(url=r'/api/v1/users/{user_id}}')
 
     with pytest.raises(ValueError):
+        URLWithVariablesModel(url=r'/api/v1/users/{user_id}{abc/')
+
+    with pytest.raises(ValueError):
         URLWithVariablesModel(url=r'/api/v1/users/{user_{id}}/')
