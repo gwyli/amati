@@ -23,6 +23,7 @@ dev = [
     "mutmut>=2.4.3",
     "hypothesis>=6.122.0",
     "black>=24.8.0",
+    "pre-commit",
     "pylint",
     "hammett",
     "isort"
