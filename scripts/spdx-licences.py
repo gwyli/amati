@@ -1,6 +1,7 @@
-import requests
-import pathlib
 import json
+import pathlib
+
+import requests
 
 if __name__ == "__main__":
     response = requests.get("https://raw.githubusercontent.com/spdx/license-list-data/refs/heads/main/json/licenses.json")

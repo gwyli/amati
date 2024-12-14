@@ -4,7 +4,8 @@ Tests amati/fields/email.py
 
 import pytest
 from abnf import ParseError
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from amati.fields.email import Email
 from amati.validators.generic import GenericObject
@@ -33,7 +34,7 @@ def strings_except_emails(draw: st.DrawFn) -> str:
 
     # If our candidate matches any possible email, draw again; highly unlikely.
     while candidate == email:
-        candidate = draw(st.text()) # pragma: no cover
+        candidate = draw(st.text())  # pragma: no cover
 
     return candidate
 

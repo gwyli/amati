@@ -3,15 +3,15 @@ Tests amati/validators/oas311.py - LicenceObject
 """
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
-from amati.logging import LogMixin
 from amati.fields.spdx_licences import VALID_LICENCES, VALID_URLS
+from amati.logging import LogMixin
 from amati.validators.oas311 import LicenceObject
 from tests import helpers
-
 
 VALID_IDENTIFIERS = list(VALID_LICENCES.keys())
 
@@ -32,7 +32,7 @@ def test_all_variables_random(name: str, identifier: str, url: str):
         assert LogMixin.logs
 
 
-@given(st.just('')) # This is the only case where name is empty
+@given(st.just(""))  # This is the only case where name is empty
 def test_name_invalid(name: str):
     with pytest.raises(ValidationError):
         LicenceObject(name=name)
@@ -40,7 +40,7 @@ def test_name_invalid(name: str):
 
 def test_no_name():
     with pytest.raises(ValidationError):
-        LicenceObject() # type: ignore
+        LicenceObject()  # type: ignore
 
 
 @given(helpers.text_excluding_empty_string(), st.sampled_from(VALID_IDENTIFIERS))
@@ -48,13 +48,18 @@ def test_valid_identifier_no_url(name: str, identifier: str):
     LicenceObject(name=name, identifier=identifier)
 
 
-@given(helpers.text_excluding_empty_string(), st.sampled_from(VALID_IDENTIFIERS),
-       st.sampled_from(VALID_URLS))
+@given(
+    helpers.text_excluding_empty_string(),
+    st.sampled_from(VALID_IDENTIFIERS),
+    st.sampled_from(VALID_URLS),
+)
 def test_valid_identifier_invalid_url(name: str, identifier: str, url: str):
     # These lines are only reached when the identifier has a URL and the URL is
     # not associated with the identifier
-    if url in VALID_LICENCES[identifier]: return
-    if not VALID_LICENCES[identifier]: return
+    if url in VALID_LICENCES[identifier]:
+        return
+    if not VALID_LICENCES[identifier]:
+        return
 
     with LogMixin.context():
         LicenceObject(name=name, identifier=identifier, url=url)

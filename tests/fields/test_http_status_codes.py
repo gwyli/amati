@@ -7,10 +7,9 @@ from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
 from pydantic import ValidationError
 
+from amati.fields.http_status_codes import ASSIGNED_HTTP_STATUS_CODES, HTTPStatusCode
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
-from amati.fields.http_status_codes import (ASSIGNED_HTTP_STATUS_CODES,
-                                                HTTPStatusCode)
 from tests import helpers
 
 

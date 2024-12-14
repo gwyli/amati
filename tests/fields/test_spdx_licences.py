@@ -3,10 +3,16 @@ Tests amati/fields/spdx_licences.py
 """
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from hypothesis.provisional import urls
 
-from amati.fields.spdx_licences import SPDXIdentifier, SPDXURL, VALID_LICENCES, VALID_URLS
+from amati.fields.spdx_licences import (
+    SPDXURL,
+    VALID_LICENCES,
+    VALID_URLS,
+    SPDXIdentifier,
+)
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 
@@ -15,8 +21,10 @@ VALID_IDENTIFIERS = list(VALID_LICENCES.keys())
 INVALID_URLS = urls().filter(lambda x: x not in VALID_URLS)
 INVALID_IDENTIFIERS = st.text().filter(lambda x: x not in VALID_IDENTIFIERS)
 
+
 class IdentifierModel(GenericObject):
     identifier: SPDXIdentifier
+
 
 class URLModel(GenericObject):
     url: SPDXURL

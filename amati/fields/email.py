@@ -9,11 +9,10 @@ from pydantic import AfterValidator
 
 from amati.validators.reference_object import Reference, ReferenceModel
 
-
 reference: Reference = ReferenceModel(
-    title='Internet Message Format',
-    url='https://www.rfc-editor.org/rfc/rfc5322#section-3',
-    section='Syntax'
+    title="Internet Message Format",
+    url="https://www.rfc-editor.org/rfc/rfc5322#section-3",
+    section="Syntax",
 )
 
 
@@ -23,15 +22,12 @@ def _validate_after_email(value: str) -> str:
 
     Args:
         value: The email address to validate
-    
+
     Raises:
         ParseError: If the email address does not conform to RFC5322 ABNF grammar
     """
 
-    return rfc5322.Rule('address').parse_all(value).value
+    return rfc5322.Rule("address").parse_all(value).value
 
 
-Email = Annotated[
-    Optional[str],
-    AfterValidator(_validate_after_email)
-]
+Email = Annotated[Optional[str], AfterValidator(_validate_after_email)]
