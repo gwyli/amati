@@ -22,9 +22,10 @@ dev = [
     "pytest-cov",
     "mutmut>=2.4.3",
     "hypothesis>=6.122.0",
-    "autopep8",
+    "black>=24.8.0",
     "pylint",
-    "hammett"
+    "hammett",
+    "isort"
 ]
 
 build = [
@@ -40,7 +41,6 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpath = ["."]
-
 
 [tool.isort]
 src_paths = ["amati", "tests"]

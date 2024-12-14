@@ -14,7 +14,7 @@ This uses Pydantic, especially the validation, and Typing to construct the entir
 
 Where the specification conforms, but relies on implementation-defined behavior (e.g. [data type formats](https://spec.openapis.org/oas/v3.1.1.html#data-type-format)), a warning will be raised.
 
-## Testing
+## Testing and formatting
 
 This project uses:
 
@@ -25,7 +25,8 @@ This project uses:
 * [Hypothesis](https://hypothesis.readthedocs.io/en/latest/index.html) for test data generation
 * [mutmut](https://mutmut.readthedocs.io/en/latest/index.html) for mutation testing
 * [Coverage](https://coverage.readthedocs.io/en/7.6.8/) on both the tests and code for test coverage
-* [authpep8](https://pypi.org/project/autopep8/) for automated formatting
+* [Black](https://black.readthedocs.io/en/stable/index.html) for automated formatting
+* [isort](https://pycqa.github.io/isort/) for import sorting
 
 It's expected that there are no errors, no surviving mutants and 100% of the code is reached and executed.
 
