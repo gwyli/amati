@@ -47,5 +47,5 @@ pythonpath = ["."]
 src_paths = ["amati", "tests"]
 known_first_party=["amati"]
 known_third_party=["pytest","pydantic","yaml","abnf"]
-known_standard_library=["typing", "typing_extensions"]
+extra_standard_library=["typing_extensions"]
 profile="black"
