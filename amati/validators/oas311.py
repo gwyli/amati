@@ -7,6 +7,7 @@ from typing_extensions import Self
 
 from pydantic import Field, model_validator
 
+from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
 from amati.fields.openapi_versions import OpenAPI
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
@@ -88,7 +89,7 @@ class InfoObject(GenericObject):
 
     title: str
     summary: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[CommonMark] = None
     termsOfService: Optional[str] = None  # pylint: disable=invalid-name
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
@@ -107,7 +108,7 @@ class ServerVariableObject(GenericObject):
 
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
-    description: Optional[str] = None
+    description: Optional[CommonMark] = None
     _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
@@ -143,7 +144,7 @@ class ServerObject(GenericObject):
     """
 
     url: URLWithVariables | URL
-    description: Optional[str] = None
+    description: Optional[CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
     _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
