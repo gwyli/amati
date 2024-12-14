@@ -72,7 +72,7 @@ class LicenceObject(GenericObject):
         if str(self.url) not in VALID_LICENCES[self.identifier]:
             LogMixin.log(
                 Log(
-                    message=f"{self.url} is not associated with the identifier {self.identifier}", # pylint: disable=line-too-long
+                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
                     type=Warning,
                     reference=self._reference,
                 )
@@ -142,7 +142,7 @@ class ServerVariableObject(GenericObject):
         if self.default not in self.enum:
             LogMixin.log(
                 Log(
-                    message=f"The default value {self.default} is not in the enum list {self.enum}", # pylint: disable=line-too-long
+                    message=f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
                     type=ValueError,
                     reference=self._reference,
                 )
