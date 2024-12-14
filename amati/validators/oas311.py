@@ -162,6 +162,33 @@ class ServerObject(GenericObject):
         section="Server Object",
     )
 
+class ExternalDocumentationObject(GenericObject):
+    """
+    Validates the OpenAPI Specification external documentation object - §4.8.22
+    """
+
+    description: Optional[CommonMark] = None
+    url: URI
+    _reference: Reference = ReferenceModel(  # type: ignore
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
+        section="External Documentation Object",
+    )
+
+
+class TagObject(GenericObject):
+    """
+    Validates the OpenAPI Specification tag object - §4.8.22
+    """
+
+    name: str
+    description: Optional[CommonMark] = None
+    externalDocs: Optional[ExternalDocumentationObject] = None # pylint: disable=invalid-name
+    _reference: Reference = ReferenceModel(  # type: ignore
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
+        section="Tag Object",
+    )
 
 class OpenAPIObject(GenericObject):
     """
