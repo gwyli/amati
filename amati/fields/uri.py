@@ -1,5 +1,5 @@
 """
-Validates a URL according to the RFC3986 ABNF grammar
+Validates a URI according to the RFC3986 ABNF grammar
 """
 
 from typing import Annotated, Union
@@ -19,16 +19,16 @@ reference: Reference = ReferenceModel(
 
 def _validate_after_relative(value: str | AnyUrl) -> str:
     """
-    Validate that the URL is a valid relative URL.
+    Validate that the URI is a valid relative URI.
 
     Args:
-        value: The URL to validate
+        value: The URI to validate
 
     Returns:
         The original value
 
     Notes:
-        Logs if the URL is relative
+        Logs if the URI is relative
     """
 
     return rfc3986.Rule("relative-ref").parse_all(str(value)).value
@@ -36,10 +36,10 @@ def _validate_after_relative(value: str | AnyUrl) -> str:
 
 def _validate_after_absolute(value: AnyUrl | str) -> AnyUrl:
     """
-    Validate that the URL is a valid absolute URL.
+    Validate that the URI is a valid absolute URI.
 
     Args:
-        value: The URL to validate
+        value: The URI to validate
     """
     uri = rfc3986.Rule("URI").parse_all(str(value))
 
@@ -48,10 +48,10 @@ def _validate_after_absolute(value: AnyUrl | str) -> AnyUrl:
 
 def _validate_after(value: AnyUrl | str) -> AnyUrl | str:
     """
-    Validate that the URL is a valid URL.
+    Validate that the URI is a valid URI.
 
     Args:
-        value: The URL to validate
+        value: The URI to validate
 
     Raises: ParseError
     """
@@ -64,21 +64,21 @@ def _validate_after(value: AnyUrl | str) -> AnyUrl | str:
     return _validate_after_relative(value)
 
 
-def _validate_after_url_with_variables(value: str) -> str:
+def _validate_after_uri_with_variables(value: str) -> str:
     """
-    Validate that the URL is a valid URL with variables.
+    Validate that the URI is a valid URI with variables.
     e.g. of the form:
 
     https://{username}.example.com/api/v1/{resource}
 
     Args:
-        value: The URL to validate
+        value: The URI to validate
 
     Returns:
         The original value, if valid
 
     Raises:
-        ParseError: If the URL is not valid
+        ParseError: If the URI is not valid
     """
 
     count = 0
@@ -104,16 +104,16 @@ def _validate_after_url_with_variables(value: str) -> str:
         def __missing__(self, key: str) -> str:
             return key
 
-    url: URL = value.format_map(MissingKeyDict())
-    _validate_after(url)
+    uri: URI = value.format_map(MissingKeyDict())
+    _validate_after(uri)
 
     return value
 
 
-AbsoluteURL = Annotated[AnyUrl | str, AfterValidator(_validate_after_absolute)]
+AbsoluteURI = Annotated[AnyUrl | str, AfterValidator(_validate_after_absolute)]
 
-RelativeURL = Annotated[str, AfterValidator(_validate_after_relative)]
+RelativeURI = Annotated[str, AfterValidator(_validate_after_relative)]
 
-URL = Annotated[Union[AbsoluteURL, RelativeURL], AfterValidator(_validate_after)]
+URI = Annotated[Union[AbsoluteURI, RelativeURI], AfterValidator(_validate_after)]
 
-URLWithVariables = Annotated[str, AfterValidator(_validate_after_url_with_variables)]
+URIWithVariables = Annotated[str, AfterValidator(_validate_after_uri_with_variables)]

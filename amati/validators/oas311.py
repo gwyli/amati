@@ -1,5 +1,15 @@
 """
 Validates the OpenAPI Specification version 3.1.1
+
+Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris  # pylint: disable=line-too-long
+
+> URIs used as references within an OpenAPI Description, or to external documentation
+> or other supplementary information such as a license, are resolved as identifiers, 
+> and described by this specification as URIs. 
+
+> Note that some URI fields are named url for historical reasons, but the descriptive 
+> text for those fields uses the correct “URI” terminology.
+
 """
 
 from typing import Optional
@@ -11,7 +21,7 @@ from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
 from amati.fields.openapi_versions import OpenAPI
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.url import URL, URLWithVariables
+from amati.fields.uri import URI, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -21,11 +31,11 @@ TITLE = "OpenAPI Specification v3.1.1"
 
 class ContactObject(GenericObject):
     """
-    Validates the Open API Specification contact object - §4.8.3
+    Validates the OpenAPI Specification contact object - §4.8.3
     """
 
     name: Optional[str] = None
-    url: Optional[URL] = None
+    url: Optional[URI] = None
     email: Optional[Email] = None
     _reference: Reference = ReferenceModel(  # type: ignore
         title=TITLE,
@@ -36,7 +46,7 @@ class ContactObject(GenericObject):
 
 class LicenceObject(GenericObject):
     """
-    A model representing the Open API Specification licence object §4.8.4
+    A model representing the OpenAPI Specification licence object §4.8.4
 
     OAS uses the SPDX licence list.
     """
@@ -52,7 +62,7 @@ class LicenceObject(GenericObject):
     )
 
     @model_validator(mode="after")
-    def check_url_associated_with_identifier(self: Self) -> Self:
+    def check_uri_associated_with_identifier(self: Self) -> Self:
         """
         Validate that the URL matches the provided licence identifier.
 
@@ -84,7 +94,7 @@ class LicenceObject(GenericObject):
 
 class InfoObject(GenericObject):
     """
-    Validates the Open API Specification info object - §4.8.2:
+    Validates the OpenAPI Specification info object - §4.8.2:
     """
 
     title: str
@@ -103,7 +113,7 @@ class InfoObject(GenericObject):
 
 class ServerVariableObject(GenericObject):
     """
-    Validates the Open API Specification server variable object - §4.8.6
+    Validates the OpenAPI Specification server variable object - §4.8.6
     """
 
     enum: Optional[list[str]] = Field(None, min_length=1)
@@ -140,10 +150,10 @@ class ServerVariableObject(GenericObject):
 
 class ServerObject(GenericObject):
     """
-    Validates the Open API Specification server object - §4.8.5
+    Validates the OpenAPI Specification server object - §4.8.5
     """
 
-    url: URLWithVariables | URL
+    url: URIWithVariables | URI
     description: Optional[CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
     _reference: Reference = ReferenceModel(  # type: ignore
@@ -155,7 +165,7 @@ class ServerObject(GenericObject):
 
 class OpenAPIObject(GenericObject):
     """
-    Validates the Open API Specification object - §4.1
+    Validates the OpenAPI Specification object - §4.1
     """
 
     openapi: OpenAPI
