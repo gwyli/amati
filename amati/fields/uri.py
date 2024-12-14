@@ -6,7 +6,7 @@ from typing import Annotated, Union
 
 from abnf import ParseError
 from abnf.grammars import rfc3986
-from pydantic import AfterValidator, AnyUrl, ValidationError
+from pydantic import AfterValidator, AnyUrl
 
 from amati.validators.reference_object import Reference, ReferenceModel
 
@@ -57,11 +57,9 @@ def _validate_after(value: AnyUrl | str) -> AnyUrl | str:
     """
     try:
         return _validate_after_absolute(value)
-    except (ParseError, ValidationError):
-        pass
-
-    # If the URI is neither absolute or relative then raise an error
-    return _validate_after_relative(value)
+    except ParseError:
+        # If the URI is neither absolute or relative then raise an error
+        return _validate_after_relative(value)
 
 
 def _validate_after_uri_with_variables(value: str) -> str:
