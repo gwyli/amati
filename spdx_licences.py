@@ -9,8 +9,8 @@ import requests
 
 if __name__ == "__main__":
     response = requests.get(
-        "https://raw.githubusercontent.com/spdx/license-list-data/refs/heads/main/json/licenses.json", # pylint: disable=ignore line-too-long
-        timeout=20
+        "https://raw.githubusercontent.com/spdx/license-list-data/refs/heads/main/json/licenses.json",  # pylint: disable=ignore line-too-long
+        timeout=20,
     )
     response.raise_for_status()  # Raise an exception for HTTP errors
 
