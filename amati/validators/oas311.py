@@ -12,7 +12,7 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 
 """
 
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
 from pydantic import Field, model_validator
@@ -20,7 +20,7 @@ from pydantic import Field, model_validator
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
 from amati.fields.json import JSON
-from amati.fields.openapi_versions import OpenAPI
+from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
 from amati.fields.uri import URI, URIWithVariables
 from amati.logging import Log, LogMixin
@@ -100,7 +100,7 @@ class InfoObject(GenericObject):
 
     title: str
     summary: Optional[str] = None
-    description: Optional[CommonMark] = None
+    description: Optional[str | CommonMark] = None
     termsOfService: Optional[str] = None  # pylint: disable=invalid-name
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
@@ -119,7 +119,7 @@ class ServerVariableObject(GenericObject):
 
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
-    description: Optional[CommonMark] = None
+    description: Optional[str | CommonMark] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
@@ -155,7 +155,7 @@ class ServerObject(GenericObject):
     """
 
     url: URIWithVariables | URI
-    description: Optional[CommonMark] = None
+    description: Optional[str | CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
@@ -169,7 +169,7 @@ class ExternalDocumentationObject(GenericObject):
     Validates the OpenAPI Specification external documentation object - §4.8.22
     """
 
-    description: Optional[CommonMark] = None
+    description: Optional[str | CommonMark] = None
     url: URI
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
@@ -184,14 +184,14 @@ class TagObject(GenericObject):
     """
 
     name: str
-    description: Optional[CommonMark] = None
+    description: Optional[str | CommonMark] = None
     externalDocs: Optional[ExternalDocumentationObject] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
         section="Tag Object",
     )
-    
+
 
 class ExampleObject(GenericObject):
     """
@@ -199,7 +199,7 @@ class ExampleObject(GenericObject):
     """
 
     summary: Optional[str] = None
-    description: Optional[CommonMark] = None
+    description: Optional[str | CommonMark] = None
     value: Optional[JSON] = None
     externalValue: Optional[URI] = None
     _reference: ClassVar[Reference] = ReferenceModel(
@@ -207,7 +207,7 @@ class ExampleObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
         section="Example Object",
     )
-    
+
     @model_validator(mode="after")
     def check_values_mutually_exclusive(self: Self) -> Self:
         """
@@ -220,6 +220,43 @@ class ExampleObject(GenericObject):
             LogMixin.log(
                 Log(
                     message="Only one of value or externalValue can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+class LinkObject(GenericObject):
+    """
+    Validates the OpenAPI Specification link object - §4.8.20
+    """
+
+    operationRef: Optional[URI] = None
+    operationId: Optional[str] = None
+    parameters: Optional[dict[str, RuntimeExpression]] = None
+    requestBody: Optional[Any | RuntimeExpression] = None
+    description: Optional[str | CommonMark] = None
+    server: Optional[ServerObject] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
+        section="Link Object",
+    )
+
+    @model_validator(mode="after")
+    def _validate_operation_ref_id_mutually_exclusive(self: Self) -> Self:
+        """
+        Validate that only one of operationRef or operationId is provided.
+
+        Returns:
+            The validated link object
+        """
+        if self.operationRef is not None and self.operationId is not None:
+            LogMixin.log(
+                Log(
+                    message="Only one of operationRef or operationId can be provided",
                     type=ValueError,
                     reference=self._reference,
                 )
