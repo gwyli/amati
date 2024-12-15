@@ -12,13 +12,14 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 
 """
 
-from typing import Optional
+from typing import ClassVar, Optional
 from typing_extensions import Self
 
 from pydantic import Field, model_validator
 
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
+from amati.fields.json import JSON
 from amati.fields.openapi_versions import OpenAPI
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
 from amati.fields.uri import URI, URIWithVariables
@@ -37,7 +38,7 @@ class ContactObject(GenericObject):
     name: Optional[str] = None
     url: Optional[URI] = None
     email: Optional[Email] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#contact-object",
         section="Contact Object",
@@ -55,7 +56,7 @@ class LicenceObject(GenericObject):
     # What difference does Optional make here?
     identifier: SPDXIdentifier = None
     url: SPDXURL = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
         section="License Object",
@@ -104,7 +105,7 @@ class InfoObject(GenericObject):
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#info-object",
         section="Info Object",
@@ -119,7 +120,7 @@ class ServerVariableObject(GenericObject):
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
     description: Optional[CommonMark] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
         section="Server Variable Object",
@@ -156,7 +157,7 @@ class ServerObject(GenericObject):
     url: URIWithVariables | URI
     description: Optional[CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
         section="Server Object",
@@ -170,7 +171,7 @@ class ExternalDocumentationObject(GenericObject):
 
     description: Optional[CommonMark] = None
     url: URI
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
         section="External Documentation Object",
@@ -185,11 +186,46 @@ class TagObject(GenericObject):
     name: str
     description: Optional[CommonMark] = None
     externalDocs: Optional[ExternalDocumentationObject] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
         section="Tag Object",
     )
+    
+
+class ExampleObject(GenericObject):
+    """
+    Validates the OpenAPI Specification example object - §4.8.19
+    """
+
+    summary: Optional[str] = None
+    description: Optional[CommonMark] = None
+    value: Optional[JSON] = None
+    externalValue: Optional[URI] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
+        section="Example Object",
+    )
+    
+    @model_validator(mode="after")
+    def check_values_mutually_exclusive(self: Self) -> Self:
+        """
+        Validate that only one of value or externalValue is provided.
+
+        Returns:
+            The validated example object
+        """
+        if self.value is not None and self.externalValue is not None:
+            LogMixin.log(
+                Log(
+                    message="Only one of value or externalValue can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
 
 
 class OpenAPIObject(GenericObject):
@@ -200,7 +236,7 @@ class OpenAPIObject(GenericObject):
     openapi: OpenAPI
     info: InfoObject
     servers: list[ServerObject] = []
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
         section="OpenAPI Object",
