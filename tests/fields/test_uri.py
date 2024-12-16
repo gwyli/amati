@@ -75,11 +75,8 @@ def test_auri_validation_uses_correct_rule():
         mock_rule = mock.Mock()
         mock_rule.parse_all.return_value.value = "https://example.com"
         mock_rule_class.return_value = mock_rule
-
-        try:
-            URIModel(uri="https://example.com")
-        except ValidationError:
-            pass  # We don't care about validation here, just the rule name
+    
+        URIModel(uri="https://example.com")
 
         # Verify the correct rule name was used
         mock_rule_class.assert_called_with("URI")
@@ -89,12 +86,8 @@ def test_auri_validation_uses_correct_rule():
         mock_rule.parse_all.return_value.value = "/example"
         mock_rule_class.return_value = mock_rule
 
-        try:
-            RelativeURIModel(uri="/example")
-        except ValidationError:
-            pass  # We don't care about validation here, just the rule name
+        RelativeURIModel(uri="/example")
         mock_rule_class.assert_called_with("relative-ref")
-
 
 def test_rfc3986_parser_errors():
 

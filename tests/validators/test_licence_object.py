@@ -56,9 +56,9 @@ def test_valid_identifier_no_url(name: str, identifier: str):
 def test_valid_identifier_invalid_url(name: str, identifier: str, url: str):
     # These lines are only reached when the identifier has a URL and the URL is
     # not associated with the identifier
-    if url in VALID_LICENCES[identifier]:
+    if url in VALID_LICENCES[identifier]:  # pragma: no cover
         return
-    if not VALID_LICENCES[identifier]:
+    if not VALID_LICENCES[identifier]:  # pragma: no cover
         return
 
     with LogMixin.context():

@@ -5,7 +5,7 @@ Tests amati/fields/openapi_versions.py
 from hypothesis import given
 from hypothesis import strategies as st
 
-from amati.fields.openapi_versions import OPENAPI_VERSIONS, OpenAPI
+from amati.fields.oas import OPENAPI_VERSIONS, OpenAPI
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 

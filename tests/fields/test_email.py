@@ -2,6 +2,8 @@
 Tests amati/fields/email.py
 """
 
+import re
+
 import pytest
 from abnf import ParseError
 from hypothesis import given, settings
@@ -18,7 +20,7 @@ class EmailModel(GenericObject):
 # I believe that there's an issue with the Hypothesis domain strategy
 # as emails() and urls() unreliably exceeds deadlines. In this file there
 # are several deadline extensions to prevent these failures.
-
+# See https://github.com/HypothesisWorks/hypothesis/issues/4201.
 
 @given(st.emails())
 @settings(deadline=300)
@@ -28,12 +30,11 @@ def test_email_valid(email: str):
 
 @st.composite
 def strings_except_emails(draw: st.DrawFn) -> str:
-    # Draw both a string and an email
     candidate: str = draw(st.text())
-    email: str = draw(st.emails())
 
-    # If our candidate matches any possible email, draw again; highly unlikely.
-    while candidate == email:
+    # The Hypothesis string shrinking algorithm ends up producing a valid RFC 5322 email
+    # email sometimes. Exclude them.
+    while re.match("[a-z0-9]@[a-z0-9]", candidate, flags=re.IGNORECASE):
         candidate = draw(st.text())  # pragma: no cover
 
     return candidate
