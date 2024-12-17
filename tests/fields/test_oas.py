@@ -38,19 +38,41 @@ def test_valid_openapi_version(value: str):
 
 def test_valid_runtime_expression():
     expressions = [
+        # Basic root expressions
         "$url",
         "$method",
         "$statusCode",
-        "$request.header.content-type",
-        "$request.query.userId",
-        "$request.query./name",
-        "$response.path.itemId",
-        "$response.body",
-        "$response.body#/users/0/name",
-        "$request.body#/data/items~1products/0",
-        "$response.header.x-rate-limit_remaining",
-        "$request.header..double-dot",
-        "$request.header.token.",
+        # Header references
+        "$request.header.content-type",  # Common header format
+        "$request.header.x-rate-limit_remaining",  # Header with underscore
+        "$request.header..double-dot",  # Multiple dots in token
+        "$request.header.token.",  # Trailing dot
+        "$request.header.!#$%&'",  # Special characters at start
+        "$response.header.*+-.^_`|~",  # Special characters throughout
+        "$request.header.123ABC",  # Digits and letters
+        # Query references
+        "$request.query.userId",  # Simple query param
+        "$request.query./name",  # With leading slash
+        "$request.query.with space",  # Space in name
+        "$response.query.with/slash",  # Slash in name
+        "$request.query.with{brackets}",  # Special chars in name
+        # Path references
+        "$response.path.itemId",  # Simple path param
+        "$response.path.param_123",  # Underscores and numbers
+        "$request.path.with@special#chars",  # Special characters in name
+        # Body references
+        "$response.body",  # Simple body reference
+        "$request.body#/data/items~1products/0",  # Escaped forward slash
+        "$response.body#/users/0/name",  # Array indexing
+        "$request.body#/deeply/nested/array/0/field",  # Deep nesting
+        "$response.body#/~0~1",  # Escaped ~ and /
+        "$request.body#/special*chars/in.pointer",  # Special chars in pointer
+        "$response.body#/with~0tilde",  # Escaped tilde mid-string
+        # Mixing maximum character sets
+        "$request.header.~.-_*+$%",  # Mix of allowed special chars in token
+        "$response.query.\u0394\u0395\u0396",  # Unicode chars in name
+        "$request.path.éèêëēėę",  # Accented chars in name
+        "$response.body#/\u2603/\u2600",  # Unicode in json pointer
     ]
 
     for expression in expressions:
