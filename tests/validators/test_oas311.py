@@ -9,9 +9,36 @@ import yaml
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
-from pydantic import ValidationError
+from pydantic import AnyUrl, ValidationError
 
-from amati.validators.oas311 import ContactObject, OpenAPIObject
+from amati.fields.json import JSON
+from amati.logging import LogMixin
+from amati.validators.oas311 import (
+    ContactObject,
+    ExampleObject,
+    LinkObject,
+    OpenAPIObject,
+)
+
+
+@given(st.text(), st.text(), urls())
+def test_example_object(summary: str, description: str, external_value: AnyUrl):
+    with LogMixin.context():
+        value: JSON = {"value": "value"}
+        ExampleObject(
+            summary=summary,
+            description=description,
+            value=value,
+            externalValue=external_value,
+        )
+        assert LogMixin.logs[0].type == ValueError
+
+
+@given(urls(), st.text())
+def test_link_object(operation_ref: AnyUrl, operation_id: str):
+    with LogMixin.context():
+        LinkObject(operationRef=operation_ref, operationId=operation_id)
+        assert LogMixin.logs[0].type == ValueError
 
 
 @given(st.text(), urls(), st.emails())

@@ -16,10 +16,10 @@ from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
 from pydantic import Field, model_validator
+from pydantic.json_schema import JsonSchemaValue
 
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
-from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
 from amati.fields.uri import URI, URIWithVariables
@@ -200,7 +200,7 @@ class ExampleObject(GenericObject):
 
     summary: Optional[str] = None
     description: Optional[str | CommonMark] = None
-    value: Optional[JSON] = None
+    value: Optional[JsonSchemaValue] = None
     externalValue: Optional[URI] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
@@ -226,6 +226,9 @@ class ExampleObject(GenericObject):
             )
 
         return self
+
+
+ExampleObject.model_rebuild()
 
 
 class LinkObject(GenericObject):
