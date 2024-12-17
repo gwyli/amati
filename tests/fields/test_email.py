@@ -22,6 +22,7 @@ class EmailModel(GenericObject):
 # are several deadline extensions to prevent these failures.
 # See https://github.com/HypothesisWorks/hypothesis/issues/4201.
 
+
 @given(st.emails())
 @settings(deadline=300)
 def test_email_valid(email: str):

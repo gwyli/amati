@@ -75,7 +75,7 @@ def test_auri_validation_uses_correct_rule():
         mock_rule = mock.Mock()
         mock_rule.parse_all.return_value.value = "https://example.com"
         mock_rule_class.return_value = mock_rule
-    
+
         URIModel(uri="https://example.com")
 
         # Verify the correct rule name was used
@@ -88,6 +88,7 @@ def test_auri_validation_uses_correct_rule():
 
         RelativeURIModel(uri="/example")
         mock_rule_class.assert_called_with("relative-ref")
+
 
 def test_rfc3986_parser_errors():
 
