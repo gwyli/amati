@@ -24,12 +24,17 @@ from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
 from amati.fields.uri import URI, URIWithVariables
 from amati.logging import Log, LogMixin
-from amati.validators.generic import GenericObject
+from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.reference_object import Reference, ReferenceModel
 
 TITLE = "OpenAPI Specification v3.1.1"
 
+# Convenience naming to ensure that it's clear what's happening.
+# https://spec.openapis.org/oas/v3.1.1.html#specification-extensions
+specification_extensions = allow_extra_fields
 
+
+@specification_extensions("x-")
 class ContactObject(GenericObject):
     """
     Validates the OpenAPI Specification contact object - §4.8.3
@@ -45,6 +50,7 @@ class ContactObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class LicenceObject(GenericObject):
     """
     A model representing the OpenAPI Specification licence object §4.8.4
@@ -93,6 +99,7 @@ class LicenceObject(GenericObject):
         return self
 
 
+@specification_extensions("x-")
 class InfoObject(GenericObject):
     """
     Validates the OpenAPI Specification info object - §4.8.2:
@@ -112,6 +119,7 @@ class InfoObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class ServerVariableObject(GenericObject):
     """
     Validates the OpenAPI Specification server variable object - §4.8.6
@@ -149,6 +157,7 @@ class ServerVariableObject(GenericObject):
         return self
 
 
+@specification_extensions("x-")
 class ServerObject(GenericObject):
     """
     Validates the OpenAPI Specification server object - §4.8.5
@@ -164,6 +173,7 @@ class ServerObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class ExternalDocumentationObject(GenericObject):
     """
     Validates the OpenAPI Specification external documentation object - §4.8.22
@@ -178,6 +188,7 @@ class ExternalDocumentationObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class TagObject(GenericObject):
     """
     Validates the OpenAPI Specification tag object - §4.8.22
@@ -193,6 +204,7 @@ class TagObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class ExampleObject(GenericObject):
     """
     Validates the OpenAPI Specification example object - §4.8.19
@@ -231,6 +243,7 @@ class ExampleObject(GenericObject):
 ExampleObject.model_rebuild()
 
 
+@specification_extensions("x-")
 class LinkObject(GenericObject):
     """
     Validates the OpenAPI Specification link object - §4.8.20
@@ -268,6 +281,7 @@ class LinkObject(GenericObject):
         return self
 
 
+@specification_extensions("x-")
 class OpenAPIObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.1
