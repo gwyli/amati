@@ -9,7 +9,7 @@ from typing import Annotated, Optional
 
 from pydantic import AfterValidator
 
-from amati.fields.url import URL
+from amati.fields.uri import URI
 from amati.logging import Log, LogMixin
 from amati.validators.reference_object import Reference, ReferenceModel
 
@@ -59,7 +59,7 @@ SPDXIdentifier = Annotated[
 ]
 
 
-def _validate_after_spdx_url(value: Optional[URL | str]) -> Optional[URL]:
+def _validate_after_spdx_url(value: Optional[URI | str]) -> Optional[URI]:
     """
     Validate that the licence URL exists in the list of known SPDX licence URLs.
     Not that the URL is associated with the specific identifier.
@@ -84,4 +84,4 @@ def _validate_after_spdx_url(value: Optional[URL | str]) -> Optional[URL]:
     return value
 
 
-SPDXURL = Annotated[Optional[URL | str], AfterValidator(_validate_after_spdx_url)]
+SPDXURL = Annotated[Optional[URI | str], AfterValidator(_validate_after_spdx_url)]

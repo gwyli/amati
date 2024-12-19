@@ -1,16 +1,28 @@
 """
 Validates the OpenAPI Specification version 3.1.1
+
+Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris  # pylint: disable=line-too-long
+
+> URIs used as references within an OpenAPI Description, or to external documentation
+> or other supplementary information such as a license, are resolved as identifiers, 
+> and described by this specification as URIs. 
+
+> Note that some URI fields are named url for historical reasons, but the descriptive 
+> text for those fields uses the correct “URI” terminology.
+
 """
 
-from typing import Optional
+from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
 from pydantic import Field, model_validator
+from pydantic.json_schema import JsonSchemaValue
 
+from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
-from amati.fields.openapi_versions import OpenAPI
+from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.url import URL
+from amati.fields.uri import URI, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -20,13 +32,13 @@ TITLE = "OpenAPI Specification v3.1.1"
 
 class ContactObject(GenericObject):
     """
-    Validates the Open API Specification contact object - §4.8.3
+    Validates the OpenAPI Specification contact object - §4.8.3
     """
 
     name: Optional[str] = None
-    url: Optional[URL] = None
+    url: Optional[URI] = None
     email: Optional[Email] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#contact-object",
         section="Contact Object",
@@ -35,7 +47,7 @@ class ContactObject(GenericObject):
 
 class LicenceObject(GenericObject):
     """
-    A model representing the Open API Specification licence object §4.8.4
+    A model representing the OpenAPI Specification licence object §4.8.4
 
     OAS uses the SPDX licence list.
     """
@@ -44,14 +56,14 @@ class LicenceObject(GenericObject):
     # What difference does Optional make here?
     identifier: SPDXIdentifier = None
     url: SPDXURL = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
         section="License Object",
     )
 
     @model_validator(mode="after")
-    def check_url_associated_with_identifier(self: Self) -> Self:
+    def check_uri_associated_with_identifier(self: Self) -> Self:
         """
         Validate that the URL matches the provided licence identifier.
 
@@ -83,46 +95,32 @@ class LicenceObject(GenericObject):
 
 class InfoObject(GenericObject):
     """
-    Validates the Open API Specification info object - §4.8.2:
+    Validates the OpenAPI Specification info object - §4.8.2:
     """
 
     title: str
     summary: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[str | CommonMark] = None
     termsOfService: Optional[str] = None  # pylint: disable=invalid-name
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#info-object",
         section="Info Object",
     )
 
 
-class OpenAPIObject(GenericObject):
-    """
-    Validates the Open API Specification object - §4.1
-    """
-
-    openapi: OpenAPI
-    info: InfoObject
-    _reference: ReferenceModel(  # type: ignore
-        title=TITLE,
-        url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
-        section="OpenAPI Object",
-    )
-
-
 class ServerVariableObject(GenericObject):
     """
-    Validates the Open API Specification server variable object - §4.8.6
+    Validates the OpenAPI Specification server variable object - §4.8.6
     """
 
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
-    description: Optional[str] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    description: Optional[str | CommonMark] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
         section="Server Variable Object",
@@ -153,14 +151,133 @@ class ServerVariableObject(GenericObject):
 
 class ServerObject(GenericObject):
     """
-    Validates the Open API Specification server object - §4.8.5
+    Validates the OpenAPI Specification server object - §4.8.5
     """
 
-    url: URL
-    description: Optional[str] = None
+    url: URIWithVariables | URI
+    description: Optional[str | CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
-    _reference: Reference = ReferenceModel(  # type: ignore
+    _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
         section="Server Object",
+    )
+
+
+class ExternalDocumentationObject(GenericObject):
+    """
+    Validates the OpenAPI Specification external documentation object - §4.8.22
+    """
+
+    description: Optional[str | CommonMark] = None
+    url: URI
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
+        section="External Documentation Object",
+    )
+
+
+class TagObject(GenericObject):
+    """
+    Validates the OpenAPI Specification tag object - §4.8.22
+    """
+
+    name: str
+    description: Optional[str | CommonMark] = None
+    externalDocs: Optional[ExternalDocumentationObject] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
+        section="Tag Object",
+    )
+
+
+class ExampleObject(GenericObject):
+    """
+    Validates the OpenAPI Specification example object - §4.8.19
+    """
+
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    value: Optional[JsonSchemaValue] = None
+    externalValue: Optional[URI] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
+        section="Example Object",
+    )
+
+    @model_validator(mode="after")
+    def check_values_mutually_exclusive(self: Self) -> Self:
+        """
+        Validate that only one of value or externalValue is provided.
+
+        Returns:
+            The validated example object
+        """
+        if self.value is not None and self.externalValue is not None:
+            LogMixin.log(
+                Log(
+                    message="Only one of value or externalValue can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+ExampleObject.model_rebuild()
+
+
+class LinkObject(GenericObject):
+    """
+    Validates the OpenAPI Specification link object - §4.8.20
+    """
+
+    operationRef: Optional[URI] = None
+    operationId: Optional[str] = None
+    parameters: Optional[dict[str, RuntimeExpression]] = None
+    requestBody: Optional[Any | RuntimeExpression] = None
+    description: Optional[str | CommonMark] = None
+    server: Optional[ServerObject] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
+        section="Link Object",
+    )
+
+    @model_validator(mode="after")
+    def _validate_operation_ref_id_mutually_exclusive(self: Self) -> Self:
+        """
+        Validate that only one of operationRef or operationId is provided.
+
+        Returns:
+            The validated link object
+        """
+        if self.operationRef is not None and self.operationId is not None:
+            LogMixin.log(
+                Log(
+                    message="Only one of operationRef or operationId can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+class OpenAPIObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.1
+    """
+
+    openapi: OpenAPI
+    info: InfoObject
+    servers: list[ServerObject] = []
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
+        section="OpenAPI Object",
     )
