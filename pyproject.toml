@@ -22,7 +22,7 @@ dev = [
     "pytest-cov",
     "mutmut",
     "hypothesis",
-    "black",
+    "black>=25.1.0",
     "pre-commit",
     "pylint",
     "isort"
