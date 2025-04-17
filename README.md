@@ -1,16 +1,16 @@
 # amati
 
-A programme designed to validate that a file conforms to [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.1.html) (OAS).
+amati is designed to validate that a file conforms to [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.1.html) (OAS).
 
 Currently a proof of concept.
 
 ## Name
 
-amati means to observe in Malay, especially with attention to detail. It's also one of the plurals of beloved or favourite in Italian.
+"Amati" means to observe in Malay, especially with attention to detail. It's also one of the plurals of beloved or favourite in Italian.
 
 ## Architecture
 
-This uses Pydantic, especially the validation, and Typing to construct the entire OAS as a single data type. Passing a dictionary to the top-level data type runs all the validation in the Pydantic models constructing a single set of inherited classes and datatypes that validate that the API specification is accurate.
+amati uses Pydantic, especially the validation, and `Typing` to construct the entire OAS as a single data type. Passing a dictionary to the top-level data type runs all the validation in the Pydantic models constructing a single set of inherited classes and datatypes that validate that the API specification is accurate.
 
 Where the specification conforms, but relies on implementation-defined behavior (e.g. [data type formats](https://spec.openapis.org/oas/v3.1.1.html#data-type-format)), a warning will be raised.
 
