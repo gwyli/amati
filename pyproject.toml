@@ -9,23 +9,23 @@ description = "Your project description"
 authors = [{name = "Ben Alexander", email = "amati@ben-alexander.com"},]
 
 dependencies = [
-    "pydantic>=2.10.2",
+    "pydantic",
     "pyyaml",
-    "abnf>=2.3.0"
+    "abnf"
 ]
 requires-python = ">=3.13"
 
 [project.optional-dependencies]
 
 dev = [
-    "pytest>=7.0",
+    "pytest",
     "pytest-cov",
-    "mutmut>=2.4.3",
-    "hypothesis>=6.122.0",
-    "black>=24.8.0",
+    "mutmut",
+    "hypothesis",
+    "black>=25.1.0",
     "pre-commit",
-    "pylint",
-    "isort"
+    "pylint>=3.3.6",
+    "isort>=6.0.1"
 ]
 
 build = [

@@ -4,10 +4,10 @@ Validates the OpenAPI Specification version 3.1.1
 Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris  # pylint: disable=line-too-long
 
 > URIs used as references within an OpenAPI Description, or to external documentation
-> or other supplementary information such as a license, are resolved as identifiers, 
-> and described by this specification as URIs. 
+> or other supplementary information such as a license, are resolved as identifiers,
+> and described by this specification as URIs.
 
-> Note that some URI fields are named url for historical reasons, but the descriptive 
+> Note that some URI fields are named url for historical reasons, but the descriptive
 > text for those fields uses the correct “URI” terminology.
 
 """

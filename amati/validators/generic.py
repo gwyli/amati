@@ -42,7 +42,10 @@ class GenericObject(LogMixin, BaseModel):
         # If extra fields aren't allowed log those that aren't going to be added
         # to the model.
         for field in data:
-            if field not in self.model_fields:
+            if (
+                field
+                not in self.model_fields  # pylint: disable=unsupported-membership-test
+            ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
                 self.log(
                     Log(
