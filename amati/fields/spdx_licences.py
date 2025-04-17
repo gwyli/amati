@@ -1,5 +1,5 @@
 """
-Validates the idenfitier and licences from the System Package Data 
+Validates the idenfitier and licences from the System Package Data
 Exchange (SPDX) licence list.
 """
 
