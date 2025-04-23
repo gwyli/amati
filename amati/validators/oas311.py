@@ -20,9 +20,10 @@ from pydantic.json_schema import JsonSchemaValue
 
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
+from amati.fields.iso9110 import HTTPAuthenticationScheme
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.uri import URI, URIWithVariables
+from amati.fields.uri import URI, RelativeURI, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -313,6 +314,90 @@ class OAuthFlowsObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
         section="OAuth Flows Object",
     )
+
+
+SECURITY_SCHEME_TYPES: set[str] = {
+    "apiKey",
+    "http",
+    "mutualTLS",
+    "oauth2",
+    "openIdConnect",
+}
+
+
+class SecuritySchemeObject(GenericObject):
+    """
+    Validates the OpenAPI Security Scheme object - §4.8.27
+    """
+
+    type: str
+    description: Optional[str | CommonMark] = None
+    name: Optional[str] = None
+    in_: Optional[str] = Field(alias="in")
+    scheme: Optional[HTTPAuthenticationScheme] = None
+    bearerFormat: Optional[str] = None
+    flows: Optional[OAuthFlowsObject] = None
+    openIdConnectUrl: Optional[RelativeURI] = None
+
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0",
+        section="Security Scheme Object",
+    )
+
+    def __init__(self, **data: Any) -> None:
+        self.model_config["populate_by_name"] = True
+        super().__init__(**data)
+
+    @model_validator(mode="after")
+    def _validate_after(self: Self) -> Self:
+        """
+        Validates the conditional logic of the security scheme
+        """
+
+        # Security schemes must be one of the valid schemes
+        if self.type not in SECURITY_SCHEME_TYPES:
+            message = f"{self.type} is not a valid Security Scheme type."
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=self._reference)
+            )
+
+        if self.type == "apiKey":
+            if self.name is None:
+                message = "The name of the header, query or cookie parameter to be used is required if the security type is apiKey"  # pylint: disable=line-too-long
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if self.in_ not in ("query", "header", "cookie"):
+                message = "The location (in) of the API key is not valid."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type == "http":
+            if self.scheme is None:
+                message = "The scheme is required if the security type is http"
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type == "oauth2":
+            if self.flows is None:
+                message = (
+                    "The OAuth Flows Object is required if the security type is oauth2"
+                )
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type == "openIdConnect":
+            if self.openIdConnectUrl is None:
+                message = "The openIdConnectUrl is required if the security type is openIdConnect"  # pylint: disable=line-too-long
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        return self
 
 
 @specification_extensions("x-")
