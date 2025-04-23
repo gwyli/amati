@@ -282,6 +282,40 @@ class LinkObject(GenericObject):
 
 
 @specification_extensions("x-")
+class OAuthFlowObject(GenericObject):
+    """
+    Validates the OpenAPI OAuth Flow object - §4.8.29
+    """
+
+    authorizationUrl: URI
+    tokenUrl: URI
+    refreshUrl: Optional[URI] = None
+    scopes: dict[str, str] = {}
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
+        section="OAuth Flow Object",
+    )
+
+
+@specification_extensions("-x")
+class OAuthFlowsObject(GenericObject):
+    """
+    Validates the OpenAPI OAuth Flows object - §4.8.28
+    """
+
+    implicit: Optional[OAuthFlowObject] = None
+    password: Optional[OAuthFlowObject] = None
+    clientCredentials: Optional[OAuthFlowObject] = None
+    authorizationCode: Optional[OAuthFlowObject] = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
+        section="OAuth Flows Object",
+    )
+
+
+@specification_extensions("x-")
 class OpenAPIObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.1
