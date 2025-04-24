@@ -47,7 +47,7 @@ def _validate_after(value: Optional[str]) -> Optional[str]:
 
     if value not in HTTP_AUTHENTICATION_SCHEMES:
         message = f"{value} is not a valid HTTP authentication schema."
-        LogMixin.log(Log(message=message, type=Warning, reference=reference))
+        LogMixin.log(Log(message=message, type=ValueError, reference=reference))
 
     return value
 
