@@ -15,7 +15,7 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 from pydantic.json_schema import JsonSchemaValue
 
 from amati.fields.commonmark import CommonMark
@@ -288,21 +288,68 @@ class OAuthFlowObject(GenericObject):
     Validates the OpenAPI OAuth Flow object - §4.8.29
     """
 
-    authorizationUrl: URI
-    tokenUrl: URI
+    authorizationUrl: Optional[URI] = None
+    tokenUrl: Optional[URI] = None
     refreshUrl: Optional[URI] = None
     scopes: dict[str, str] = {}
+    type: Optional[str] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
         section="OAuth Flow Object",
     )
 
+    @model_validator(mode="after")
+    def _validate_after(self: Self) -> Self:
+        """
+        Validates that the correct type of OAuth2 flow has the correct fields.
+        """
+        if self.type == "implicit":
+            if not self.authorizationUrl:
+                message = f"{self.type} requires an authorizationUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if self.tokenUrl:
+                message = f"{self.type} must not have a tokenUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+        if self.type == "authorizationCode":
+            if not self.authorizationUrl:
+                message = f"{self.type} requires an authorizationUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if not self.tokenUrl:
+                message = f"{self.type} requires a tokenUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type in ("clientCredentials", "password"):
+
+            if self.authorizationUrl:
+                message = f"{self.type} must not have an authorizationUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if not self.tokenUrl:
+                message = f"{self.type} requires a tokenUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        return self
+
 
 @specification_extensions("-x")
 class OAuthFlowsObject(GenericObject):
     """
     Validates the OpenAPI OAuth Flows object - §4.8.28
+
+    SPECFIX: Not all of these should be optional as an OAuth2 workflow
+    without any credentials will not do anything.
     """
 
     implicit: Optional[OAuthFlowObject] = None
@@ -314,6 +361,19 @@ class OAuthFlowsObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
         section="OAuth Flows Object",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _push_down_type(cls, data: Any) -> Any:
+        """
+        Adds the type of OAuth2 flow, e.g. implicit, password to the child
+        OAuthFlowObject so that additional validation can be done on this object.
+        """
+
+        for k in data.keys():
+            data[k].type = k
+
+        return data
 
 
 SECURITY_SCHEME_TYPES: set[str] = {
@@ -330,10 +390,13 @@ class SecuritySchemeObject(GenericObject):
     Validates the OpenAPI Security Scheme object - §4.8.27
     """
 
+    # Ensure that passing `in_` to the object works.
+    model_config = ConfigDict(populate_by_name=True)
+
     type: str
     description: Optional[str | CommonMark] = None
     name: Optional[str] = None
-    in_: Optional[str] = Field(alias="in")
+    in_: Optional[str] = Field(default=None, alias="in")
     scheme: Optional[HTTPAuthenticationScheme] = None
     bearerFormat: Optional[str] = None
     flows: Optional[OAuthFlowsObject] = None
@@ -344,10 +407,6 @@ class SecuritySchemeObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0",
         section="Security Scheme Object",
     )
-
-    def __init__(self, **data: Any) -> None:
-        self.model_config["populate_by_name"] = True
-        super().__init__(**data)
 
     @model_validator(mode="after")
     def _validate_after(self: Self) -> Self:
@@ -363,19 +422,19 @@ class SecuritySchemeObject(GenericObject):
             )
 
         if self.type == "apiKey":
-            if self.name is None:
+            if self.name is None or self.name == "":
                 message = "The name of the header, query or cookie parameter to be used is required if the security type is apiKey"  # pylint: disable=line-too-long
                 LogMixin.log(
                     Log(message=message, type=ValueError, reference=self._reference)
                 )
             if self.in_ not in ("query", "header", "cookie"):
-                message = "The location (in) of the API key is not valid."
+                message = f"The location, {self.in_} of the API key is not valid."
                 LogMixin.log(
                     Log(message=message, type=ValueError, reference=self._reference)
                 )
 
         if self.type == "http":
-            if self.scheme is None:
+            if self.scheme is None or self.scheme == "":
                 message = "The scheme is required if the security type is http"
                 LogMixin.log(
                     Log(message=message, type=ValueError, reference=self._reference)
@@ -391,11 +450,17 @@ class SecuritySchemeObject(GenericObject):
                 )
 
         if self.type == "openIdConnect":
-            if self.openIdConnectUrl is None:
+            if self.openIdConnectUrl is None or self.openIdConnectUrl == "":
                 message = "The openIdConnectUrl is required if the security type is openIdConnect"  # pylint: disable=line-too-long
                 LogMixin.log(
                     Log(message=message, type=ValueError, reference=self._reference)
                 )
+
+        if self.flows and self.type != "oauth2":
+            message = "The flows object should only be used with OAuth2"  # pylint: disable=line-too-long
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=self._reference)
+            )
 
         return self
 
