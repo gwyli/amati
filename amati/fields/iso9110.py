@@ -34,7 +34,7 @@ def _validate_after(value: Optional[str]) -> Optional[str]:
     Validate the HTTP authentication scheme exists in ISO 9110.
 
     Args:
-        v: The authentication scheme to validate
+        value: The authentication scheme to validate
 
     Returns:
         The validated authentication scheme or None if not provided
@@ -42,9 +42,6 @@ def _validate_after(value: Optional[str]) -> Optional[str]:
     Raises:
         ValueError: If the identifier is not a valid authentication scheme
     """
-    if value is None:
-        return None
-
     if value not in HTTP_AUTHENTICATION_SCHEMES:
         message = f"{value} is not a valid HTTP authentication schema."
         LogMixin.log(Log(message=message, type=ValueError, reference=reference))
