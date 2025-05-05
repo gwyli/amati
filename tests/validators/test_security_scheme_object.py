@@ -6,12 +6,15 @@ and the sub-objects OAuthFlowsObject and OAuthFlowObject
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from hypothesis.provisional import urls
 from pydantic import ValidationError
 
 from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES
+from amati.fields.uri import URI
 from amati.logging import LogMixin
 from amati.validators.oas311 import (
     SECURITY_SCHEME_TYPES,
+    OAuthFlowObject,
     OAuthFlowsObject,
     SecuritySchemeObject,
 )
@@ -61,6 +64,7 @@ def test_security_scheme_apikey_invalid(
 ):
     with LogMixin.context():
         SecuritySchemeObject(type=type_, description=description, name=name, in_=in_)
+
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
@@ -123,3 +127,147 @@ def test_security_scheme_oauth2_invalid(
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
+
+
+@given(
+    urls(),
+    urls(),
+    st.dictionaries(keys=text_excluding_empty_string(), values=st.text()),
+)
+def test_oauth_flows_implicit_valid(
+    authorization_url: URI, refresh_url: URI, scopes: dict[str, str]
+):
+    with LogMixin.context():
+        OAuthFlowsObject(
+            implicit=OAuthFlowObject(
+                authorizationUrl=authorization_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert not LogMixin.logs
+
+
+@given(
+    urls(),
+    urls(),
+    urls(),
+    st.dictionaries(keys=text_excluding_empty_string(), values=st.text()),
+)
+def test_oauth_flows_implicit_invalid(
+    authorization_url: URI, token_url: URI, refresh_url: URI, scopes: dict[str, str]
+):
+    with LogMixin.context():
+        OAuthFlowsObject(
+            implicit=OAuthFlowObject(
+                authorizationUrl=authorization_url,
+                tokenUrl=token_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert LogMixin.logs
+
+
+@given(
+    urls(),
+    urls(),
+    urls(),
+    st.dictionaries(keys=text_excluding_empty_string(), values=st.text()),
+)
+def test_oauth_flows_authorization_code_valid(
+    authorization_url: URI, token_url: URI, refresh_url: URI, scopes: dict[str, str]
+):
+    with LogMixin.context():
+        OAuthFlowsObject(
+            authorizationCode=OAuthFlowObject(
+                authorizationUrl=authorization_url,
+                tokenUrl=token_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert not LogMixin.logs
+
+
+@given(
+    urls(),
+    urls(),
+    st.dictionaries(keys=text_excluding_empty_string(), values=st.text()),
+)
+def test_oauth_flows_authorization_code_invalid(
+    uri: URI, refresh_url: URI, scopes: dict[str, str]
+):
+    with LogMixin.context():
+        OAuthFlowsObject(
+            authorizationCode=OAuthFlowObject(
+                authorizationUrl=uri, refreshUrl=refresh_url, scopes=scopes
+            )
+        )
+        assert LogMixin.logs
+    with LogMixin.context():
+        OAuthFlowsObject(
+            authorizationCode=OAuthFlowObject(
+                tokenUrl=uri, refreshUrl=refresh_url, scopes=scopes
+            )
+        )
+        assert LogMixin.logs
+
+
+@given(
+    urls(),
+    urls(),
+    st.dictionaries(keys=text_excluding_empty_string(), values=st.text()),
+)
+def test_oauth_flows_client_and_password_valid(
+    token_url: URI, refresh_url: URI, scopes: dict[str, str]
+):
+    with LogMixin.context():
+        OAuthFlowsObject(
+            clientCredentials=OAuthFlowObject(
+                tokenUrl=token_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert not LogMixin.logs
+    with LogMixin.context():
+        OAuthFlowsObject(
+            password=OAuthFlowObject(
+                tokenUrl=token_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert not LogMixin.logs
+
+
+@given(
+    urls(),
+    urls(),
+    urls(),
+    st.dictionaries(keys=text_excluding_empty_string(), values=st.text()),
+)
+def test_oauth_flows_client_and_password_invalid(
+    authorization_url: URI, token_url: URI, refresh_url: URI, scopes: dict[str, str]
+):
+    with LogMixin.context():
+        OAuthFlowsObject(
+            clientCredentials=OAuthFlowObject(
+                authorizationUrl=authorization_url,
+                tokenUrl=token_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert LogMixin.logs
+    with LogMixin.context():
+        OAuthFlowsObject(
+            password=OAuthFlowObject(
+                authorizationUrl=authorization_url,
+                tokenUrl=token_url,
+                refreshUrl=refresh_url,
+                scopes=scopes,
+            )
+        )
+        assert LogMixin.logs
