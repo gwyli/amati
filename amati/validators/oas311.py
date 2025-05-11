@@ -23,7 +23,7 @@ from amati.fields.email import Email
 from amati.fields.iso9110 import HTTPAuthenticationScheme
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.uri import URI, RelativeURI, URIWithVariables
+from amati.fields.uri import URI, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -420,7 +420,7 @@ class SecuritySchemeObject(GenericObject):
     scheme: Optional[HTTPAuthenticationScheme] = None
     bearerFormat: Optional[str] = None
     flows: Optional[OAuthFlowsObject] = None
-    openIdConnectUrl: Optional[RelativeURI] = None
+    openIdConnectUrl: Optional[URI] = None
 
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,

@@ -13,6 +13,7 @@ from hypothesis.provisional import urls
 from pydantic import ValidationError
 
 from amati.fields.uri import URI, URIWithVariables
+from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 
 
@@ -44,7 +45,9 @@ def test_uri_path_extraction(uri: str):
 
 @given(urls())
 def test_absolute_uri_valid(uri: str):
-    URIModel(uri=uri)
+    with LogMixin.context():
+        URIModel(uri=uri)
+        assert not LogMixin.logs
 
 
 @st.composite
@@ -55,14 +58,18 @@ def relative_uris(draw: st.DrawFn) -> str:
 
 @given(relative_uris())
 def test_relative_uri_valid(uri: str):
-    URIModel(uri=uri)
+    with LogMixin.context():
+        URIModel(uri=uri)
+        assert not LogMixin.logs
 
 
 @given(urls())
 def test_uri_valid(uri: str):
-    URIModel(uri=uri)
-    get_uri_path_and_query(uri)
-    URIModel(uri=uri)
+    with LogMixin.context():
+        URIModel(uri=uri)
+        get_uri_path_and_query(uri)
+        URIModel(uri=uri)
+        assert not LogMixin.logs
 
 
 def test_rfc3986_parser_errors():
@@ -84,40 +91,57 @@ def test_rfc3986_parser_errors():
 
 
 def test_uri_none():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         URIModel(uri=None)  # type: ignore
 
 
 def test_uri_with_variables_valid():
 
-    uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
-    model = URIWithVariablesModel(uri=uri)
-    assert model.uri == uri
+    with LogMixin.context():
+        uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
+        model = URIWithVariablesModel(uri=uri)
+        assert model.uri == uri
 
-    uri = r"/api/v1/users/{user_id}"
-    model = URIWithVariablesModel(uri=uri)
-    assert model.uri == uri
+        uri = r"/api/v1/users/{user_id}"
+        model = URIWithVariablesModel(uri=uri)
+        assert model.uri == uri
 
-    uri = r"/api/v1/users/{user_id}/"
-    model = URIWithVariablesModel(uri=uri)
-    assert model.uri == uri
+        uri = r"/api/v1/users/{user_id}/"
+        model = URIWithVariablesModel(uri=uri)
+        assert model.uri == uri
+        assert not LogMixin.logs
 
 
 def test_uri_with_variables_invalid():
 
-    with pytest.raises(ValueError):
+    with LogMixin.context():
         URIWithVariablesModel(
             uri=r"https://{{subdomain}.example.com/api/v1/users/{user_id}"
         )
+        assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == ValueError
 
-    with pytest.raises((ValueError, ValidationError)):
+    with LogMixin.context():
         URIWithVariablesModel(uri=r"https://{}.example.com")
+        assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == ValueError
 
-    with pytest.raises((ValueError, ValidationError)):
+    with LogMixin.context():
         URIWithVariablesModel(uri=r"/api/v1/users/{user_id}}")
+        assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == ValueError
 
-    with pytest.raises((ValueError, ValidationError)):
+    with LogMixin.context():
         URIWithVariablesModel(uri=r"/api/v1/users/{user_id}{abc/")
+        assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == ValueError
 
-    with pytest.raises((ValueError, ValidationError)):
+    with LogMixin.context():
         URIWithVariablesModel(uri=r"/api/v1/users/{user_{id}}/")
+        assert LogMixin.logs
+        assert LogMixin.logs[0].message is not None
+        assert LogMixin.logs[0].type == ValueError
