@@ -8,6 +8,7 @@ from abnf import ParseError
 from abnf.grammars import rfc3986
 from pydantic import AfterValidator, AnyUrl
 
+from amati.logging import Log, LogMixin
 from amati.validators.reference_object import Reference, ReferenceModel
 
 reference: Reference = ReferenceModel(
@@ -85,21 +86,6 @@ def _validate_after_uri_with_variables(value: str) -> str:
         ParseError: If the URI is not valid
     """
 
-    count = 0
-
-    for char in value:
-        if char == "{":
-            if count > 0:  # Already have an opening brace
-                raise ValueError("Opening brace inside opening brace")
-            count += 1
-        elif char == "}":
-            if count == 0:  # Closing brace without opening brace
-                raise ValueError("No closing brace")
-            count -= 1
-
-    if count != 0:  # Check for any unmatched opening braces
-        raise ValueError("Unmatched opening brace")
-
     # Beautiful hack. `string.format()` takes a dict of the key, value pairs to replace
     # to replace the keys inside braces. As we don't have the keys a dict that returns
     # the keys that `string.format()` is expecting will have the effect of replacing
@@ -108,8 +94,14 @@ def _validate_after_uri_with_variables(value: str) -> str:
         def __missing__(self, key: str) -> str:
             return key
 
-    uri: URI = value.format_map(MissingKeyDict())
-    _validate_after(uri)
+    # Unbalanced or embedded braces, e.g. /example/{id{a}}/ or /example/{id
+    # will cause a ValueError in .format_map().
+    try:
+        uri: URI = value.format_map(MissingKeyDict())
+        _validate_after(uri)
+    except ValueError:
+        message = "Unbalanced or embedded braces in URI"
+        LogMixin.log(Log(message=message, type=ValueError, reference=reference))
 
     return value
 
