@@ -205,6 +205,26 @@ class TagObject(GenericObject):
     )
 
 
+class ReferenceObject(GenericObject):
+    """
+    Validates the OpenAPI Specification reference object - §4.8.23
+
+    SPECFIX: The examples given, e.g. '#/components/schemas/Pet', are
+    not valid URIs according to the ABNF grammar in RFC 3986.
+    """
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    ref: URI = Field(alias="$ref")
+    summary: Optional[str]
+    description: Optional[CommonMark]
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#reference-object",
+        section="Reference Object",
+    )
+
+
 @specification_extensions("x-")
 class ExampleObject(GenericObject):
     """
