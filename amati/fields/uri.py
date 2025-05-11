@@ -2,7 +2,7 @@
 Validates a URI according to the RFC3986 ABNF grammar
 """
 
-from typing import Annotated, Union
+from typing import Annotated
 
 from abnf import ParseError
 from abnf.grammars import rfc3986
@@ -17,7 +17,7 @@ reference: Reference = ReferenceModel(
 )
 
 
-def _validate_after_relative(value: str | AnyUrl) -> str:
+def _validate_after_relative(value: AnyUrl | str) -> str:
     """
     Validate that the URI is a valid relative URI.
 
@@ -26,12 +26,17 @@ def _validate_after_relative(value: str | AnyUrl) -> str:
 
     Returns:
         The original value
-
-    Notes:
-        Logs if the URI is relative
     """
 
-    return rfc3986.Rule("relative-ref").parse_all(str(value)).value
+    value_: str = str(value)
+
+    # The OAS standard is to include a hash at the start of a relative URI
+    # The hash does not indicate that the URI is a fragment, e.g.
+    # "$ref": "#/components/schemas/pet".
+    if value_.startswith("#"):
+        return f"#{rfc3986.Rule("relative-ref").parse_all(value_[1:]).value}"
+    else:
+        return rfc3986.Rule("relative-ref").parse_all(value_).value
 
 
 def _validate_after_absolute(value: AnyUrl | str) -> AnyUrl:
@@ -56,6 +61,7 @@ def _validate_after(value: AnyUrl | str) -> AnyUrl | str:
     Raises: ParseError
     """
     try:
+        # Prioritise validating the URI as absolute.
         return _validate_after_absolute(value)
     except ParseError:
         # If the URI is neither absolute or relative then raise an error
@@ -108,10 +114,6 @@ def _validate_after_uri_with_variables(value: str) -> str:
     return value
 
 
-AbsoluteURI = Annotated[AnyUrl | str, AfterValidator(_validate_after_absolute)]
-
-RelativeURI = Annotated[str, AfterValidator(_validate_after_relative)]
-
-URI = Annotated[Union[AbsoluteURI, RelativeURI], AfterValidator(_validate_after)]
+URI = Annotated[AnyUrl | str, AfterValidator(_validate_after)]
 
 URIWithVariables = Annotated[str, AfterValidator(_validate_after_uri_with_variables)]

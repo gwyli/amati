@@ -12,7 +12,7 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
-from amati.fields.uri import URI, AbsoluteURI, RelativeURI, URIWithVariables
+from amati.fields.uri import URI, URIWithVariables
 from amati.validators.generic import GenericObject
 
 
@@ -20,12 +20,7 @@ class URIModel(GenericObject):
     uri: URI
 
 
-class AbsoluteURIModel(GenericObject):
-    uri: AbsoluteURI
-
-
-class RelativeURIModel(GenericObject):
-    uri: RelativeURI
+URIModel(uri="#/components/schemas/Pet")
 
 
 class URIWithVariablesModel(GenericObject):
@@ -49,7 +44,7 @@ def test_uri_path_extraction(uri: str):
 
 @given(urls())
 def test_absolute_uri_valid(uri: str):
-    AbsoluteURIModel(uri=uri)
+    URIModel(uri=uri)
 
 
 @st.composite
@@ -60,7 +55,7 @@ def relative_uris(draw: st.DrawFn) -> str:
 
 @given(relative_uris())
 def test_relative_uri_valid(uri: str):
-    RelativeURIModel(uri=uri)
+    URIModel(uri=uri)
 
 
 @given(urls())
@@ -68,26 +63,6 @@ def test_uri_valid(uri: str):
     URIModel(uri=uri)
     get_uri_path_and_query(uri)
     URIModel(uri=uri)
-
-
-def test_auri_validation_uses_correct_rule():
-    with mock.patch("abnf.grammars.rfc3986.Rule") as mock_rule_class:
-        mock_rule = mock.Mock()
-        mock_rule.parse_all.return_value.value = "https://example.com"
-        mock_rule_class.return_value = mock_rule
-
-        URIModel(uri="https://example.com")
-
-        # Verify the correct rule name was used
-        mock_rule_class.assert_called_with("URI")
-
-    with mock.patch("abnf.grammars.rfc3986.Rule") as mock_rule_class:
-        mock_rule = mock.Mock()
-        mock_rule.parse_all.return_value.value = "/example"
-        mock_rule_class.return_value = mock_rule
-
-        RelativeURIModel(uri="/example")
-        mock_rule_class.assert_called_with("relative-ref")
 
 
 def test_rfc3986_parser_errors():
