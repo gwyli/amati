@@ -21,16 +21,13 @@ class URIModel(GenericObject):
     uri: URI
 
 
-URIModel(uri="#/components/schemas/Pet")
-
-
 class URIWithVariablesModel(GenericObject):
     uri: URIWithVariables
 
 
-def get_uri_path_and_query(uri: str) -> str:
+def get_uri_path_and_query(value: str) -> str:
     """Extract everything after the domain from a URI."""
-    parsed = urlparse(uri)
+    parsed = urlparse(value)
     path = parsed.path or "/"
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
@@ -38,15 +35,15 @@ def get_uri_path_and_query(uri: str) -> str:
 
 
 @given(urls())
-def test_uri_path_extraction(uri: str):
-    result = get_uri_path_and_query(uri)
+def test_uri_path_extraction(value: str):
+    result = get_uri_path_and_query(value)
     assert result.startswith("/")
 
 
 @given(urls())
-def test_absolute_uri_valid(uri: str):
+def test_absolute_uri_valid(value: str):
     with LogMixin.context():
-        URIModel(uri=uri)
+        URIModel(uri=value)
         assert not LogMixin.logs
 
 
@@ -57,18 +54,26 @@ def relative_uris(draw: st.DrawFn) -> str:
 
 
 @given(relative_uris())
-def test_relative_uri_valid(uri: str):
+def test_relative_uri_valid(value: str):
     with LogMixin.context():
-        URIModel(uri=uri)
+        URIModel(uri=value)
         assert not LogMixin.logs
 
 
-@given(urls())
-def test_uri_valid(uri: str):
+@given(relative_uris())
+def test_relative_uri_with_hash(value: str):
     with LogMixin.context():
-        URIModel(uri=uri)
-        get_uri_path_and_query(uri)
-        URIModel(uri=uri)
+        model = URIModel(uri=f"#{value}")
+        assert not LogMixin.logs
+        assert model.uri == f"#{value}"
+
+
+@given(urls())
+def test_uri_valid(value: str):
+    with LogMixin.context():
+        URIModel(uri=value)
+        get_uri_path_and_query(value)
+        URIModel(uri=value)
         assert not LogMixin.logs
 
 
