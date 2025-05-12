@@ -59,11 +59,9 @@ def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
 
 
 @given(st.text(), st.text(), st.text(), st.text())
-def test_security_scheme_apikey_invalid(
-    type_: str, description: str, name: str, in_: str
-):
+def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
     with LogMixin.context():
-        SecuritySchemeObject(type=type_, description=description, name=name, in_=in_)
+        SecuritySchemeObject(type="apiKey", description=description, name=name, in_=in_)
 
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
