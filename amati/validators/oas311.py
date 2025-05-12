@@ -486,6 +486,24 @@ class SecuritySchemeObject(GenericObject):
 
 
 @specification_extensions("x-")
+class DiscriminatorObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.8.25
+    """
+
+    # FIXME: Need post processing to determine whether the property actually exists
+    # FIXME: The component and schema objects need to check that this is being used
+    # properly.
+    mapping: Optional[dict[str, str]]
+    propertyName: str
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#discriminator-object",
+        section="Security Scheme Object",
+    )
+
+
+@specification_extensions("x-")
 class OpenAPIObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.1
