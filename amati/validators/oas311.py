@@ -209,8 +209,10 @@ class ReferenceObject(GenericObject):
     """
     Validates the OpenAPI Specification reference object - §4.8.23
 
-    SPECFIX: The examples given, e.g. '#/components/schemas/Pet', are
-    not valid URIs according to the ABNF grammar in RFC 3986.
+    Note, "URIs" can be prefixed with a hash; this is because if the
+    representation of the referenced document is JSON or YAML, then
+    the fragment identifier SHOULD be interpreted as a JSON-Pointer
+    as per RFC6901.
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
