@@ -13,6 +13,7 @@ from hypothesis.provisional import urls
 from pydantic import ValidationError
 
 from amati.fields.uri import URI, URIWithVariables
+from amati.grammars import rfc6901
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 
@@ -53,6 +54,20 @@ def relative_uris(draw: st.DrawFn) -> str:
     return get_uri_path_and_query(uri)
 
 
+@st.composite
+def json_pointers(draw: st.DrawFn) -> str:
+
+    while True:
+        pointer = get_uri_path_and_query(draw(urls()))
+        try:
+            candidate = rfc6901.Rule("json-pointer").parse_all(pointer).value
+            break
+        except ParseError:
+            continue
+
+    return f"#{candidate}"
+
+
 @given(relative_uris())
 def test_relative_uri_valid(value: str):
     with LogMixin.context():
@@ -60,12 +75,12 @@ def test_relative_uri_valid(value: str):
         assert not LogMixin.logs
 
 
-@given(relative_uris())
+@given(json_pointers())
 def test_relative_uri_with_hash(value: str):
     with LogMixin.context():
-        model = URIModel(uri=f"#{value}")
+        model = URIModel(uri=value)
         assert not LogMixin.logs
-        assert model.uri == f"#{value}"
+        assert model.uri == value
 
 
 @given(urls())
@@ -91,8 +106,11 @@ def test_rfc3986_parser_errors():
 
     with mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule):
         # Test that validation fails when parser fails
-        with pytest.raises(ParseError):
+        with LogMixin.context():
             URIModel(uri="https://example.com")
+            assert LogMixin.logs
+            assert LogMixin.logs[0].message is not None
+            assert LogMixin.logs[0].type == ValueError
 
 
 def test_uri_none():

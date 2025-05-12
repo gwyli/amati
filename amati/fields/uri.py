@@ -8,6 +8,7 @@ from abnf import ParseError
 from abnf.grammars import rfc3986
 from pydantic import AfterValidator, AnyUrl
 
+from amati.grammars import rfc6901
 from amati.logging import Log, LogMixin
 from amati.validators.reference_object import Reference, ReferenceModel
 
@@ -18,55 +19,59 @@ reference: Reference = ReferenceModel(
 )
 
 
-def _validate_after_relative(value: AnyUrl | str) -> str:
-    """
-    Validate that the URI is a valid relative URI.
-
-    Args:
-        value: The URI to validate
-
-    Returns:
-        The original value
-    """
-
-    value_: str = str(value)
-
-    # The OAS standard is to include a hash at the start of a relative URI
-    # The hash does not indicate that the URI is a fragment, e.g.
-    # "$ref": "#/components/schemas/pet".
-    if value_.startswith("#"):
-        return f"#{rfc3986.Rule("relative-ref").parse_all(value_[1:]).value}"
-    else:
-        return rfc3986.Rule("relative-ref").parse_all(value_).value
-
-
-def _validate_after_absolute(value: AnyUrl | str) -> AnyUrl:
-    """
-    Validate that the URI is a valid absolute URI.
-
-    Args:
-        value: The URI to validate
-    """
-    uri = rfc3986.Rule("URI").parse_all(str(value))
-
-    return AnyUrl(uri.value)
-
-
 def _validate_after(value: AnyUrl | str) -> AnyUrl | str:
     """
-    Validate that the URI is a valid URI.
+    Validate that the URI is a valid URI, absolute, relative
+    or a JSON pointer
 
     Args:
         value: The URI to validate
 
     Raises: ParseError
     """
+
+    # The OAS standard is to use a fragment identifier
+    # (https://www.rfc-editor.org/rfc/rfc6901#section-6) to indicate
+    # that it is a JSON pointer per RFC 6901, e.g.
+    # "$ref": "#/components/schemas/pet".
+    # The hash does not indicate that the URI is a fragment.
+
+    value_: str = str(value)
+
+    if value_.startswith("#"):
+        try:
+            rfc6901.Rule("json-pointer").parse_all(value_[1:])
+        except ParseError:
+            message = f"{value} is a fragment identifier but an invalid JSON pointer"
+            LogMixin.log(
+                Log(
+                    message=message,
+                    type=ValueError,
+                    reference=reference,
+                )
+            )
+        # If the URI is a JSON pointer then there's no point testing
+        # whether it's absolute or relative. A JSON pointer can't
+        # have the type AnyUrl so return the string.
+        return value_
+
     try:
         # Prioritise validating the URI as absolute.
-        return _validate_after_absolute(value)
+        return AnyUrl(rfc3986.Rule("URI").parse_all(value_).value)
     except ParseError:
-        # If the URI is neither absolute or relative then raise an error
-        return _validate_after_relative(value)
+        pass
+
+    try:
+        return rfc3986.Rule("relative-ref").parse_all(value_).value
+    except ParseError:
+        LogMixin.log(
+            Log(
+                message=f"{value} is not a valid URI",
+                type=ValueError,
+                reference=reference,
+            )
+        )
+    return value
 
 
 def _validate_after_uri_with_variables(value: str) -> str:
