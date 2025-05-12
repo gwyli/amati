@@ -58,7 +58,7 @@ def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
         assert not LogMixin.logs
 
 
-@given(st.text(), st.text(), st.text(), st.text())
+@given(st.text(), st.text(), st.text())
 def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
     with LogMixin.context():
         SecuritySchemeObject(type="apiKey", description=description, name=name, in_=in_)
