@@ -504,6 +504,20 @@ class DiscriminatorObject(GenericObject):
 
 
 @specification_extensions("x-")
+class XMLObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.8.25
+    """
+
+    # FIXME: Implement this
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
+        section="Security Scheme Object",
+    )
+
+
+@specification_extensions("x-")
 class OpenAPIObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.1
