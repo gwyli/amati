@@ -15,7 +15,7 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, RootModel, model_validator
 from pydantic.json_schema import JsonSchemaValue
 
 from amati.fields.commonmark import CommonMark
@@ -508,7 +508,7 @@ class DiscriminatorObject(GenericObject):
 @specification_extensions("x-")
 class XMLObject(GenericObject):
     """
-    Validates the OpenAPI Specification object - §4.8.25
+    Validates the OpenAPI Specification object - §4.8.26
     """
 
     # FIXME: Implement this
@@ -516,6 +516,25 @@ class XMLObject(GenericObject):
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
         section="Security Scheme Object",
+    )
+
+
+type _Requirement = dict[str, list[str]]
+
+
+# NB This is implemented as a RootModel as there are no pre-defined field names.
+class SecurityRequirementObject(RootModel[list[_Requirement] | _Requirement]):
+    """
+    Validates the OpenAPI Specification security requirement object - §4.8.30:
+    """
+
+    # FIXME: The name must be a valid Security Scheme - need to use post-processing
+    # FIXME If the security scheme is of type "oauth2" or "openIdConnect", then the
+    # value must be a list
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/3.1.1.html#security-requirement-object",
+        section="Security Requirement Object",
     )
 
 
