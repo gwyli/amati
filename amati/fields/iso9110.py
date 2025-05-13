@@ -49,4 +49,6 @@ def _validate_after(value: Optional[str]) -> Optional[str]:
     return value
 
 
-HTTPAuthenticationScheme = Annotated[Optional[str], AfterValidator(_validate_after)]
+type HTTPAuthenticationScheme = Annotated[
+    Optional[str], AfterValidator(_validate_after)
+]  # pylint: disable=invalid-name

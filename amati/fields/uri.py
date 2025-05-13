@@ -111,6 +111,10 @@ def _validate_after_uri_with_variables(value: str) -> str:
     return value
 
 
-URI = Annotated[AnyUrl | str, AfterValidator(_validate_after)]
+type URI = Annotated[  # pylint: disable=invalid-name
+    AnyUrl | str, AfterValidator(_validate_after)
+]
 
-URIWithVariables = Annotated[str, AfterValidator(_validate_after_uri_with_variables)]
+type URIWithVariables = Annotated[
+    str, AfterValidator(_validate_after_uri_with_variables)
+]

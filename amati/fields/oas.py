@@ -38,7 +38,15 @@ reference: Reference = ReferenceModel(
     section="OpenAPI Specification ",
 )
 
-OPENAPI_VERSIONS = ["3.0", "3.0.1", "3.0.2", "3.0.3", "3.0.4", "3.1", "3.1.1"]
+OPENAPI_VERSIONS: list[str] = [
+    "3.0",
+    "3.0.1",
+    "3.0.2",
+    "3.0.3",
+    "3.0.4",
+    "3.1",
+    "3.1.1",
+]
 
 
 def _validate_after_openapi(value: str) -> str:
@@ -48,4 +56,6 @@ def _validate_after_openapi(value: str) -> str:
     return value
 
 
-OpenAPI = Annotated[str, Field(strict=True), AfterValidator(_validate_after_openapi)]
+type OpenAPI = Annotated[  # pylint: disable=invalid-name
+    str, Field(strict=True), AfterValidator(_validate_after_openapi)
+]

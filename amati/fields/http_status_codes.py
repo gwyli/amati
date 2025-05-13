@@ -57,13 +57,15 @@ def _validate_after(value: PositiveInt) -> PositiveInt:
     return value
 
 
-HTTPStatusCodeN = Annotated[
+type HTTPStatusCodeN = Annotated[  # pylint: disable=invalid-name
     PositiveInt, Field(strict=True, ge=100, le=599), AfterValidator(_validate_after)
 ]
 
 
-HTTPStatusCodeX = Annotated[str, Field(strict=True, pattern="^[1-5]XX$")]
+type HTTPStatusCodeX = Annotated[  # pylint: disable=invalid-name
+    str, Field(strict=True, pattern="^[1-5]XX$")
+]
 
 
 # Convenience type for all possibilities
-HTTPStatusCode = HTTPStatusCodeN | HTTPStatusCodeX
+type HTTPStatusCode = HTTPStatusCodeN | HTTPStatusCodeX

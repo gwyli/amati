@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from amati.validators.reference_object import Reference
 
-LogType = Exception | Warning
+type LogType = Exception | Warning
 
 
 class Log(BaseModel):

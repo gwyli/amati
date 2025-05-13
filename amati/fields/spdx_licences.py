@@ -54,7 +54,7 @@ def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
     return value
 
 
-SPDXIdentifier = Annotated[
+type SPDXIdentifier = Annotated[
     Optional[str], AfterValidator(_validate_after_spdx_identifier)
 ]
 
@@ -84,4 +84,6 @@ def _validate_after_spdx_url(value: Optional[URI | str]) -> Optional[URI]:
     return value
 
 
-SPDXURL = Annotated[Optional[URI | str], AfterValidator(_validate_after_spdx_url)]
+type SPDXURL = Annotated[  # pylint: disable=invalid-name
+    Optional[URI | str], AfterValidator(_validate_after_spdx_url)
+]
