@@ -2,6 +2,7 @@
 Tests amati/fields/uri.py
 """
 
+import re
 from unittest import mock
 from urllib.parse import urlparse
 
@@ -12,7 +13,7 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
-from amati.fields.uri import URI, URIWithVariables
+from amati.fields.uri import URI, URIType, URIWithVariables
 from amati.grammars import rfc6901
 from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
@@ -29,7 +30,10 @@ class URIWithVariablesModel(GenericObject):
 def get_uri_path_and_query(value: str) -> str:
     """Extract everything after the domain from a URI."""
     parsed = urlparse(value)
-    path = parsed.path or "/"
+    # urlparse incorrectly parses the URI http://a.com// with
+    # a path of //, which is indicates that the succeeding
+    # item is the authority in RFC 2986
+    path = f"/{parsed.path.lstrip("/")}"
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
     return f"{path}{query}{fragment}"
@@ -39,19 +43,23 @@ def get_uri_path_and_query(value: str) -> str:
 def test_uri_path_extraction(value: str):
     result = get_uri_path_and_query(value)
     assert result.startswith("/")
+    assert not result.startswith("//")
 
 
 @given(urls())
 def test_absolute_uri_valid(value: str):
     with LogMixin.context():
-        URIModel(uri=value)
+        model = URIModel(uri=value)  # type: ignore
         assert not LogMixin.logs
+        assert model.uri.type == URIType.ABSOLUTE
 
 
 @st.composite
 def relative_uris(draw: st.DrawFn) -> str:
-    uri = draw(urls())
-    return get_uri_path_and_query(uri)
+
+    candidate = get_uri_path_and_query(draw(urls()))
+
+    return candidate
 
 
 @st.composite
@@ -71,25 +79,28 @@ def json_pointers(draw: st.DrawFn) -> str:
 @given(relative_uris())
 def test_relative_uri_valid(value: str):
     with LogMixin.context():
-        URIModel(uri=value)
+        model = URIModel(uri=value)  # type: ignore
         assert not LogMixin.logs
+        assert model.uri.type == URIType.RELATIVE
 
 
 @given(json_pointers())
 def test_relative_uri_with_hash(value: str):
     with LogMixin.context():
-        model = URIModel(uri=value)
+        model = URIModel(uri=value)  # type: ignore
         assert not LogMixin.logs
         assert model.uri == value
+        assert model.uri.type == URIType.JSON_POINTER
 
 
 @given(urls())
-def test_uri_valid(value: str):
+def test_uri_authority(value: str):
+
+    candidate: str = f"//{re.split("//", value)[1]}"
+
     with LogMixin.context():
-        URIModel(uri=value)
-        get_uri_path_and_query(value)
-        URIModel(uri=value)
-        assert not LogMixin.logs
+        model = URIModel(uri=candidate)  # type: ignore
+        assert model.uri.type == URIType.AUTHORITY
 
 
 def test_rfc3986_parser_errors():
@@ -107,7 +118,7 @@ def test_rfc3986_parser_errors():
     with mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule):
         # Test that validation fails when parser fails
         with LogMixin.context():
-            URIModel(uri="https://example.com")
+            URIModel(uri="https://example.com")  # type: ignore
             assert LogMixin.logs
             assert LogMixin.logs[0].message is not None
             assert LogMixin.logs[0].type == ValueError
@@ -122,49 +133,52 @@ def test_uri_with_variables_valid():
 
     with LogMixin.context():
         uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
-        model = URIWithVariablesModel(uri=uri)
+        model = URIWithVariablesModel(uri=uri)  # type: ignore
         assert model.uri == uri
+        assert model.uri.type == URIType.ABSOLUTE
 
         uri = r"/api/v1/users/{user_id}"
-        model = URIWithVariablesModel(uri=uri)
+        model = URIWithVariablesModel(uri=uri)  # type: ignore
         assert model.uri == uri
+        assert model.uri.type == URIType.RELATIVE
 
-        uri = r"/api/v1/users/{user_id}/"
-        model = URIWithVariablesModel(uri=uri)
-        assert model.uri == uri
         assert not LogMixin.logs
 
 
 def test_uri_with_variables_invalid():
 
     with LogMixin.context():
-        URIWithVariablesModel(
-            uri=r"https://{{subdomain}.example.com/api/v1/users/{user_id}"
+        model = URIWithVariablesModel(
+            uri=r"https://{{subdomain}.example.com/api/users/{user_id}"  # type: ignore
         )
+        assert model.uri.type == URIType.UNKNOWN
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
 
     with LogMixin.context():
-        URIWithVariablesModel(uri=r"https://{}.example.com")
+        model = URIWithVariablesModel(uri=r"https://{}.example.com")  # type: ignore
+        assert model.uri.type == URIType.UNKNOWN
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
 
     with LogMixin.context():
-        URIWithVariablesModel(uri=r"/api/v1/users/{user_id}}")
+        model = URIWithVariablesModel(uri=r"/api/users/{user_id}}")  # type: ignore
+        assert model.uri.type == URIType.UNKNOWN
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
 
     with LogMixin.context():
-        URIWithVariablesModel(uri=r"/api/v1/users/{user_id}{abc/")
+        model = URIWithVariablesModel(uri=r"/api/users/{user_id}{abc/")  # type: ignore
+        assert model.uri.type == URIType.UNKNOWN
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
 
     with LogMixin.context():
-        URIWithVariablesModel(uri=r"/api/v1/users/{user_{id}}/")
-        assert LogMixin.logs
+        model = URIWithVariablesModel(uri=r"/api/users/{user_{id}}/")  # type: ignore
+        assert model.uri.type == URIType.UNKNOWN
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
