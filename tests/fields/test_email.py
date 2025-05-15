@@ -35,7 +35,7 @@ def strings_except_emails(draw: st.DrawFn) -> str:
 
     # The Hypothesis string shrinking algorithm ends up producing a valid RFC 5322 email
     # email sometimes. Exclude them.
-    while re.match("[a-z0-9]@[a-z0-9]", candidate, flags=re.IGNORECASE):
+    while re.match("[a-z0-9]+@[a-z0-9]+", candidate, flags=re.IGNORECASE):
         candidate = draw(st.text())  # pragma: no cover
 
     return candidate
