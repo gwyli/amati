@@ -15,15 +15,19 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
-from pydantic import ConfigDict, Field, RootModel, model_validator
+from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
+from jsonschema.protocols import Validator as JSONSchemaValidator
+from jsonschema.validators import validator_for  # type: ignore
+from pydantic import ConfigDict, Field, RootModel, field_validator, model_validator
 from pydantic.json_schema import JsonSchemaValue
 
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
 from amati.fields.iso9110 import HTTPAuthenticationScheme
+from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.uri import URI, URIWithVariables
+from amati.fields.uri import URI, URIType, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -263,9 +267,6 @@ class ExampleObject(GenericObject):
         return self
 
 
-ExampleObject.model_rebuild()
-
-
 @specification_extensions("x-")
 class LinkObject(GenericObject):
     """
@@ -296,6 +297,85 @@ class LinkObject(GenericObject):
             LogMixin.log(
                 Log(
                     message="Only one of operationRef or operationId can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+class SchemaObject(GenericObject):
+    """
+    Schema Object as per OAS 3.1.1 specification (section 4.8.24)
+
+    This model defines only the OpenAPI-specific fields explicitly.
+    Standard JSON Schema fields are allowed via the 'extra' config
+    and validated through jsonschema.
+    """
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="allow",  # Allow all standard JSON Schema fields
+    )
+
+    # OpenAPI-specific fields not in standard JSON Schema
+    nullable: Optional[bool] = None  # OAS 3.0 style nullable flag
+    discriminator: Optional["DiscriminatorObject"] = None  # Polymorphism support
+    readOnly: Optional[bool] = None  # Declares property as read-only for requests
+    writeOnly: Optional[bool] = None  # Declares property as write-only for responses
+    xml: Optional["XMLObject"] = None  # XML metadata
+    externalDocs: Optional[ExternalDocumentationObject] = None  # External documentation
+    example: Optional[Any] = None  # Example of schema
+    examples: Optional[list[Any]] = None  # Examples of schema (OAS 3.1)
+    deprecated: Optional[bool] = None  # Specifies schema is deprecated
+
+    # JSON Schema fields that need special handling in OAS context
+    ref: Optional[str] = Field(
+        default=None, alias="$ref"
+    )  # Reference to another schema
+
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        section="Link Object",
+    )
+
+    @model_validator(mode="after")
+    def validate_schema(self):
+        """
+        Use jsonschema to validate the model as a valid JSON Schema
+        """
+        schema_dict = self.model_dump(exclude_none=True, by_alias=True)
+
+        # Handle OAS 3.1 specific validations
+
+        # 1. Convert nullable to type array with null if needed
+        if schema_dict.get("nullable") is True and "type" in schema_dict:
+            type_val = schema_dict["type"]
+            if isinstance(type_val, str) and type_val != "null":
+                schema_dict["type"] = [type_val, "null"]
+            elif isinstance(type_val, list) and "null" not in type_val:
+                schema_dict["type"] = type_val + ["null"]
+
+        # 2. Validate the schema structure using jsonschema's meta-schema
+        # Get the right validator based on the declared $schema or default
+        # to Draft 2020-12
+        schema_version = schema_dict.get(
+            "$schema", "https://json-schema.org/draft/2020-12/schema"
+        )
+        try:
+            validator_cls: JSONSchemaValidator = validator_for(  # type: ignore
+                {"$schema": schema_version}
+            )
+            meta_schema: JSON = validator_cls.META_SCHEMA  # type: ignore
+
+            # This will validate the structure conforms to JSON Schema
+            validator_cls(meta_schema).validate(schema_dict)  # type: ignore
+        except JSONVSchemeValidationError as e:
+            LogMixin.log(
+                Log(
+                    message=f"Invalid JSON Schema: {e.message}",
                     type=ValueError,
                     reference=self._reference,
                 )
@@ -496,7 +576,7 @@ class DiscriminatorObject(GenericObject):
     # FIXME: Need post processing to determine whether the property actually exists
     # FIXME: The component and schema objects need to check that this is being used
     # properly.
-    mapping: Optional[dict[str, str]]
+    mapping: Optional[dict[str, str]] = None
     propertyName: str
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
@@ -511,12 +591,27 @@ class XMLObject(GenericObject):
     Validates the OpenAPI Specification object - §4.8.26
     """
 
-    # FIXME: Implement this
+    name: Optional[str] = None
+    namespace: Optional[URI] = None
+    prefix: Optional[str] = None
+    attribute: Optional[bool] = Field(default=False)
+    wrapped: Optional[bool] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
         section="Security Scheme Object",
     )
+
+    @field_validator("namespace", mode="after")
+    @classmethod
+    def _validate_namespace(cls, value: URI) -> URI:
+        if value.type == URIType.RELATIVE:
+            message = "XML namespace {value} cannot be a relative URI"
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=cls._reference)
+            )
+
+        return value
 
 
 type _Requirement = dict[str, list[str]]

@@ -11,7 +11,8 @@ authors = [{name = "Ben Alexander", email = "amati@ben-alexander.com"},]
 dependencies = [
     "pydantic",
     "pyyaml",
-    "abnf"
+    "abnf",
+    "jsonschema"
 ]
 requires-python = ">=3.13"
 
