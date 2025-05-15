@@ -59,22 +59,21 @@ type SPDXIdentifier = Annotated[
 ]
 
 
-def _validate_after_spdx_url(value: Optional[URI | str]) -> Optional[URI]:
+def _validate_after_spdx_url(value: URI) -> URI:
     """
     Validate that the licence URL exists in the list of known SPDX licence URLs.
     Not that the URL is associated with the specific identifier.
 
     Args:
-        v: The URL to validate
+        v: The URI to validate
 
     Returns:
-        The validated URL or None if not provided
+        The validated URI or None if not provided
 
     Warns:
         InconsistencyWarning: If the URL is not associated with any known licence.
     """
-    if value is None:
-        return None
+
     if str(value) in VALID_URLS:
         return value
 
@@ -85,5 +84,5 @@ def _validate_after_spdx_url(value: Optional[URI | str]) -> Optional[URI]:
 
 
 type SPDXURL = Annotated[  # pylint: disable=invalid-name
-    Optional[URI | str], AfterValidator(_validate_after_spdx_url)
+    URI, AfterValidator(_validate_after_spdx_url)
 ]
