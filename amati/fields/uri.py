@@ -3,14 +3,13 @@ Validates a URI according to the RFC3986 ABNF grammar
 """
 
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
-from abnf import ParseError
+from abnf import Node, ParseError
 from abnf.grammars import rfc3986
 from pydantic_core import core_schema
 
 from amati.grammars import rfc6901
-from amati.logging import Log, LogMixin
 from amati.validators.reference_object import Reference, ReferenceModel
 
 reference: Reference = ReferenceModel(
@@ -21,7 +20,6 @@ reference: Reference = ReferenceModel(
 
 
 class URIType(str, Enum):
-    """Enum for different types of URIs"""
 
     ABSOLUTE = "absolute"
     RELATIVE = "relative"
@@ -37,12 +35,13 @@ class URI(str):
     were a string in calling Pydantic models.
     """
 
-    type: URIType
-
-    def __new__(cls, content: str = ""):
-        instance = super().__new__(cls, content)
-        instance.type = URIType.UNKNOWN  # Initialize type attribute
-        return instance
+    scheme: Optional[str] = None
+    hier_part: Optional[str] = None
+    relative_part: Optional[str] = None
+    query: Optional[str] = None
+    fragment: Optional[str] = None
+    relative: bool = False
+    json_pointer: bool = False
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -70,67 +69,77 @@ class URI(str):
         Raises: ParseError
         """
 
+        # Remove False and None to check whether there are
+        # any relevant parts in the URI
+        parts = [x for x in cls.__dict__.values() if x]
+
+        if not parts:
+            raise ValueError
+
+        if cls.scheme and not cls.hier_part and not cls.relative_part:
+            raise ValueError
+
+        return cls(value)
+
+    @property
+    def type(self):
+        if self.json_pointer:
+            return URIType.JSON_POINTER
+        if self.relative:
+            return URIType.RELATIVE
+        if self.scheme and self.hier_part:
+            return URIType.ABSOLUTE
+        if self.relative_part:
+            return URIType.AUTHORITY
+        return URIType.UNKNOWN
+
+    def _store_values(self, parsed_rule: Node):
+
+        for node in parsed_rule.children:
+            node_name = node.name.replace("-", "_")
+            if node_name in self.__annotations__:
+                self.__dict__[node_name] = node.value
+
+    def __init__(self, value: str):
+
+        if value is None:  # type: ignore
+            raise ValueError
+
+        candidate = value
         # The OAS standard is to use a fragment identifier
         # (https://www.rfc-editor.org/rfc/rfc6901#section-6) to indicate
         # that it is a JSON pointer per RFC 6901, e.g.
         # "$ref": "#/components/schemas/pet".
         # The hash does not indicate that the URI is a fragment.
 
-        result: URI = cls(value)
-
-        if result.startswith("#"):
+        if value.startswith("#"):
+            candidate = value[1:]
             try:
-                rfc6901.Rule("json-pointer").parse_all(result[1:])
-            except ParseError:
-                message = (
-                    f"{value} is a fragment identifier but an invalid JSON pointer"
-                )
-                LogMixin.log(
-                    Log(
-                        message=message,
-                        type=ValueError,
-                        reference=reference,
-                    )
-                )
-            # If the URI is a JSON pointer then there's no point testing
-            # whether it's absolute or relative. A JSON pointer can't
-            # have the type AnyUrl so return the string.
-            result.type = URIType.JSON_POINTER
-            return result
+                rfc6901.Rule("json-pointer").parse_all(candidate)
+                self.json_pointer = True
+            except ParseError as e:
+                raise ValueError from e
 
         try:
             # Prioritise validating the URI as absolute.
-            rfc3986.Rule("URI").parse_all(result)
-            result.type = URIType.ABSOLUTE
-            return result
+            result = rfc3986.Rule("URI").parse_all(candidate)
+            self._store_values(result)
         except ParseError:
-            pass
+            try:
+                # Using `relative-ref` to find authoratitive URIs
+                # as the ABNF grammar doesn't directly index for
+                # a URI of the form //authority/?guery or
+                # //authority/#fragment.
+                result: Node = rfc3986.Rule("relative-ref").parse_all(candidate)
 
-        try:
-            # Using `relative-ref` to find authoratitive URIs
-            # as the ABNF grammar doesn't directly index for
-            # a URI of the form //authority/?guery or
-            # //authority/#fragment.
-            rfc3986.Rule("relative-ref").parse_all(result)
+                # If the URI has an authority, it is not relative. Check
+                # that next as the distinction is important in some cases.
+                if not result.value.startswith("//"):
+                    self.relative = True
 
-            # If the URI has an authority, it is not relative. Check
-            # that next as the distinction is important in some cases.
-            if result.startswith("//"):
-                result.type = URIType.AUTHORITY
-            else:
-                result.type = URIType.RELATIVE
-            return result
-        except ParseError:
-            LogMixin.log(
-                Log(
-                    message=f"{value} is not a valid URI",
-                    type=ValueError,
-                    reference=reference,
-                )
-            )
-
-        result.type = URIType.UNKNOWN
-        return result
+                self._store_values(result)
+            except ParseError as e:
+                raise ValueError from e
 
 
 class URIWithVariables(URI):
@@ -143,8 +152,7 @@ class URIWithVariables(URI):
     use this URI.
     """
 
-    @classmethod
-    def validate(cls, value: str) -> "URIWithVariables":
+    def __init__(self, value: str):
         """
         Validate that the URI is a valid URI with variables.
         e.g. of the form:
@@ -161,8 +169,8 @@ class URIWithVariables(URI):
             ParseError: If the URI is not valid
         """
 
-        result: URIWithVariables = cls(value)
-        result.type = URIType.UNKNOWN
+        if value is None:  # type: ignore
+            raise ValueError
 
         # Beautiful hack. `string.format()` takes a dict of the key, value pairs to
         # replace to replace the keys inside braces. As we don't have the keys a dict
@@ -175,10 +183,6 @@ class URIWithVariables(URI):
         # Unbalanced or embedded braces, e.g. /example/{id{a}}/ or /example/{id
         # will cause a ValueError in .format_map().
         try:
-            intermediate = super().validate(result.format_map(MissingKeyDict()))
-            result.type = intermediate.type
-        except ValueError:
-            message = "Unbalanced or embedded braces in URI"
-            LogMixin.log(Log(message=message, type=ValueError, reference=reference))
-
-        return result
+            super().__init__(value.format_map(MissingKeyDict()))
+        except ValueError as e:
+            raise ValueError(f"Unbalanced or embedded braces in {value}") from e

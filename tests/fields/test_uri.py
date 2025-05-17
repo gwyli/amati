@@ -11,20 +11,9 @@ from abnf.parser import Matches, ParseError, Parser
 from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
-from pydantic import ValidationError
 
 from amati.fields.uri import URI, URIType, URIWithVariables
 from amati.grammars import rfc6901
-from amati.logging import LogMixin
-from amati.validators.generic import GenericObject
-
-
-class URIModel(GenericObject):
-    uri: URI
-
-
-class URIWithVariablesModel(GenericObject):
-    uri: URIWithVariables
 
 
 def get_uri_path_and_query(value: str) -> str:
@@ -48,10 +37,9 @@ def test_uri_path_extraction(value: str):
 
 @given(urls())
 def test_absolute_uri_valid(value: str):
-    with LogMixin.context():
-        model = URIModel(uri=value)  # type: ignore
-        assert not LogMixin.logs
-        assert model.uri.type == URIType.ABSOLUTE
+    result = URI(value)
+    assert result == value
+    assert result.type == URIType.ABSOLUTE
 
 
 @st.composite
@@ -78,19 +66,16 @@ def json_pointers(draw: st.DrawFn) -> str:
 
 @given(relative_uris())
 def test_relative_uri_valid(value: str):
-    with LogMixin.context():
-        model = URIModel(uri=value)  # type: ignore
-        assert not LogMixin.logs
-        assert model.uri.type == URIType.RELATIVE
+    result = URI(value)
+    assert result == value
+    assert result.type == URIType.RELATIVE
 
 
 @given(json_pointers())
-def test_relative_uri_with_hash(value: str):
-    with LogMixin.context():
-        model = URIModel(uri=value)  # type: ignore
-        assert not LogMixin.logs
-        assert model.uri == value
-        assert model.uri.type == URIType.JSON_POINTER
+def test_json_pointer(value: str):
+    result = URI(value)
+    assert result == value
+    assert result.type == URIType.JSON_POINTER
 
 
 @given(urls())
@@ -98,9 +83,9 @@ def test_uri_authority(value: str):
 
     candidate: str = f"//{re.split("//", value)[1]}"
 
-    with LogMixin.context():
-        model = URIModel(uri=candidate)  # type: ignore
-        assert model.uri.type == URIType.AUTHORITY
+    result = URI(candidate)
+    assert result == candidate
+    assert result.type == URIType.AUTHORITY
 
 
 def test_rfc3986_parser_errors():
@@ -117,68 +102,49 @@ def test_rfc3986_parser_errors():
 
     with mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule):
         # Test that validation fails when parser fails
-        with LogMixin.context():
-            URIModel(uri="https://example.com")  # type: ignore
-            assert LogMixin.logs
-            assert LogMixin.logs[0].message is not None
-            assert LogMixin.logs[0].type == ValueError
+        with pytest.raises(ValueError):
+            URI("https://example.com")
 
 
 def test_uri_none():
-    with pytest.raises(ValidationError):
-        URIModel(uri=None)  # type: ignore
+    with pytest.raises(ValueError):
+        URI(None)  # type: ignore
+        URIWithVariables(None)  # type: ignore
 
 
 def test_uri_with_variables_valid():
 
-    with LogMixin.context():
-        uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
-        model = URIWithVariablesModel(uri=uri)  # type: ignore
-        assert model.uri == uri
-        assert model.uri.type == URIType.ABSOLUTE
+    uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
+    result = URIWithVariables(uri)
+    assert result == uri
+    assert result.type == URIType.ABSOLUTE
 
-        uri = r"/api/v1/users/{user_id}"
-        model = URIWithVariablesModel(uri=uri)  # type: ignore
-        assert model.uri == uri
-        assert model.uri.type == URIType.RELATIVE
-
-        assert not LogMixin.logs
+    uri = r"/api/v1/users/{user_id}"
+    result = URIWithVariables(uri)
+    assert result == uri
+    assert result.type == URIType.RELATIVE
 
 
 def test_uri_with_variables_invalid():
 
-    with LogMixin.context():
-        model = URIWithVariablesModel(
-            uri=r"https://{{subdomain}.example.com/api/users/{user_id}"  # type: ignore
+    with pytest.raises(ValueError):
+        result = URIWithVariables(
+            r"https://{{subdomain}.example.com/api/users/{user_id}"
         )
-        assert model.uri.type == URIType.UNKNOWN
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+        assert result.type == URIType.UNKNOWN
 
-    with LogMixin.context():
-        model = URIWithVariablesModel(uri=r"https://{}.example.com")  # type: ignore
-        assert model.uri.type == URIType.UNKNOWN
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+    with pytest.raises(ValueError):
+        result = URIWithVariables(r"https://{}.example.com")
+        assert result.type == URIType.UNKNOWN
 
-    with LogMixin.context():
-        model = URIWithVariablesModel(uri=r"/api/users/{user_id}}")  # type: ignore
-        assert model.uri.type == URIType.UNKNOWN
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+    with pytest.raises(ValueError):
+        result = URIWithVariables(r"/api/users/{user_id}}")
+        assert result.type == URIType.UNKNOWN
 
-    with LogMixin.context():
-        model = URIWithVariablesModel(uri=r"/api/users/{user_id}{abc/")  # type: ignore
-        assert model.uri.type == URIType.UNKNOWN
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+    with pytest.raises(ValueError):
+        result = URIWithVariables(r"/api/users/{user_id}{abc/")
+        assert result.type == URIType.UNKNOWN
 
-    with LogMixin.context():
-        model = URIWithVariablesModel(uri=r"/api/users/{user_{id}}/")  # type: ignore
-        assert model.uri.type == URIType.UNKNOWN
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+    with pytest.raises(ValueError):
+        result = URIWithVariables(r"/api/users/{user_{id}}/")
+        assert result.type == URIType.UNKNOWN
