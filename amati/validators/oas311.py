@@ -65,8 +65,8 @@ class LicenceObject(GenericObject):
 
     name: str = Field(min_length=1)
     # What difference does Optional make here?
-    identifier: SPDXIdentifier = None
-    url: SPDXURL = None
+    identifier: Optional[SPDXIdentifier] = None
+    url: Optional[SPDXURL] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
@@ -194,6 +194,55 @@ class ExternalDocumentationObject(GenericObject):
 
 
 @specification_extensions("x-")
+class RequestBodyObject(GenericObject):
+    """
+    Validates the OpenAPI Specification request body object - §4.8.13
+    """
+
+    description: Optional[CommonMark | str] = None
+    content: dict[str, "MediaTypeObject"]
+    required: Optional[bool] = False
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#request-body-object",
+        section="Request Body Object",
+    )
+
+
+@specification_extensions("x-")
+class MediaTypeObject(GenericObject):
+    """
+    Validates the OpenAPI Specification media type object - §4.8.14
+    """
+
+    schema_: "Optional[SchemaObject]" = Field(alias="schema", default=None)
+    # FIXME: Define example
+    example: Optional[Any] = None
+    examples: "Optional[dict[str, ExampleObject | ReferenceObject]]" = None
+    encoding: "Optional[EncodingObject]" = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#media-type-object",
+        section="Tag Object",
+    )
+
+
+@specification_extensions("x-")
+class EncodingObject(GenericObject):
+    """
+    Validates the OpenAPI Specification media type object - §4.8.15
+    """
+
+    contentType: Optional[str] = None
+    headers: "Optional[dict[str, HeaderObject | ReferenceObject]]" = None
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#encoding object-object",
+        section="Encoding Object",
+    )
+
+
+@specification_extensions("x-")
 class TagObject(GenericObject):
     """
     Validates the OpenAPI Specification tag object - §4.8.22
@@ -297,6 +346,54 @@ class LinkObject(GenericObject):
             LogMixin.log(
                 Log(
                     message="Only one of operationRef or operationId can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+@specification_extensions("x-")
+class HeaderObject(GenericObject):
+    """
+    Validates the OpenAPI Specification link object - §4.8.20
+    """
+
+    # Common schema/content fields
+    description: Optional[str | CommonMark] = None
+    required: Optional[bool] = Field(default=False)
+    deprecated: Optional[bool] = Field(default=False)
+
+    # Schema fields
+    style: Optional[str] = Field(default="simple")
+    explode: Optional[bool] = Field(default=False)
+    schema_: "Optional[SchemaObject | ReferenceObject]" = Field(
+        alias="schema", default=None
+    )
+    example: Optional[Any] = None
+    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
+
+    # Content fields
+    content: Optional[dict[str, MediaTypeObject]] = None
+
+    _reference: ClassVar[Reference] = ReferenceModel(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
+        section="Link Object",
+    )
+
+    @model_validator(mode="after")
+    def _validate_afer(self: Self) -> Self:
+        """
+        Validates that a content and schema header are not
+        both provided in a single header object.
+        """
+
+        if self.schema_ is not None and self.content is not None:
+            LogMixin.log(
+                Log(
+                    message="Only one of content and schema can be provided",
                     type=ValueError,
                     reference=self._reference,
                 )

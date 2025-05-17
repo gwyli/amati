@@ -2,17 +2,13 @@
 Tests amati/fields/media.py
 """
 
+import re
+
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
 from amati.fields.media import MediaType
-from amati.logging import LogMixin
-from amati.validators.generic import GenericObject
-
-
-class MediaTypeModel(GenericObject):
-    media_type: MediaType
-
 
 MEDIA_TYPES = [
     "text/plain",
@@ -31,7 +27,6 @@ MEDIA_TYPES = [
     "audio/mpeg",
     "audio/ogg",
     "video/mp4",
-    "video/webm",
     "multipart/form-data",
     "application/vnd.ms-excel",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -59,9 +54,27 @@ MEDIA_TYPES = [
 
 
 @given(st.sampled_from(MEDIA_TYPES))
-def test_media_type(value: str):
-    with LogMixin.context():
-        result = MediaTypeModel(media_type=value)  # type: ignore
-        assert not LogMixin.logs
+def test_media_type_valid(value: str):
+    result = MediaType(value)
+    assert " ".join(value.split()) == str(result)
+    assert result.is_registered
 
-        assert " ".join(value.split()) == str(result.media_type)
+    subtype_parameter = value.split("/")[1].split(";")
+
+    if subtype_parameter[0] == "*":
+        assert result.is_range
+
+    if len(subtype_parameter) > 1:
+        assert result.parameter
+
+
+@given(st.text().filter(lambda x: x not in MEDIA_TYPES))
+def test_media_type_invalid(value: str):
+
+    if re.match("[a-zA-Z0-9]+/[a-zA-Z0-9]+", value):
+        result = MediaType(value)
+        assert not result.is_registered
+        assert not result.is_range
+    else:
+        with pytest.raises(ValueError):
+            MediaType(value)

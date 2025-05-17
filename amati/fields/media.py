@@ -2,6 +2,8 @@
 Validates a media type or media type range according to RFC7321
 """
 
+import json
+import pathlib
 from typing import Any, Optional
 
 from abnf import ParseError
@@ -16,6 +18,11 @@ reference: Reference = ReferenceModel(
     section="Appendix D",
 )
 
+DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
+
+with open(DATA_DIRECTORY / "media-types.json", "r", encoding="utf-8") as f:
+    MEDIA_TYPES = json.loads(f.read())
+
 
 class MediaType(str):
     """
@@ -27,6 +34,8 @@ class MediaType(str):
     type: str = ""
     subtype: str = ""
     parameter: Optional[str] = None
+    is_registered: bool = False
+    is_range: bool = False
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -65,7 +74,20 @@ class MediaType(str):
                     self.__dict__[node.name] = node.value
 
         except ParseError as e:
-            raise ValueError("Invalid media type") from e
+            raise ValueError("Invalid media type or media type range") from e
+
+        if self.type in MEDIA_TYPES:
+
+            if self.subtype == "*":
+                self.is_range = True
+                self.is_registered = True
+
+            if self.subtype in MEDIA_TYPES[self.type]:
+                self.is_registered = True
+
+        if value == "*/*":
+            self.is_range = True
+            self.is_registered = True
 
     @classmethod
     def validate(cls, value: str) -> "MediaType":
