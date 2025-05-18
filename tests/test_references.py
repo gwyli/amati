@@ -6,7 +6,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
-from pydantic import AnyUrl, ValidationError
+from pydantic import AnyUrl
 
 from amati.validators.reference_object import Reference, ReferenceModel
 from tests.helpers import text_excluding_empty_string
@@ -25,8 +25,8 @@ def test_valid_reference_object(title: str, section: str, url: str):
 @given(text_excluding_empty_string())
 def test_invalid_reference_object(url: str):
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError):
         ReferenceModel(url=url)  # type: ignore
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError):
         ReferenceModel(title=url, url=None)  # type: ignore

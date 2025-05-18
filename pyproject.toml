@@ -12,7 +12,8 @@ dependencies = [
     "pydantic",
     "pyyaml",
     "abnf",
-    "jsonschema"
+    "jsonschema",
+    "idna"
 ]
 requires-python = ">=3.13"
 
@@ -52,3 +53,6 @@ profile="black"
 
 [tool.coverage.run]
 relative_files=true
+
+[tool.pyright]
+reportMissingTypeStubs=false

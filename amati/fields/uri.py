@@ -5,6 +5,7 @@ Validates a URI according to the RFC3986 ABNF grammar
 from enum import Enum
 from typing import Any, Optional
 
+import idna
 from abnf import Node, ParseError
 from abnf.grammars import rfc3986
 from pydantic_core import core_schema
@@ -35,13 +36,13 @@ class URI(str):
     were a string in calling Pydantic models.
     """
 
-    scheme: Optional[str] = None
-    hier_part: Optional[str] = None
-    relative_part: Optional[str] = None
-    query: Optional[str] = None
-    fragment: Optional[str] = None
-    relative: bool = False
-    json_pointer: bool = False
+    _scheme: Optional[str] = None
+    _hier_part: Optional[str] = None
+    _relative_part: Optional[str] = None
+    _query: Optional[str] = None
+    _fragment: Optional[str] = None
+    type: URIType = URIType.UNKNOWN
+    is_puycode: bool = False
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -70,42 +71,70 @@ class URI(str):
         """
 
         # Remove False and None to check whether there are
-        # any relevant parts in the URI
-        parts = [x for x in cls.__dict__.values() if x]
+        # any relevant components in the URI
+        components = [x for x in cls.__dict__.values() if x]
 
-        if not parts:
+        if not components:
             raise ValueError
 
-        if cls.scheme and not cls.hier_part and not cls.relative_part:
+        if cls._scheme and not cls._hier_part and not cls._relative_part:
             raise ValueError
 
         return cls(value)
 
+    def _property_value(self, attr: str) -> Optional[str]:
+
+        value = getattr(self, attr)
+
+        if not value:
+            return None
+
+        if self.is_puycode:
+            return idna.decode(value.encode("ascii"))
+
+        return value
+
     @property
-    def type(self):
-        if self.json_pointer:
-            return URIType.JSON_POINTER
-        if self.relative:
-            return URIType.RELATIVE
-        if self.scheme and self.hier_part:
-            return URIType.ABSOLUTE
-        if self.relative_part:
-            return URIType.AUTHORITY
-        return URIType.UNKNOWN
+    def scheme(self) -> Optional[str]:
+        return self._property_value("_scheme")
+
+    @property
+    def hier_part(self) -> Optional[str]:
+        return self._property_value("_hier_part")
+
+    @property
+    def relative_part(self) -> Optional[str]:
+        return self._property_value("_relative_part")
+
+    @property
+    def query(self) -> Optional[str]:
+        return self._property_value("_query")
+
+    @property
+    def fragment(self) -> Optional[str]:
+        return self._property_value("_fragment")
 
     def _store_values(self, parsed_rule: Node):
 
         for node in parsed_rule.children:
-            node_name = node.name.replace("-", "_")
-            if node_name in self.__annotations__:
-                self.__dict__[node_name] = node.value
+            attr = f"_{node.name.replace("-", "_")}"
+            if attr in self.__annotations__:
+                self.__dict__[attr] = node.value
 
     def __init__(self, value: str):
 
         if value is None:  # type: ignore
             raise ValueError
 
-        candidate = value
+        # Encode punycode domain names according to RFC 5891, the
+        # Internationalized Domain Names in Applications (IDNA): Protocol
+        # Decode into ASCII per the ABNF grammar in RFC 3986
+        try:
+            candidate = idna.encode(value, uts46=True).decode("ascii")
+            self.is_puycode = True
+        except idna.IDNAError:
+            candidate = value
+
         # The OAS standard is to use a fragment identifier
         # (https://www.rfc-editor.org/rfc/rfc6901#section-6) to indicate
         # that it is a JSON pointer per RFC 6901, e.g.
@@ -116,13 +145,14 @@ class URI(str):
             candidate = value[1:]
             try:
                 rfc6901.Rule("json-pointer").parse_all(candidate)
-                self.json_pointer = True
+                self.type = URIType.JSON_POINTER
             except ParseError as e:
                 raise ValueError from e
 
         try:
             # Prioritise validating the URI as absolute.
             result = rfc3986.Rule("URI").parse_all(candidate)
+            self.type = URIType.ABSOLUTE
             self._store_values(result)
         except ParseError:
             try:
@@ -134,8 +164,10 @@ class URI(str):
 
                 # If the URI has an authority, it is not relative. Check
                 # that next as the distinction is important in some cases.
-                if not result.value.startswith("//"):
-                    self.relative = True
+                if result.value.startswith("//"):
+                    self.type = URIType.AUTHORITY
+                elif self.type != URIType.JSON_POINTER:
+                    self.type = URIType.RELATIVE
 
                 self._store_values(result)
             except ParseError as e:
