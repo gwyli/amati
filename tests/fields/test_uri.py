@@ -3,11 +3,10 @@ Tests amati/fields/uri.py
 """
 
 import re
-from unittest import mock
 from urllib.parse import urlparse
 
 import pytest
-from abnf.parser import Matches, ParseError, Parser
+from abnf.parser import ParseError
 from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
@@ -106,29 +105,12 @@ def test_json_pointer(value: str):
 @given(st.one_of(urls(), st.sampled_from(NON_RELATIVE_URIS)))
 def test_uri_non_relative(value: str):
 
+    # the urls() strategy doesn't necessarily provide absolute URIs
     candidate: str = f"//{re.split("//", value)[1]}"
 
     result = URI(candidate)
     assert result == candidate
-    assert result.type == URIType.AUTHORITY
-
-
-def test_rfc3986_parser_errors():
-
-    class MockParser(Parser):
-        def lparse(self, source: str, start: int) -> Matches: ...  # pragma: no cover
-
-    # Create a mock Rule class that raises an exception when parse_all is called
-    mock_rule = mock.Mock()
-    mock_rule.parse_all.side_effect = ParseError(parser=MockParser(), start=1)
-
-    # Mock the Rule constructor to return our mock rule
-    mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule)
-
-    with mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule):
-        # Test that validation fails when parser fails
-        with pytest.raises(ValueError):
-            URI("https://example.com")
+    assert result.type == URIType.NON_RELATIVE
 
 
 def test_uri_none():

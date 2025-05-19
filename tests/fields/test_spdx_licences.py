@@ -32,6 +32,7 @@ class URLModel(GenericObject):
 @given(st.sampled_from(VALID_IDENTIFIERS))
 def test_spdx_identifier_valid(identifier: str):
     IdentifierModel(identifier=identifier)
+    print(LogMixin.logs)
 
 
 @given(st.text())

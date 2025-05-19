@@ -2,138 +2,113 @@
 Validates a URI according to the RFC3986 ABNF grammar
 """
 
+import json
+import pathlib
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 
-import idna
-from abnf import Node, ParseError
-from abnf.grammars import rfc3986
-from pydantic_core import core_schema
+import rfc3987
+from abnf import ParseError
 
+from amati.fields import _Str
 from amati.grammars import rfc6901
-from amati.validators.reference_object import Reference, ReferenceModel
 
-reference: Reference = ReferenceModel(
-    title="Uniform Resource Identifier (URI): Generic Syntax",
-    url="https://datatracker.ietf.org/doc/html/rfc3986#appendix-A",
-    section="Appendix A",
-)
+DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
+
+with open(DATA_DIRECTORY / "schemes.json", "r", encoding="utf-8") as f:
+    SCHEMES = json.loads(f.read())
+
+with open(DATA_DIRECTORY / "tlds.json", "r", encoding="utf-8") as f:
+    TLDS = json.loads(f.read())
 
 
 class URIType(str, Enum):
 
     ABSOLUTE = "absolute"
     RELATIVE = "relative"
-    AUTHORITY = "authority"
-    JSON_POINTER = "json_pointer"
+    NON_RELATIVE = "non-relative"
+    JSON_POINTER = "JSON pointer"
     UNKNOWN = "unknown"
 
 
-class URI(str):
+class URI(_Str):
     """
-    Defines a URI, and adds whether the URI is relative, absolute
-    etc. The class allows for the type URI to be treated as if it
-    were a string in calling Pydantic models.
+    Represents a Uniform Resource Identifier (URI) as defined in RFC 3986/3987.
+
+    This class parses and validates URI strings, supporting standard URIs, IRIs
+    (Internationalized Resource Identifiers), and JSON pointers. It provides attributes
+    for accessing URI components and determining the URI type and validity.
+
+    Attributes:
+        scheme (Optional[str]): The URI scheme component (e.g., "http", "https",
+            "file").
+        authority (Optional[str]): The authority component (typically host/server).
+        path (Optional[str]): The path component of the URI.
+        query (Optional[str]): The query string component.
+        fragment (Optional[str]): The fragment identifier component.
+        is_iri (bool): Whether this is an Internationalized Resource Identifier
+            (RFC 3987).
+        scheme_status (Optional[str]): The registration status of the scheme with IANA,
+            if known. Can be used
+        tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
+
+    Inherits:
+        _Str: A string class allowing for metadata
     """
 
-    _scheme: Optional[str] = None
-    _hier_part: Optional[str] = None
-    _relative_part: Optional[str] = None
-    _query: Optional[str] = None
-    _fragment: Optional[str] = None
-    type: URIType = URIType.UNKNOWN
-    is_puycode: bool = False
+    scheme: Optional[str] = None
+    authority: Optional[str] = None
+    path: Optional[str] = None
+    query: Optional[str] = None
+    fragment: Optional[str] = None
+    # Is this an RFC 3987 "Internationalized Resource Identifier (IRI)
+    # per RFC 3987
+    is_iri: bool = False
+    scheme_status: Optional[str] = None
+    tld_registered: Optional[bool] = None
 
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, _source_type: Any, _handler: Any
-    ) -> core_schema.CoreSchema:
-        """Define how Pydantic should handle this custom type."""
-        return core_schema.chain_schema(
-            [
-                # First validate as a string
-                core_schema.str_schema(),
-                # Then convert to our Test type and run validation
-                core_schema.no_info_plain_validator_function(cls.validate),
-            ]
-        )
-
-    @classmethod
-    def validate(cls, value: str) -> "URI":
+    @property
+    def type(self) -> URIType:
         """
-        Validate that the URI is a valid URI, absolute, relative
-        or a JSON pointer
+        Determine the type of the URI.
 
-        Args:
-            value: The URI to validate
+        This property analyzes the URI components to classify the URI according to the
+        URIType enumeration.
 
-        Raises: ParseError
+        Returns:
+            URIType: The classified type of the URI (ABSOLUTE, NON_RELATIVE, RELATIVE,
+                     JSON_POINTER, or UNKNOWN).
         """
-
-        # Remove False and None to check whether there are
-        # any relevant components in the URI
-        components = [x for x in cls.__dict__.values() if x]
-
-        if not components:
-            raise ValueError
-
-        if cls._scheme and not cls._hier_part and not cls._relative_part:
-            raise ValueError
-
-        return cls(value)
-
-    def _property_value(self, attr: str) -> Optional[str]:
-
-        value = getattr(self, attr)
-
-        if not value:
-            return None
-
-        if self.is_puycode:
-            return idna.decode(value.encode("ascii"))
-
-        return value
-
-    @property
-    def scheme(self) -> Optional[str]:
-        return self._property_value("_scheme")
-
-    @property
-    def hier_part(self) -> Optional[str]:
-        return self._property_value("_hier_part")
-
-    @property
-    def relative_part(self) -> Optional[str]:
-        return self._property_value("_relative_part")
-
-    @property
-    def query(self) -> Optional[str]:
-        return self._property_value("_query")
-
-    @property
-    def fragment(self) -> Optional[str]:
-        return self._property_value("_fragment")
-
-    def _store_values(self, parsed_rule: Node):
-
-        for node in parsed_rule.children:
-            attr = f"_{node.name.replace("-", "_")}"
-            if attr in self.__annotations__:
-                self.__dict__[attr] = node.value
+        if self.scheme:
+            return URIType.ABSOLUTE
+        if self.authority:
+            return URIType.NON_RELATIVE
+        if self.path:
+            if str(self).startswith("#"):
+                return URIType.JSON_POINTER
+            return URIType.RELATIVE
+        return URIType.UNKNOWN
 
     def __init__(self, value: str):
+        """
+        Initialize a URI object by parsing a URI string.
+
+        Parses the input string according to RFC 3986/3987 grammar rules for URIs/IRIs.
+        Handles special cases like JSON pointers (RFC 6901) and performs validation.
+        Sets appropriate attributes based on the parsed components.
+
+        Args:
+            value (str): A string representing a URI.
+
+        Raises:
+            ValueError: If the input string is not a valid URI, or if essential
+                components are missing.
+        """
 
         if value is None:  # type: ignore
             raise ValueError
 
-        # Encode punycode domain names according to RFC 5891, the
-        # Internationalized Domain Names in Applications (IDNA): Protocol
-        # Decode into ASCII per the ABNF grammar in RFC 3986
-        try:
-            candidate = idna.encode(value, uts46=True).decode("ascii")
-            self.is_puycode = True
-        except idna.IDNAError:
-            candidate = value
+        candidate = value
 
         # The OAS standard is to use a fragment identifier
         # (https://www.rfc-editor.org/rfc/rfc6901#section-6) to indicate
@@ -145,43 +120,59 @@ class URI(str):
             candidate = value[1:]
             try:
                 rfc6901.Rule("json-pointer").parse_all(candidate)
-                self.type = URIType.JSON_POINTER
             except ParseError as e:
                 raise ValueError from e
 
+        # Parse as if the candidate were an IRI per RFC 3987.
+        # Raises ValueError if invalid
+        result = rfc3987.parse(candidate)
+
+        for component, value in result.items():
+            self.__dict__[component] = value
+
+        # If an URI/IRI is invalid if only a fragment.
+        if not self.scheme and not self.authority and not self.path:
+            raise ValueError
+
+        # If valid according to RFC 3987 but not ASCII the candidate is a IRI
+        # not a URI
         try:
-            # Prioritise validating the URI as absolute.
-            result = rfc3986.Rule("URI").parse_all(candidate)
-            self.type = URIType.ABSOLUTE
-            self._store_values(result)
-        except ParseError:
-            try:
-                # Using `relative-ref` to find authoratitive URIs
-                # as the ABNF grammar doesn't directly index for
-                # a URI of the form //authority/?guery or
-                # //authority/#fragment.
-                result: Node = rfc3986.Rule("relative-ref").parse_all(candidate)
+            candidate.encode("ascii")
+        except UnicodeEncodeError:
+            self.is_iri = True
 
-                # If the URI has an authority, it is not relative. Check
-                # that next as the distinction is important in some cases.
-                if result.value.startswith("//"):
-                    self.type = URIType.AUTHORITY
-                elif self.type != URIType.JSON_POINTER:
-                    self.type = URIType.RELATIVE
+        # If the scheme is permanent, provisional etc.
+        self.scheme_status = SCHEMES.get(self.scheme, None)
 
-                self._store_values(result)
-            except ParseError as e:
-                raise ValueError from e
+        # Determine if the TLD in the authority is registered with IANA
+        if self.authority:
+            self.tld_registered = f".{self.authority.split(".")[-1]}" in TLDS
 
 
 class URIWithVariables(URI):
     """
-    Defines a URI, and adds whether the URI is relative, absolute
-    etc. The class allows for the type URI to be treated as if it
-    were a string in calling Pydantic models. The URI can be of the
-    form https://{username}.example.com/api/v1/{resource}, i.e. where
-    some string interpolation is expected by software that will
-    use this URI.
+    Extends URI to cope with URIs with variable components, e.g.
+    https://{username}.example.com/api/v1/{resource}
+
+    Expected to be used where tooling is required to use string interpolation to
+    generate a valid URI. Will change `{username}` to `username` for validation,
+    but return the original string when called.
+
+    Attributes:
+        scheme (Optional[str]): The URI scheme component (e.g., "http", "https",
+            "file").
+        authority (Optional[str]): The authority component (typically host/server).
+        path (Optional[str]): The path component of the URI.
+        query (Optional[str]): The query string component.
+        fragment (Optional[str]): The fragment identifier component.
+        is_iri (bool): Whether this is an Internationalized Resource Identifier
+            (RFC 3987).
+        scheme_status (Optional[str]): The registration status of the scheme with IANA,
+            if known. Can be used
+        tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
+
+    Inherits:
+        URI: Represents a Uniform Resource Identifier (URI) as defined in RFC 3986/3987.
     """
 
     def __init__(self, value: str):
@@ -204,7 +195,7 @@ class URIWithVariables(URI):
         if value is None:  # type: ignore
             raise ValueError
 
-        # Beautiful hack. `string.format()` takes a dict of the key, value pairs to
+        # `string.format()` takes a dict of the key, value pairs to
         # replace to replace the keys inside braces. As we don't have the keys a dict
         # that returns the keys that `string.format()` is expecting will have the
         # effect of replacing '{a}b{c} with 'abc'.
@@ -215,6 +206,8 @@ class URIWithVariables(URI):
         # Unbalanced or embedded braces, e.g. /example/{id{a}}/ or /example/{id
         # will cause a ValueError in .format_map().
         try:
-            super().__init__(value.format_map(MissingKeyDict()))
+            candidate = value.format_map(MissingKeyDict())
         except ValueError as e:
             raise ValueError(f"Unbalanced or embedded braces in {value}") from e
+
+        super().__init__(candidate)
