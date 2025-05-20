@@ -10,8 +10,8 @@ from typing import Optional
 import rfc3987
 from abnf import ParseError
 
-from amati import AmatiValueError
-from amati.fields import Reference, _Str
+from amati import AmatiValueError, Reference
+from amati.fields import _Str
 from amati.grammars import rfc6901
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"

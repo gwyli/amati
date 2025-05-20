@@ -5,9 +5,26 @@ a single datatype and validate on instantiation.
 
 __version__ = "0.1.0"
 
-from typing import Optional
+from dataclasses import dataclass
+from typing import Optional, Sequence
 
-from amati.fields import References
+
+@dataclass
+class Reference:
+    """
+    Attributes:
+        title (str): Title of the referenced content
+        section (str): Section of the referenced content
+        url (str): URL where the referenced content can be found
+    """
+
+    title: Optional[str] = None
+    section: Optional[str] = None
+    url: Optional[str] = None
+
+
+type ReferenceArray = Sequence[Reference]
+type References = Reference | ReferenceArray
 
 
 class AmatiValueError(ValueError):

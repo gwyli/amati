@@ -11,8 +11,8 @@ import pathlib
 import re
 from typing import Optional, Self
 
-from amati import AmatiValueError
-from amati.fields import Reference, _Str
+from amati import AmatiValueError, Reference
+from amati.fields import _Str
 
 reference = Reference(
     title="Hypertext Transfer Protocol (HTTP) Status Code Registry",

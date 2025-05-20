@@ -9,8 +9,8 @@ from typing import Optional
 from abnf import ParseError
 from abnf.grammars import rfc7231
 
-from amati import AmatiValueError
-from amati.fields import Reference, _Str
+from amati import AmatiValueError, Reference
+from amati.fields import _Str
 
 reference = Reference(
     title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",

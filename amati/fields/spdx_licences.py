@@ -5,15 +5,11 @@ Exchange (SPDX) licence list.
 
 import json
 import pathlib
-from typing import Annotated, Optional
 
-from pydantic import AfterValidator
+from amati import AmatiValueError, Reference
+from amati.fields import URI, _Str
 
-from amati.fields.uri import URI
-from amati.logging import Log, LogMixin
-from amati.validators.reference_object import Reference, ReferenceModel
-
-reference: Reference = ReferenceModel(
+reference = Reference(
     title="SPDX License List",
     url="https://spdx.org/licenses/",
 )
@@ -31,58 +27,23 @@ VALID_LICENCES: dict[str, list[str]] = {
 VALID_URLS: list[str] = [url for urls in VALID_LICENCES.values() for url in urls]
 
 
-def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
-    """
-    Validate that the licence identifier is a valid SPDX licence.
+class SPDXIdentifier(_Str):
 
-    Args:
-        v: The licence identifier to validate
+    def __init__(self, value: str):
 
-    Returns:
-        The validated licence identifier or None if not provided
-
-    Raises:
-        ValueError: If the identifier is not a valid SPDX licence
-    """
-    if value is None:
-        return None
-
-    if value not in VALID_LICENCES:
-        message = f"{value} is not a valid SPDX licence identifier."
-        LogMixin.log(Log(message=message, type=Warning, reference=reference))
-
-    return value
+        if value not in VALID_LICENCES:
+            raise AmatiValueError(
+                f"{value} is not a valid SPDX licence identifier", reference=reference
+            )
 
 
-type SPDXIdentifier = Annotated[
-    Optional[str], AfterValidator(_validate_after_spdx_identifier)
-]
+class SPDXURL(URI):  # pylint: disable=invalid-name
 
+    def __init__(self, value: str):
 
-def _validate_after_spdx_url(value: URI) -> URI:
-    """
-    Validate that the licence URL exists in the list of known SPDX licence URLs.
-    Not that the URL is associated with the specific identifier.
+        super().__init__(value)
 
-    Args:
-        v: The URI to validate
-
-    Returns:
-        The validated URI or None if not provided
-
-    Warns:
-        InconsistencyWarning: If the URL is not associated with any known licence.
-    """
-
-    if str(value) in VALID_URLS:
-        return value
-
-    message = f"{value} is not associated with any identifier."
-    LogMixin.log(Log(message=message, type=Warning, reference=reference))
-
-    return value
-
-
-type SPDXURL = Annotated[  # pylint: disable=invalid-name
-    URI, AfterValidator(_validate_after_spdx_url)
-]
+        if value not in VALID_URLS:
+            raise AmatiValueError(
+                f"{value} is not associated with any identifier.", reference=reference
+            )
