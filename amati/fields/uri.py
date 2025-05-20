@@ -10,7 +10,8 @@ from typing import Optional
 import rfc3987
 from abnf import ParseError
 
-from amati.fields import _Str
+from amati import AmatiValueError
+from amati.fields import Reference, _Str
 from amati.grammars import rfc6901
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
@@ -20,6 +21,13 @@ with open(DATA_DIRECTORY / "schemes.json", "r", encoding="utf-8") as f:
 
 with open(DATA_DIRECTORY / "tlds.json", "r", encoding="utf-8") as f:
     TLDS = json.loads(f.read())
+
+
+class Scheme(_Str):
+    status: Optional[str] = None
+
+    def __init__(self, value: str):
+        self.status = SCHEMES.get(value, None)
 
 
 class URIType(str, Enum):
@@ -51,12 +59,9 @@ class URI(_Str):
         scheme_status (Optional[str]): The registration status of the scheme with IANA,
             if known. Can be used
         tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
-
-    Inherits:
-        _Str: A string class allowing for metadata
     """
 
-    scheme: Optional[str] = None
+    scheme: Optional[Scheme] = None
     authority: Optional[str] = None
     path: Optional[str] = None
     query: Optional[str] = None
@@ -64,8 +69,7 @@ class URI(_Str):
     # Is this an RFC 3987 "Internationalized Resource Identifier (IRI)
     # per RFC 3987
     is_iri: bool = False
-    scheme_status: Optional[str] = None
-    tld_registered: Optional[bool] = None
+    tld_registered: bool = False
 
     @property
     def type(self) -> URIType:
@@ -101,18 +105,17 @@ class URI(_Str):
             value (str): A string representing a URI.
 
         Raises:
-            ValueError: If the input string is not a valid URI, or if essential
+            AmatiValueError: If the input string is not a valid URI, or if essential
                 components are missing.
         """
 
         if value is None:  # type: ignore
-            raise ValueError
+            raise AmatiValueError("None is not a valid URI; declare as Optional")
 
         candidate = value
 
         # The OAS standard is to use a fragment identifier
-        # (https://www.rfc-editor.org/rfc/rfc6901#section-6) to indicate
-        # that it is a JSON pointer per RFC 6901, e.g.
+        # to indicate that it is a JSON pointer per RFC 6901, e.g.
         # "$ref": "#/components/schemas/pet".
         # The hash does not indicate that the URI is a fragment.
 
@@ -121,18 +124,33 @@ class URI(_Str):
             try:
                 rfc6901.Rule("json-pointer").parse_all(candidate)
             except ParseError as e:
-                raise ValueError from e
+                raise AmatiValueError(
+                    f"{value} is not a valid JSON pointer",
+                    reference=Reference(
+                        title="JavaScript Object Notation (JSON) Pointer",
+                        section="6 - URI Fragment Identifier Representation",
+                        url="https://www.rfc-editor.org/rfc/rfc6901#section-6",
+                    ),
+                ) from e
 
         # Parse as if the candidate were an IRI per RFC 3987.
         # Raises ValueError if invalid
         result = rfc3987.parse(candidate)
 
         for component, value in result.items():
-            self.__dict__[component] = value
+            if not value:
+                continue
+
+            if component == "scheme":
+                self.__dict__["scheme"] = Scheme(value)
+            else:
+                self.__dict__[component] = value
 
         # If an URI/IRI is invalid if only a fragment.
         if not self.scheme and not self.authority and not self.path:
-            raise ValueError
+            raise AmatiValueError(
+                "{value} does not contain a scheme, authority or path"
+            )
 
         # If valid according to RFC 3987 but not ASCII the candidate is a IRI
         # not a URI
@@ -141,12 +159,9 @@ class URI(_Str):
         except UnicodeEncodeError:
             self.is_iri = True
 
-        # If the scheme is permanent, provisional etc.
-        self.scheme_status = SCHEMES.get(self.scheme, None)
-
-        # Determine if the TLD in the authority is registered with IANA
         if self.authority:
-            self.tld_registered = f".{self.authority.split(".")[-1]}" in TLDS
+            tld_candidate = f".{self.authority.split(".")[-1]}"
+            self.tld_registered = tld_candidate in TLDS
 
 
 class URIWithVariables(URI):

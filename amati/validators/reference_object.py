@@ -4,7 +4,7 @@ information in errors and warnings.
 """
 
 from types import NoneType
-from typing import Annotated, Optional, Sequence
+from typing import Annotated, Optional, Sequence, Union
 
 from pydantic import AfterValidator, AnyUrl, BaseModel, Field
 
@@ -39,6 +39,6 @@ class ReferenceModel(BaseModel):
     ]
 
 
-type ReferencePrimitive = ReferenceModel | NoneType
-type ReferenceArray = Sequence[ReferencePrimitive]
-type Reference = ReferencePrimitive | ReferenceArray
+ReferencePrimitive = Union[ReferenceModel, NoneType]
+ReferenceArray = Sequence[ReferencePrimitive]
+Reference = Union[ReferencePrimitive, ReferenceArray]

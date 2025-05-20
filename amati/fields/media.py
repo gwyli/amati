@@ -9,10 +9,10 @@ from typing import Optional
 from abnf import ParseError
 from abnf.grammars import rfc7231
 
-from amati.fields import _Str
-from amati.validators.reference_object import Reference, ReferenceModel
+from amati import AmatiValueError
+from amati.fields import Reference, _Str
 
-reference: Reference = ReferenceModel(
+reference = Reference(
     title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
     url="https://datatracker.ietf.org/doc/html/rfc7231#appendix-D",
     section="Appendix D",
@@ -56,7 +56,7 @@ class MediaType(_Str):
             value (str): A string representing a media type (e.g., "text/html").
 
         Raises:
-            ValueError: If the input string is not a valid media type according to
+            AmatiValueError: If the input string is not a valid media type according to
                 RFC 7231.
         """
 
@@ -68,7 +68,9 @@ class MediaType(_Str):
                     self.__dict__[node.name] = node.value
 
         except ParseError as e:
-            raise ValueError("Invalid media type or media type range") from e
+            raise AmatiValueError(
+                "Invalid media type or media type range", reference=reference
+            ) from e
 
         if self.type in MEDIA_TYPES:
 

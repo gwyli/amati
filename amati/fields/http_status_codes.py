@@ -6,66 +6,77 @@ but are in common usage. They can be accessed separately via HTTPStatusCodeX,
 or the numeric codes can be accessed via HTTPStatusCodeN.
 """
 
-from itertools import chain
-from typing import Annotated
+import json
+import pathlib
+import re
+from typing import Optional, Self
 
-from pydantic import AfterValidator, Field, PositiveInt
+from amati import AmatiValueError
+from amati.fields import Reference, _Str
 
-from amati.logging import Log, LogMixin
-from amati.validators.reference_object import Reference, ReferenceModel
-
-reference: Reference = ReferenceModel(
+reference = Reference(
     title="Hypertext Transfer Protocol (HTTP) Status Code Registry",
     url="https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml",
 )
 
+DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
-ASSIGNED_HTTP_STATUS_CODES = set(
-    chain(
-        [100, 101, 102, 103, 104],
-        range(200, 209),
-        [226],
-        range(300, 308),
-        range(400, 418),
-        range(421, 426),
-        range(428, 429),
-        [431, 451],
-        range(500, 508),
-        range(510, 511),
-    )
-)
+with open(DATA_DIRECTORY / "http-status-codes.json", "r", encoding="utf-8") as f:
+    HTTP_STATUS_CODES = json.loads(f.read())
 
 
-def _validate_after(value: PositiveInt) -> PositiveInt:
+class HTTPStatusCode(_Str):
     """
-    Pydantic AfterValidator to raise a warning if the status code is unassigned.
+    A class representing an HTTP status code as defined in RFC 7231 and related RFCs.
 
-    Args:
-        value: The status code
+    This class validates and provides information about HTTP status codes, including
+    whether they are registered with IANA, assigned for use, or represent a status code
+    range (e.g., 4XX). It inherits from _Str to maintain compatibility with string
+    operations while adding HTTP-specific validation and metadata.
 
-    Returns:
-        The unchanged value
-
-    Warns:
-        UserWarning: If the code is unassigned.
+    Attributes:
+        description (Optional[str]): The official description of the status code,
+            if registered.
+        is_registered (bool): Whether the status code is registered with IANA.
+        is_assigned (bool): Whether the status code is assigned for use
+            (not marked as 'Unassigned').
+        is_range (bool): Whether the status code represents a range (e.g., "2XX").
     """
 
-    if value not in ASSIGNED_HTTP_STATUS_CODES:
-        message = f"Status code {value} is unassigned or invalid."
-        LogMixin.log(Log(message=message, type=Warning, reference=reference))
+    description: Optional[str] = None
+    is_registered: bool = False
+    is_assigned: bool = False
+    is_range: bool = False
+    _pattern = re.compile(r"^[1-5]XX$")
 
-    return value
+    def __init__(self: Self, value: str | int):
+        """
+        Initialize an HTTPStatusCode object from a string or integer value.
 
+        Validates the input against known HTTP status codes and status code ranges.
+        Sets attributes indicating whether the code is registered, assigned, and/or
+        represents a range.
 
-type HTTPStatusCodeN = Annotated[  # pylint: disable=invalid-name
-    PositiveInt, Field(strict=True, ge=100, le=599), AfterValidator(_validate_after)
-]
+        Args:
+            value (str | int): A string or integer representing an HTTP status code
+                (e.g., "200", 404) or status code range (e.g., "4XX").
 
+        Raises:
+            AmatiValueError: If the provided value is not a valid HTTP status code or
+                status code range.
+        """
 
-type HTTPStatusCodeX = Annotated[  # pylint: disable=invalid-name
-    str, Field(strict=True, pattern="^[1-5]XX$")
-]
+        candidate = str(value)
 
+        if candidate in HTTP_STATUS_CODES:
+            self.is_registered = True
+            self.description = HTTP_STATUS_CODES[candidate]
+        elif self._pattern.match(candidate):
+            self.is_range = True
+        else:
+            raise AmatiValueError(
+                f"{value} is not a valid HTTP Status Code", reference=reference
+            )
 
-# Convenience type for all possibilities
-type HTTPStatusCode = HTTPStatusCodeN | HTTPStatusCodeX
+        if self.description != "Unassigned":
+            self.is_assigned = True
