@@ -25,6 +25,7 @@ from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
 from amati.fields.iso9110 import HTTPAuthenticationScheme
 from amati.fields.json import JSON
+from amati.fields.media import MediaType
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
 from amati.fields.uri import URI, URIType, URIWithVariables
@@ -240,6 +241,21 @@ class EncodingObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#encoding object-object",
         section="Encoding Object",
     )
+
+    @field_validator("contentType", mode="after")
+    @classmethod
+    def check_content_type(cls, value: str) -> str:
+        """
+        contentType is a comma-separated list of media types.
+        Check that they are all valid
+
+        raises: ValueError
+        """
+
+        for media_type in value.split(","):
+            MediaType(media_type.strip())
+
+        return value
 
 
 @specification_extensions("x-")
