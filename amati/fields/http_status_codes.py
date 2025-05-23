@@ -66,6 +66,13 @@ class HTTPStatusCode(_Str):
                 status code range.
         """
 
+        if not isinstance(value, str) and not isinstance(value, int):
+
+            type_ = type(value).__name__
+            raise AmatiValueError(
+                f"{value} of type {type_} cannot be a valid HTTP Status code."
+            )
+
         candidate = str(value)
 
         if candidate in HTTP_STATUS_CODES:

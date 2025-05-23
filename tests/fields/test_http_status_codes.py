@@ -49,4 +49,4 @@ def test_status_code_range(value: str):
 @given(helpers.everything_except(int))
 def test_everything_except_integers(value: Any):
     with pytest.raises(AmatiValueError):
-        HTTPStatusCode(str(value))  # type: ignore
+        HTTPStatusCode(value)  # type: ignore
