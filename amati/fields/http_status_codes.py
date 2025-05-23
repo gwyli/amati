@@ -49,13 +49,17 @@ class HTTPStatusCode(_Str):
     is_range: bool = False
     _pattern = re.compile(r"^[1-5]XX$")
 
-    def __init__(self: Self, value: str | int):
+    def __init__(self: Self, value: str):
         """
         Initialize an HTTPStatusCode object from a string or integer value.
 
         Validates the input against known HTTP status codes and status code ranges.
         Sets attributes indicating whether the code is registered, assigned, and/or
         represents a range.
+
+        NB: OAS 3.1.1 states that:
+        > This field MUST be enclosed in quotation marks (for example, “200”)
+        > for compatibility between JSON and YAML.
 
         Args:
             value (str | int): A string or integer representing an HTTP status code
@@ -66,7 +70,7 @@ class HTTPStatusCode(_Str):
                 status code range.
         """
 
-        if not isinstance(value, str) and not isinstance(value, int):
+        if not isinstance(value, str):
 
             type_ = type(value).__name__
             raise AmatiValueError(
