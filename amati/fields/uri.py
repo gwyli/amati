@@ -109,6 +109,8 @@ class URI(_Str):
                 components are missing.
         """
 
+        super().__init__()
+
         if value is None:  # type: ignore
             raise AmatiValueError("None is not a valid URI; declare as Optional")
 

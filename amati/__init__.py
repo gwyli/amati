@@ -9,6 +9,10 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 
+class AmatiReferenceException(Exception):
+    message: str = "Cannot construct empty references"
+
+
 @dataclass
 class Reference:
     """
@@ -21,6 +25,11 @@ class Reference:
     title: Optional[str] = None
     section: Optional[str] = None
     url: Optional[str] = None
+
+    def __post_init__(self):
+
+        if not self.title and not self.section and not self.url:
+            raise AmatiReferenceException
 
 
 type ReferenceArray = Sequence[Reference]

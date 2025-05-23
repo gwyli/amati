@@ -2,12 +2,12 @@
 Tests amati/fields/spdx_licences.py
 """
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
+from amati import AmatiValueError
 from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES, HTTPAuthenticationScheme
-from amati.logging import LogMixin
-from amati.validators.generic import GenericObject
 
 VALID_HTTP_AUTHENTICATION_SCHEMES: list[str] = list(HTTP_AUTHENTICATION_SCHEMES)
 INVALID_HTTP_AUTHENTICATION_SCHEMES = st.text().filter(
@@ -15,13 +15,9 @@ INVALID_HTTP_AUTHENTICATION_SCHEMES = st.text().filter(
 )
 
 
-class HTTPAuthenticationSchemeModel(GenericObject):
-    http_authentication_scheme: HTTPAuthenticationScheme
-
-
 @given(st.sampled_from(VALID_HTTP_AUTHENTICATION_SCHEMES))
-def test_http_authentication_scheme_valid(http_authentication_scheme: str):
-    HTTPAuthenticationSchemeModel(http_authentication_scheme=http_authentication_scheme)
+def test_http_authentication_scheme_valid(value: str):
+    HTTPAuthenticationScheme(value)
 
 
 @st.composite
@@ -37,12 +33,6 @@ def strings_without_valid_http_authentication_schemes(draw: st.DrawFn) -> str:
 
 
 @given(strings_without_valid_http_authentication_schemes())
-def test_http_authentication_scheme_invalid(http_authentication_scheme: str):
-    with LogMixin.context():
-        HTTPAuthenticationSchemeModel(
-            http_authentication_scheme=http_authentication_scheme
-        )
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
-        assert LogMixin.logs[0].reference is not None
+def test_http_authentication_scheme_invalid(value: str):
+    with pytest.raises(AmatiValueError):
+        HTTPAuthenticationScheme(value)

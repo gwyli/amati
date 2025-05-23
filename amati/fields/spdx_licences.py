@@ -7,7 +7,8 @@ import json
 import pathlib
 
 from amati import AmatiValueError, Reference
-from amati.fields import URI, _Str
+from amati.fields import _Str
+from amati.fields.uri import URI
 
 reference = Reference(
     title="SPDX License List",
@@ -28,6 +29,25 @@ VALID_URLS: list[str] = [url for urls in VALID_LICENCES.values() for url in urls
 
 
 class SPDXIdentifier(_Str):
+    """
+    A class representing a valid SPDX license identifier.
+
+    This class validates that a string value is a registered SPDX license identifier
+    according to the official SPDX license list. It inherits from _Str to maintain
+    compatibility with string operations while adding SPDX-specific validation.
+
+    SPDX identifiers are standardized short-form identifiers for open source licenses,
+    such as "MIT", "Apache-2.0", or "GPL-3.0-only".
+
+    Attributes:
+        Inherits all attributes from _Str
+
+    Example:
+        >>> license_id = SPDXIdentifier("MIT")
+        >>> str(license_id)
+        'MIT'
+        >>> SPDXIdentifier("InvalidLicense")  # Raises AmatiValueError
+    """
 
     def __init__(self, value: str):
 
@@ -38,6 +58,25 @@ class SPDXIdentifier(_Str):
 
 
 class SPDXURL(URI):  # pylint: disable=invalid-name
+    """
+    A class representing a valid SPDX license URL.
+
+    This class validates that a URI is associated with an SPDX license in the official
+    SPDX license list. It inherits from URI to maintain compatibility with URI
+    validation and operations while adding SPDX-specific validation.
+
+    SPDX license URLs are the official reference URLs for licenses in the SPDX registry,
+    typically pointing to the canonical text of the license.
+
+    Attributes:
+        Inherits all attributes from URI
+
+    Example:
+        >>> license_url = SPDXURL("https://www.apache.org/licenses/LICENSE-2.0")
+        >>> license_url.scheme
+        'https'
+        >>> SPDXURL("https://example.com")  # Raises AmatiValueError
+    """
 
     def __init__(self, value: str):
 

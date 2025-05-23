@@ -33,6 +33,11 @@ def text_excluding_empty_string() -> st.SearchStrategy[str]:
     return st.text().filter(lambda x: x != "")
 
 
+def none_and_empty_string(type_: Any) -> st.SearchStrategy[Any]:
+    """Returns a Hypothesis strategy for generating an empty object and None"""
+    return st.sampled_from([None, type_()])
+
+
 def random_choice_empty(sequence: Sequence[Any]) -> Optional[Any]:
     """Return a random element from a sequence, or None if the sequence is empty.
 

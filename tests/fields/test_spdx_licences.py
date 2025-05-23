@@ -14,20 +14,11 @@ from amati.fields.spdx_licences import (
     VALID_URLS,
     SPDXIdentifier,
 )
-from amati.validators.generic import GenericObject
 
 VALID_IDENTIFIERS = list(VALID_LICENCES.keys())
 
 INVALID_URLS = urls().filter(lambda x: x not in VALID_URLS)
 INVALID_IDENTIFIERS = st.text().filter(lambda x: x not in VALID_IDENTIFIERS)
-
-
-class IdentifierModel(GenericObject):
-    identifier: SPDXIdentifier
-
-
-class URLModel(GenericObject):
-    url: SPDXURL
 
 
 @given(st.sampled_from(VALID_IDENTIFIERS))

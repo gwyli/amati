@@ -21,14 +21,14 @@ from jsonschema.validators import validator_for  # type: ignore
 from pydantic import ConfigDict, Field, RootModel, field_validator, model_validator
 from pydantic.json_schema import JsonSchemaValue
 
+from amati import AmatiValueError
+from amati.fields import URI, HTTPAuthenticationScheme, MediaType
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
-from amati.fields.iso9110 import HTTPAuthenticationScheme
 from amati.fields.json import JSON
-from amati.fields.media import MediaType
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.uri import URI, URIType, URIWithVariables
+from amati.fields.uri import URIType, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.reference_object import Reference, ReferenceModel
@@ -62,12 +62,16 @@ class LicenceObject(GenericObject):
     A model representing the OpenAPI Specification licence object §4.8.4
 
     OAS uses the SPDX licence list.
+
+    # SPECFIX: The URI is mutually exclusive of the identifier. I don't see
+    the purpose of this; if the identifier is a SPDX Identifier where's the
+    harm in also including the URI
     """
 
     name: str = Field(min_length=1)
     # What difference does Optional make here?
     identifier: Optional[SPDXIdentifier] = None
-    url: Optional[SPDXURL] = None
+    url: Optional[URI] = None
     _reference: ClassVar[Reference] = ReferenceModel(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
@@ -85,22 +89,58 @@ class LicenceObject(GenericObject):
         Returns:
             The validated licence object
         """
-        if self.url is None:
-            return self
 
-        # Checked in the type AfterValidator, not necessary to raise a warning here.
-        # only done to avoid an unnecessary KeyError
-        if self.identifier not in VALID_LICENCES:
-            return self
+        # There are 4 cases
+        # 1. No URL or identifier - invalid
+        # 2. Identifier only - covered in type checking
+        # 3. URI only - should warn if not SPDX
+        # 4. Both Identifier and URI, technically invalid, but should check if
+        # consistent
 
-        if str(self.url) not in VALID_LICENCES[self.identifier]:
+        # Case 1
+        if not self.url and not self.identifier:
             LogMixin.log(
                 Log(
-                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
+                    message="A Licence object requires a URL or an Identifier.",  # pylint: disable=line-too-long
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+            return self
+
+        # Case 3
+        if self.url:
+            try:
+                SPDXURL(self.url)
+            except AmatiValueError:
+                LogMixin.log(
+                    Log(
+                        message=f"{self.url} is not a valid SPDX URL",
+                        type=Warning,
+                        reference=self._reference,
+                    )
+                )
+
+        # Case 4
+
+        if self.url and self.identifier:
+            LogMixin.log(
+                Log(
+                    message="The Identifier and URL are mutually exclusive",
                     type=Warning,
                     reference=self._reference,
                 )
             )
+
+            if str(self.url) not in VALID_LICENCES[self.identifier]:
+                LogMixin.log(
+                    Log(
+                        message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
+                        type=Warning,
+                        reference=self._reference,
+                    )
+                )
 
         return self
 

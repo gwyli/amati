@@ -1,18 +1,18 @@
 """
-Validates the Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry
-(ISO 9110, section 16.4.1) from IANA.
+HTTP Authentication Scheme validation module.
+
+This module provides functionality for validating HTTP authentication schemes according
+to the IANA registry defined in ISO9110. It includes constants, data loading utilities,
+and a class for scheme validation.
 """
 
 import json
 import pathlib
-from typing import Annotated, Optional
 
-from pydantic import AfterValidator
+from amati import AmatiValueError, Reference
+from amati.fields import _Str
 
-from amati.logging import Log, LogMixin
-from amati.validators.reference_object import Reference, ReferenceModel
-
-reference: Reference = ReferenceModel(
+reference = Reference(
     title="Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry (ISO9110)",
     url="https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml",
 )
@@ -29,26 +29,31 @@ HTTP_AUTHENTICATION_SCHEMES: set[str] = set(
 )
 
 
-def _validate_after(value: Optional[str]) -> Optional[str]:
+class HTTPAuthenticationScheme(_Str):
     """
-    Validate the HTTP authentication scheme exists in ISO 9110.
+    A class representing an HTTP authentication scheme as defined in ISO9110.
 
-    Args:
-        value: The authentication scheme to validate
+    This class validates that a string value is a registered HTTP authentication scheme
+    according to the IANA registry. It inherits from _Str to maintain compatibility
+    with string operations while adding HTTP authentication-specific validation.
 
-    Returns:
-        The validated authentication scheme or None if not provided
+    The validation is performed against the list of schemes loaded from the ISO9110
+    data file, which includes schemes like Basic, Bearer, Digest, etc.
 
-    Raises:
-        ValueError: If the identifier is not a valid authentication scheme
+    Attributes:
+        Inherits all attributes from _Str
+
+    Example:
+        >>> scheme = HTTPAuthenticationScheme("Bearer")
+        >>> str(scheme)
+        'Bearer'
+        >>> HTTPAuthenticationScheme("InvalidScheme")  # Raises AmatiValueError
     """
-    if value not in HTTP_AUTHENTICATION_SCHEMES:
-        message = f"{value} is not a valid HTTP authentication schema."
-        LogMixin.log(Log(message=message, type=ValueError, reference=reference))
 
-    return value
+    def __init__(self, value: str):
 
-
-type HTTPAuthenticationScheme = Annotated[
-    Optional[str], AfterValidator(_validate_after)
-]  # pylint: disable=invalid-name
+        if value not in HTTP_AUTHENTICATION_SCHEMES:
+            raise AmatiValueError(
+                f"{value} is not a valid HTTP authentication schema.",
+                reference=reference,
+            )
