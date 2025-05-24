@@ -22,7 +22,9 @@ def valid_server_variable(draw: st.DrawFn) -> dict[str, list[str] | str]:
 
 @given(valid_server_variable())
 def test_server_variable_object(xserver_variable: dict[str, list[str] | str]):
-    ServerVariableObject(**xserver_variable)  # type: ignore
+    with LogMixin.context():
+        ServerVariableObject(**xserver_variable)  # type: ignore
+        assert not LogMixin.logs
 
 
 @given(st.text())

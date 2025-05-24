@@ -33,8 +33,10 @@ INVALID_HTTP_AUTHENTICATION_SCHEMES: st.SearchStrategy[str] = st.text().filter(
 )
 
 
+# @pytest.mark.skip(reason="Will fix later")
 @given(INVALID_SECURITY_SCHEME_TYPES)
 def test_security_scheme_invalid(scheme_type: str):
+    # LogMixin.logs = []
 
     with LogMixin.context():
         SecuritySchemeObject(type=scheme_type)
@@ -56,7 +58,9 @@ def test_security_scheme_none(scheme_type: str):
 )
 def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
     with LogMixin.context():
-        SecuritySchemeObject(type="apiKey", description=description, name=name, in_=in_)
+        SecuritySchemeObject(
+            type="apiKey", description=description, name=name, in_=in_  # type: ignore
+        )
         assert not LogMixin.logs
 
 
@@ -67,7 +71,9 @@ def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
 )
 def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
     with LogMixin.context():
-        SecuritySchemeObject(type="apiKey", description=description, name=name, in_=in_)
+        SecuritySchemeObject(
+            type="apiKey", description=description, name=name, in_=in_  # type: ignore
+        )
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
         assert LogMixin.logs[0].type == ValueError
@@ -79,7 +85,7 @@ def test_security_scheme_http_valid(description: str, scheme: str, bearer_format
         SecuritySchemeObject(
             type="http",
             description=description,
-            scheme=scheme,
+            scheme=scheme,  # type: ignore
             bearerFormat=bearer_format,
         )
         assert not LogMixin.logs
@@ -93,7 +99,7 @@ def test_security_scheme_http_invalid(
         SecuritySchemeObject(
             type=type_,
             description=description,
-            scheme=scheme,
+            scheme=scheme,  # type: ignore
             bearerFormat=bearer_format,
         )
 
@@ -106,7 +112,7 @@ def test_security_scheme_oauth2_valid(
         SecuritySchemeObject(
             type="oauth2",
             description=description,
-            scheme=scheme,
+            scheme=scheme,  # type: ignore
             bearerFormat=bearer_format,
             flows=OAuthFlowsObject(),
         )
@@ -121,7 +127,7 @@ def test_security_scheme_oauth2_invalid(
         SecuritySchemeObject(
             type=type_,
             description=description,
-            scheme=scheme,
+            scheme=scheme,  # type: ignore
             bearerFormat=bearer_format,
         )
 
