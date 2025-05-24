@@ -7,7 +7,7 @@ from typing import ClassVar, Generator, List, Optional, Type
 
 from pydantic import BaseModel
 
-from amati import Reference
+from amati import References
 
 type LogType = Exception | Warning
 
@@ -15,7 +15,7 @@ type LogType = Exception | Warning
 class Log(BaseModel):
     message: str
     type: Type[LogType]
-    reference: Optional[Reference] = None
+    reference: Optional[References] = None
 
 
 class LogMixin(object):
