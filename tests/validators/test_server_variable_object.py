@@ -16,7 +16,7 @@ from tests import helpers
 def valid_server_variable(draw: st.DrawFn) -> dict[str, list[str] | str]:
 
     enum: list[str] = draw(st.lists(helpers.text_excluding_empty_string(), min_size=1))
-    default: str = str(st.sampled_from(enum))
+    default: str = draw(st.sampled_from(enum))
     return {"enum": enum, "default": default, "description": draw(st.text())}
 
 

@@ -33,10 +33,8 @@ INVALID_HTTP_AUTHENTICATION_SCHEMES: st.SearchStrategy[str] = st.text().filter(
 )
 
 
-# @pytest.mark.skip(reason="Will fix later")
 @given(INVALID_SECURITY_SCHEME_TYPES)
 def test_security_scheme_invalid(scheme_type: str):
-    # LogMixin.logs = []
 
     with LogMixin.context():
         SecuritySchemeObject(type=scheme_type)
