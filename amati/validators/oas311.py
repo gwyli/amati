@@ -12,7 +12,7 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 
 """
 
-from typing import Any, ClassVar, Optional
+from typing import Any, Optional
 from typing_extensions import Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
@@ -21,7 +21,7 @@ from jsonschema.validators import validator_for  # type: ignore
 from pydantic import ConfigDict, Field, RootModel, field_validator, model_validator
 from pydantic.json_schema import JsonSchemaValue
 
-from amati import AmatiValueError
+from amati import AmatiValueError, Reference
 from amati.fields import URI, HTTPAuthenticationScheme, MediaType
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
@@ -31,7 +31,6 @@ from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
 from amati.fields.uri import URIType, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
-from amati.validators.reference_object import Reference, ReferenceModel
 
 TITLE = "OpenAPI Specification v3.1.1"
 
@@ -49,7 +48,7 @@ class ContactObject(GenericObject):
     name: Optional[str] = None
     url: Optional[URI] = None
     email: Optional[Email] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#contact-object",
         section="Contact Object",
@@ -72,7 +71,7 @@ class LicenceObject(GenericObject):
     # What difference does Optional make here?
     identifier: Optional[SPDXIdentifier] = None
     url: Optional[URI] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
         section="License Object",
@@ -158,7 +157,7 @@ class InfoObject(GenericObject):
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#info-object",
         section="Info Object",
@@ -174,7 +173,7 @@ class ServerVariableObject(GenericObject):
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
     description: Optional[str | CommonMark] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
         section="Server Variable Object",
@@ -212,7 +211,7 @@ class ServerObject(GenericObject):
     url: URIWithVariables | URI
     description: Optional[str | CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
         section="Server Object",
@@ -227,7 +226,7 @@ class ExternalDocumentationObject(GenericObject):
 
     description: Optional[str | CommonMark] = None
     url: URI
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
         section="External Documentation Object",
@@ -243,7 +242,7 @@ class RequestBodyObject(GenericObject):
     description: Optional[CommonMark | str] = None
     content: dict[str, "MediaTypeObject"]
     required: Optional[bool] = False
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#request-body-object",
         section="Request Body Object",
@@ -261,7 +260,7 @@ class MediaTypeObject(GenericObject):
     example: Optional[Any] = None
     examples: "Optional[dict[str, ExampleObject | ReferenceObject]]" = None
     encoding: "Optional[EncodingObject]" = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#media-type-object",
         section="Tag Object",
@@ -276,7 +275,7 @@ class EncodingObject(GenericObject):
 
     contentType: Optional[str] = None
     headers: "Optional[dict[str, HeaderObject | ReferenceObject]]" = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#encoding object-object",
         section="Encoding Object",
@@ -307,7 +306,7 @@ class TagObject(GenericObject):
     name: str
     description: Optional[str | CommonMark] = None
     externalDocs: Optional[ExternalDocumentationObject] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
         section="Tag Object",
@@ -329,7 +328,7 @@ class ReferenceObject(GenericObject):
     ref: URI = Field(alias="$ref")
     summary: Optional[str]
     description: Optional[CommonMark]
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#reference-object",
         section="Reference Object",
@@ -346,7 +345,7 @@ class ExampleObject(GenericObject):
     description: Optional[str | CommonMark] = None
     value: Optional[JsonSchemaValue] = None
     externalValue: Optional[URI] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
         section="Example Object",
@@ -384,7 +383,7 @@ class LinkObject(GenericObject):
     requestBody: Optional[Any | RuntimeExpression] = None
     description: Optional[str | CommonMark] = None
     server: Optional[ServerObject] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
         section="Link Object",
@@ -433,7 +432,7 @@ class HeaderObject(GenericObject):
     # Content fields
     content: Optional[dict[str, MediaTypeObject]] = None
 
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
         section="Link Object",
@@ -488,7 +487,7 @@ class SchemaObject(GenericObject):
         default=None, alias="$ref"
     )  # Reference to another schema
 
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#schema-object",
         section="Link Object",
@@ -548,7 +547,7 @@ class OAuthFlowObject(GenericObject):
     refreshUrl: Optional[URI] = None
     scopes: dict[str, str] = {}
     type: Optional[str] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
         section="OAuth Flow Object",
@@ -611,7 +610,7 @@ class OAuthFlowsObject(GenericObject):
     password: Optional[OAuthFlowObject] = None
     clientCredentials: Optional[OAuthFlowObject] = None
     authorizationCode: Optional[OAuthFlowObject] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
         section="OAuth Flows Object",
@@ -657,7 +656,7 @@ class SecuritySchemeObject(GenericObject):
     flows: Optional[OAuthFlowsObject] = None
     openIdConnectUrl: Optional[URI] = None
 
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0",
         section="Security Scheme Object",
@@ -731,7 +730,7 @@ class DiscriminatorObject(GenericObject):
     # properly.
     mapping: Optional[dict[str, str]] = None
     propertyName: str
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#discriminator-object",
         section="Security Scheme Object",
@@ -749,7 +748,7 @@ class XMLObject(GenericObject):
     prefix: Optional[str] = None
     attribute: Optional[bool] = Field(default=False)
     wrapped: Optional[bool] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
         section="Security Scheme Object",
@@ -779,7 +778,7 @@ class SecurityRequirementObject(RootModel[list[_Requirement] | _Requirement]):
     # FIXME: The name must be a valid Security Scheme - need to use post-processing
     # FIXME If the security scheme is of type "oauth2" or "openIdConnect", then the
     # value must be a list
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#security-requirement-object",
         section="Security Requirement Object",
@@ -795,7 +794,7 @@ class OpenAPIObject(GenericObject):
     openapi: OpenAPI
     info: InfoObject
     servers: list[ServerObject] = []
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
         section="OpenAPI Object",

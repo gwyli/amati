@@ -57,3 +57,4 @@ relative_files=true
 
 [tool.pyright]
 reportMissingTypeStubs=false
+typeCheckingMode="strict"

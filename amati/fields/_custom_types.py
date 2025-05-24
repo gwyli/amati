@@ -1,12 +1,12 @@
 """Types for use across all fields"""
 
-from typing import Any
+from typing import Any, Self
 
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
 
 
-class _Str(str):
+class Str(str):
     """
     A custom string subclass that can be used with Pydantic.
 
@@ -24,7 +24,7 @@ class _Str(str):
 
     @classmethod
     def __get_pydantic_core_schema__(
-        cls, _source_type: Any, _handler: GetCoreSchemaHandler
+        cls: type[Self], _source_type: Any, _handler: GetCoreSchemaHandler
     ) -> core_schema.CoreSchema:
         """
         Define how Pydantic should handle this custom type.
@@ -52,7 +52,7 @@ class _Str(str):
         )
 
     @classmethod
-    def validate(cls, value: str) -> "_Str":
+    def validate(cls: type[Self], value: str) -> Self:
         """
         Perform custom validation on the string value.
 

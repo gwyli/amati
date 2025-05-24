@@ -19,8 +19,8 @@ from typing import (
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
+from amati import Reference
 from amati.logging import Log, LogMixin
-from amati.validators.reference_object import Reference
 
 
 class GenericObject(LogMixin, BaseModel):

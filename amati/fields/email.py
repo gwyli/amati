@@ -6,7 +6,7 @@ from abnf import ParseError
 from abnf.grammars import rfc5322
 
 from amati import AmatiValueError, Reference
-from amati.fields import _Str
+from amati.fields import Str as _Str
 
 reference = Reference(
     title="Internet Message Format",

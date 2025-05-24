@@ -12,7 +12,7 @@ import re
 from typing import Optional, Self
 
 from amati import AmatiValueError, Reference
-from amati.fields import _Str
+from amati.fields import Str as _Str
 
 reference = Reference(
     title="Hypertext Transfer Protocol (HTTP) Status Code Registry",
@@ -70,7 +70,9 @@ class HTTPStatusCode(_Str):
                 status code range.
         """
 
-        if not isinstance(value, str):
+        # Type-hinting that something should be a string is not enough
+        # double check that a string will be returned in the models.
+        if not isinstance(value, str):  # type: ignore
 
             type_ = type(value).__name__
             raise AmatiValueError(
