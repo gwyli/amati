@@ -10,11 +10,11 @@ class Str(str):
     """
     A custom string subclass that can be used with Pydantic.
 
-    _Str extends the built-in string type and implements the necessary methods for
+    Str extends the built-in string type and implements the necessary methods for
     Pydantic validation and schema generation. It allows for custom string validation
     while maintaining compatibility with Pydantic's type system.
 
-    The primary goal behind _Str is to allow logic in models to access metadata about
+    The primary goal behind Str is to allow logic in models to access metadata about
     the string, created during class instantiation, but to still treat the string as a
     string for the purposes of JSON/YAML parsing and serialisation.
 
@@ -65,7 +65,7 @@ class Str(str):
             value (str): The string value to validate.
 
         Returns:
-            _Str: An instance of the _Str class containing the validated value.
+            Str: An instance of the _Str class containing the validated value.
         """
 
         return cls(value)

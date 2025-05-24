@@ -29,7 +29,7 @@ def test_example_object(summary: str, description: str, external_value: AnyUrl):
             summary=summary,
             description=description,
             value=value,
-            externalValue=external_value,
+            externalValue=external_value,  # type: ignore
         )
         assert LogMixin.logs[0].type == ValueError
 
@@ -37,7 +37,7 @@ def test_example_object(summary: str, description: str, external_value: AnyUrl):
 @given(urls(), st.text())
 def test_link_object(operation_ref: AnyUrl, operation_id: str):
     with LogMixin.context():
-        LinkObject(operationRef=operation_ref, operationId=operation_id)
+        LinkObject(operationRef=operation_ref, operationId=operation_id)  # type: ignore
         assert LogMixin.logs[0].type == ValueError
 
 
