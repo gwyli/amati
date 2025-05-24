@@ -11,7 +11,7 @@ import rfc3987
 from abnf import ParseError
 
 from amati import AmatiValueError, Reference
-from amati.fields import _Str
+from amati.fields import Str as _Str
 from amati.grammars import rfc6901
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
@@ -137,7 +137,7 @@ class URI(_Str):
 
         # Parse as if the candidate were an IRI per RFC 3987.
         # Raises ValueError if invalid
-        result = rfc3987.parse(candidate)
+        result = rfc3987.parse(candidate)  # type: ignore
 
         for component, value in result.items():
             if not value:

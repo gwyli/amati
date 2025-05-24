@@ -6,11 +6,11 @@ from typing import Annotated
 
 from pydantic import AfterValidator, Field
 
+from amati import Reference
 from amati.grammars import oas
 from amati.logging import Log, LogMixin
-from amati.validators.reference_object import Reference, ReferenceModel
 
-runtime_expression_reference: Reference = ReferenceModel(
+runtime_expression_reference = Reference(
     title="OpenAPI Specification v3.1.1",
     section="Runtime Expressions",
     url="https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions",
@@ -32,7 +32,7 @@ RuntimeExpression = Annotated[
     AfterValidator(_validate_after_runtime_expression),
 ]
 
-reference: Reference = ReferenceModel(
+reference = Reference(
     title="OpenAPI Initiative Publications",
     url="https://spec.openapis.org/#openapi-specification",
     section="OpenAPI Specification ",

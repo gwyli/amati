@@ -7,7 +7,7 @@ from typing import ClassVar, Generator, List, Optional, Type
 
 from pydantic import BaseModel
 
-from amati.validators.reference_object import Reference
+from amati import Reference
 
 type LogType = Exception | Warning
 

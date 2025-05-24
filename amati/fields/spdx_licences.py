@@ -7,7 +7,7 @@ import json
 import pathlib
 
 from amati import AmatiValueError, Reference
-from amati.fields import _Str
+from amati.fields import Str as _Str
 from amati.fields.uri import URI
 
 reference = Reference(

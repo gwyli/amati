@@ -10,7 +10,7 @@ import json
 import pathlib
 
 from amati import AmatiValueError, Reference
-from amati.fields import _Str
+from amati.fields import Str as _Str
 
 reference = Reference(
     title="Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry (ISO9110)",
