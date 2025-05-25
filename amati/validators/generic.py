@@ -29,7 +29,7 @@ class GenericObject(LogMixin, BaseModel):
     to pydantic.BaseModel.
     """
 
-    _reference: ClassVar[Optional[Reference]] = PrivateAttr()
+    _reference: ClassVar[Reference] = PrivateAttr()
     _extra_field_pattern: Optional[Pattern[str]] = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
