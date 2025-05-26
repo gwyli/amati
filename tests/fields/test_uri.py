@@ -106,7 +106,8 @@ def test_json_pointer(value: str):
 @given(urls())
 def test_json_pointer_invalid(value: str):
 
-    if value.startswith("/"):
+    # Guard to prevent valid JSON pointer being tested
+    if value.startswith("/"):  # pragma: no cover
         return
 
     value_ = f"#{value}"
