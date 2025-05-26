@@ -36,7 +36,6 @@ class URIType(str, Enum):
     RELATIVE = "relative"
     NON_RELATIVE = "non-relative"
     JSON_POINTER = "JSON pointer"
-    UNKNOWN = "unknown"
 
 
 class URI(_Str):
@@ -83,6 +82,7 @@ class URI(_Str):
             URIType: The classified type of the URI (ABSOLUTE, NON_RELATIVE, RELATIVE,
                      JSON_POINTER, or UNKNOWN).
         """
+
         if self.scheme:
             return URIType.ABSOLUTE
         if self.authority:
@@ -91,7 +91,13 @@ class URI(_Str):
             if str(self).startswith("#"):
                 return URIType.JSON_POINTER
             return URIType.RELATIVE
-        return URIType.UNKNOWN
+
+        # Should theoretically never be reached as if a URI does not have a scheme
+        # authority or path an AmatiValueError should be raised. However, without
+        # an additional return there is a code path in type() that doesn't return a
+        # value. It's better to deal with the potential error case than ignore the
+        # lack of a return value.
+        raise TypeError(f"{str(self)} does not have a URI type.")  # pragma: no cover
 
     def __init__(self, value: str):
         """
@@ -210,7 +216,7 @@ class URIWithVariables(URI):
         """
 
         if value is None:  # type: ignore
-            raise ValueError
+            raise AmatiValueError("None is not a valid URI; declare as Optional")
 
         # `string.format()` takes a dict of the key, value pairs to
         # replace to replace the keys inside braces. As we don't have the keys a dict

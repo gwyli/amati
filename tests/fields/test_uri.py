@@ -11,6 +11,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
 
+from amati import AmatiValueError
 from amati.fields.uri import URI, URIType, URIWithVariables
 from amati.grammars import rfc6901
 
@@ -57,9 +58,9 @@ def relative_uris(draw: st.DrawFn) -> str:
     candidate = draw(urls())
 
     parsed = urlparse(candidate)
-    # urlparse incorrectly parses the URI http://a.com// with
-    # a path of //, which is indicates that the succeeding
-    # item is the authority in RFC 2986
+    # urlparse parses the URI http://a.com// with a path of //, which indicates that
+    # the succeeding item is the authority in RFC 2986 when actual authority/netloc
+    # is removed.
     path = f"/{parsed.path.lstrip("/")}"
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
@@ -102,6 +103,17 @@ def test_json_pointer(value: str):
     assert result.type == URIType.JSON_POINTER
 
 
+@given(urls())
+def test_json_pointer_invalid(value: str):
+
+    if value.startswith("/"):
+        return
+
+    value_ = f"#{value}"
+    with pytest.raises(AmatiValueError):
+        URI(value_)
+
+
 @given(st.one_of(urls(), st.sampled_from(NON_RELATIVE_URIS)))
 def test_uri_non_relative(value: str):
 
@@ -114,8 +126,10 @@ def test_uri_non_relative(value: str):
 
 
 def test_uri_none():
-    with pytest.raises(ValueError):
+    with pytest.raises(AmatiValueError):
         URI(None)  # type: ignore
+
+    with pytest.raises(AmatiValueError):
         URIWithVariables(None)  # type: ignore
 
 
@@ -135,23 +149,16 @@ def test_uri_with_variables_valid():
 def test_uri_with_variables_invalid():
 
     with pytest.raises(ValueError):
-        result = URIWithVariables(
-            r"https://{{subdomain}.example.com/api/users/{user_id}"
-        )
-        assert result.type == URIType.UNKNOWN
+        URIWithVariables(r"https://{{subdomain}.example.com/api/users/{user_id}")
 
     with pytest.raises(ValueError):
-        result = URIWithVariables(r"https://{}.example.com")
-        assert result.type == URIType.UNKNOWN
+        URIWithVariables(r"https://{}.example.com")
 
     with pytest.raises(ValueError):
-        result = URIWithVariables(r"/api/users/{user_id}}")
-        assert result.type == URIType.UNKNOWN
+        URIWithVariables(r"/api/users/{user_id}}")
 
     with pytest.raises(ValueError):
-        result = URIWithVariables(r"/api/users/{user_id}{abc/")
-        assert result.type == URIType.UNKNOWN
+        URIWithVariables(r"/api/users/{user_id}{abc/")
 
     with pytest.raises(ValueError):
-        result = URIWithVariables(r"/api/users/{user_{id}}/")
-        assert result.type == URIType.UNKNOWN
+        URIWithVariables(r"/api/users/{user_{id}}/")
