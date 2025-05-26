@@ -15,17 +15,22 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
-from pydantic import Field, model_validator
+from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
+from jsonschema.protocols import Validator as JSONSchemaValidator
+from jsonschema.validators import validator_for  # type: ignore
+from pydantic import ConfigDict, Field, RootModel, field_validator, model_validator
 from pydantic.json_schema import JsonSchemaValue
 
+from amati import AmatiValueError, Reference
+from amati.fields import URI, HTTPAuthenticationScheme, MediaType
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
+from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.uri import URI, URIWithVariables
+from amati.fields.uri import URIType, URIWithVariables
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
-from amati.validators.reference_object import Reference, ReferenceModel
 
 TITLE = "OpenAPI Specification v3.1.1"
 
@@ -43,7 +48,7 @@ class ContactObject(GenericObject):
     name: Optional[str] = None
     url: Optional[URI] = None
     email: Optional[Email] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#contact-object",
         section="Contact Object",
@@ -56,13 +61,17 @@ class LicenceObject(GenericObject):
     A model representing the OpenAPI Specification licence object §4.8.4
 
     OAS uses the SPDX licence list.
+
+    # SPECFIX: The URI is mutually exclusive of the identifier. I don't see
+    the purpose of this; if the identifier is a SPDX Identifier where's the
+    harm in also including the URI
     """
 
     name: str = Field(min_length=1)
     # What difference does Optional make here?
-    identifier: SPDXIdentifier = None
-    url: SPDXURL = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    identifier: Optional[SPDXIdentifier] = None
+    url: Optional[URI] = None
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
         section="License Object",
@@ -79,22 +88,58 @@ class LicenceObject(GenericObject):
         Returns:
             The validated licence object
         """
-        if self.url is None:
-            return self
 
-        # Checked in the type AfterValidator, not necessary to raise a warning here.
-        # only done to avoid an unnecessary KeyError
-        if self.identifier not in VALID_LICENCES:
-            return self
+        # There are 4 cases
+        # 1. No URL or identifier - invalid
+        # 2. Identifier only - covered in type checking
+        # 3. URI only - should warn if not SPDX
+        # 4. Both Identifier and URI, technically invalid, but should check if
+        # consistent
 
-        if str(self.url) not in VALID_LICENCES[self.identifier]:
+        # Case 1
+        if not self.url and not self.identifier:
             LogMixin.log(
                 Log(
-                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
+                    message="A Licence object requires a URL or an Identifier.",  # pylint: disable=line-too-long
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+            return self
+
+        # Case 3
+        if self.url:
+            try:
+                SPDXURL(self.url)
+            except AmatiValueError:
+                LogMixin.log(
+                    Log(
+                        message=f"{self.url} is not a valid SPDX URL",
+                        type=Warning,
+                        reference=self._reference,
+                    )
+                )
+
+        # Case 4
+
+        if self.url and self.identifier:
+            LogMixin.log(
+                Log(
+                    message="The Identifier and URL are mutually exclusive",
                     type=Warning,
                     reference=self._reference,
                 )
             )
+
+            if str(self.url) not in VALID_LICENCES[self.identifier]:
+                LogMixin.log(
+                    Log(
+                        message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
+                        type=Warning,
+                        reference=self._reference,
+                    )
+                )
 
         return self
 
@@ -112,7 +157,7 @@ class InfoObject(GenericObject):
     contact: Optional[ContactObject] = None
     license: Optional[LicenceObject] = None
     version: str
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#info-object",
         section="Info Object",
@@ -128,7 +173,7 @@ class ServerVariableObject(GenericObject):
     enum: Optional[list[str]] = Field(None, min_length=1)
     default: str = Field(min_length=1)
     description: Optional[str | CommonMark] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
         section="Server Variable Object",
@@ -166,7 +211,7 @@ class ServerObject(GenericObject):
     url: URIWithVariables | URI
     description: Optional[str | CommonMark] = None
     variables: Optional[dict[str, ServerVariableObject]] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
         section="Server Object",
@@ -181,11 +226,75 @@ class ExternalDocumentationObject(GenericObject):
 
     description: Optional[str | CommonMark] = None
     url: URI
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
         section="External Documentation Object",
     )
+
+
+@specification_extensions("x-")
+class RequestBodyObject(GenericObject):
+    """
+    Validates the OpenAPI Specification request body object - §4.8.13
+    """
+
+    description: Optional[CommonMark | str] = None
+    content: dict[str, "MediaTypeObject"]
+    required: Optional[bool] = False
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#request-body-object",
+        section="Request Body Object",
+    )
+
+
+@specification_extensions("x-")
+class MediaTypeObject(GenericObject):
+    """
+    Validates the OpenAPI Specification media type object - §4.8.14
+    """
+
+    schema_: "Optional[SchemaObject]" = Field(alias="schema", default=None)
+    # FIXME: Define example
+    example: Optional[Any] = None
+    examples: "Optional[dict[str, ExampleObject | ReferenceObject]]" = None
+    encoding: "Optional[EncodingObject]" = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#media-type-object",
+        section="Tag Object",
+    )
+
+
+@specification_extensions("x-")
+class EncodingObject(GenericObject):
+    """
+    Validates the OpenAPI Specification media type object - §4.8.15
+    """
+
+    contentType: Optional[str] = None
+    headers: "Optional[dict[str, HeaderObject | ReferenceObject]]" = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#encoding object-object",
+        section="Encoding Object",
+    )
+
+    @field_validator("contentType", mode="after")
+    @classmethod
+    def check_content_type(cls, value: str) -> str:
+        """
+        contentType is a comma-separated list of media types.
+        Check that they are all valid
+
+        raises: ValueError
+        """
+
+        for media_type in value.split(","):
+            MediaType(media_type.strip())
+
+        return value
 
 
 @specification_extensions("x-")
@@ -197,10 +306,32 @@ class TagObject(GenericObject):
     name: str
     description: Optional[str | CommonMark] = None
     externalDocs: Optional[ExternalDocumentationObject] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
         section="Tag Object",
+    )
+
+
+class ReferenceObject(GenericObject):
+    """
+    Validates the OpenAPI Specification reference object - §4.8.23
+
+    Note, "URIs" can be prefixed with a hash; this is because if the
+    representation of the referenced document is JSON or YAML, then
+    the fragment identifier SHOULD be interpreted as a JSON-Pointer
+    as per RFC6901.
+    """
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    ref: URI = Field(alias="$ref")
+    summary: Optional[str]
+    description: Optional[CommonMark]
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#reference-object",
+        section="Reference Object",
     )
 
 
@@ -214,7 +345,7 @@ class ExampleObject(GenericObject):
     description: Optional[str | CommonMark] = None
     value: Optional[JsonSchemaValue] = None
     externalValue: Optional[URI] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
         section="Example Object",
@@ -240,9 +371,6 @@ class ExampleObject(GenericObject):
         return self
 
 
-ExampleObject.model_rebuild()
-
-
 @specification_extensions("x-")
 class LinkObject(GenericObject):
     """
@@ -255,7 +383,7 @@ class LinkObject(GenericObject):
     requestBody: Optional[Any | RuntimeExpression] = None
     description: Optional[str | CommonMark] = None
     server: Optional[ServerObject] = None
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
         section="Link Object",
@@ -282,6 +410,382 @@ class LinkObject(GenericObject):
 
 
 @specification_extensions("x-")
+class HeaderObject(GenericObject):
+    """
+    Validates the OpenAPI Specification link object - §4.8.20
+    """
+
+    # Common schema/content fields
+    description: Optional[str | CommonMark] = None
+    required: Optional[bool] = Field(default=False)
+    deprecated: Optional[bool] = Field(default=False)
+
+    # Schema fields
+    style: Optional[str] = Field(default="simple")
+    explode: Optional[bool] = Field(default=False)
+    schema_: "Optional[SchemaObject | ReferenceObject]" = Field(
+        alias="schema", default=None
+    )
+    example: Optional[Any] = None
+    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
+
+    # Content fields
+    content: Optional[dict[str, MediaTypeObject]] = None
+
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
+        section="Link Object",
+    )
+
+    @model_validator(mode="after")
+    def _validate_afer(self: Self) -> Self:
+        """
+        Validates that a content and schema header are not
+        both provided in a single header object.
+        """
+
+        if self.schema_ is not None and self.content is not None:
+            LogMixin.log(
+                Log(
+                    message="Only one of content and schema can be provided",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+class SchemaObject(GenericObject):
+    """
+    Schema Object as per OAS 3.1.1 specification (section 4.8.24)
+
+    This model defines only the OpenAPI-specific fields explicitly.
+    Standard JSON Schema fields are allowed via the 'extra' config
+    and validated through jsonschema.
+    """
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="allow",  # Allow all standard JSON Schema fields
+    )
+
+    # OpenAPI-specific fields not in standard JSON Schema
+    nullable: Optional[bool] = None  # OAS 3.0 style nullable flag
+    discriminator: Optional["DiscriminatorObject"] = None  # Polymorphism support
+    readOnly: Optional[bool] = None  # Declares property as read-only for requests
+    writeOnly: Optional[bool] = None  # Declares property as write-only for responses
+    xml: Optional["XMLObject"] = None  # XML metadata
+    externalDocs: Optional[ExternalDocumentationObject] = None  # External documentation
+    example: Optional[Any] = None  # Example of schema
+    examples: Optional[list[Any]] = None  # Examples of schema (OAS 3.1)
+    deprecated: Optional[bool] = None  # Specifies schema is deprecated
+
+    # JSON Schema fields that need special handling in OAS context
+    ref: Optional[str] = Field(
+        default=None, alias="$ref"
+    )  # Reference to another schema
+
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        section="Link Object",
+    )
+
+    @model_validator(mode="after")
+    def validate_schema(self):
+        """
+        Use jsonschema to validate the model as a valid JSON Schema
+        """
+        schema_dict = self.model_dump(exclude_none=True, by_alias=True)
+
+        # Handle OAS 3.1 specific validations
+
+        # 1. Convert nullable to type array with null if needed
+        if schema_dict.get("nullable") is True and "type" in schema_dict:
+            type_val = schema_dict["type"]
+            if isinstance(type_val, str) and type_val != "null":
+                schema_dict["type"] = [type_val, "null"]
+            elif isinstance(type_val, list) and "null" not in type_val:
+                schema_dict["type"] = type_val + ["null"]
+
+        # 2. Validate the schema structure using jsonschema's meta-schema
+        # Get the right validator based on the declared $schema or default
+        # to Draft 2020-12
+        schema_version = schema_dict.get(
+            "$schema", "https://json-schema.org/draft/2020-12/schema"
+        )
+        try:
+            validator_cls: JSONSchemaValidator = validator_for(  # type: ignore
+                {"$schema": schema_version}
+            )
+            meta_schema: JSON = validator_cls.META_SCHEMA  # type: ignore
+
+            # This will validate the structure conforms to JSON Schema
+            validator_cls(meta_schema).validate(schema_dict)  # type: ignore
+        except JSONVSchemeValidationError as e:
+            LogMixin.log(
+                Log(
+                    message=f"Invalid JSON Schema: {e.message}",
+                    type=ValueError,
+                    reference=self._reference,
+                )
+            )
+
+        return self
+
+
+@specification_extensions("x-")
+class OAuthFlowObject(GenericObject):
+    """
+    Validates the OpenAPI OAuth Flow object - §4.8.29
+    """
+
+    authorizationUrl: Optional[URI] = None
+    tokenUrl: Optional[URI] = None
+    refreshUrl: Optional[URI] = None
+    scopes: dict[str, str] = {}
+    type: Optional[str] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
+        section="OAuth Flow Object",
+    )
+
+    @model_validator(mode="after")
+    def _validate_after(self: Self) -> Self:
+        """
+        Validates that the correct type of OAuth2 flow has the correct fields.
+        """
+        if self.type == "implicit":
+            if not self.authorizationUrl:
+                message = f"{self.type} requires an authorizationUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if self.tokenUrl:
+                message = f"{self.type} must not have a tokenUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+        if self.type == "authorizationCode":
+            if not self.authorizationUrl:
+                message = f"{self.type} requires an authorizationUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if not self.tokenUrl:
+                message = f"{self.type} requires a tokenUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type in ("clientCredentials", "password"):
+
+            if self.authorizationUrl:
+                message = f"{self.type} must not have an authorizationUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if not self.tokenUrl:
+                message = f"{self.type} requires a tokenUrl."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        return self
+
+
+@specification_extensions("-x")
+class OAuthFlowsObject(GenericObject):
+    """
+    Validates the OpenAPI OAuth Flows object - §4.8.28
+
+    SPECFIX: Not all of these should be optional as an OAuth2 workflow
+    without any credentials will not do anything.
+    """
+
+    implicit: Optional[OAuthFlowObject] = None
+    password: Optional[OAuthFlowObject] = None
+    clientCredentials: Optional[OAuthFlowObject] = None
+    authorizationCode: Optional[OAuthFlowObject] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
+        section="OAuth Flows Object",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _push_down_type(cls, data: Any) -> Any:
+        """
+        Adds the type of OAuth2 flow, e.g. implicit, password to the child
+        OAuthFlowObject so that additional validation can be done on this object.
+        """
+
+        for k in data.keys():
+            data[k].type = k
+
+        return data
+
+
+SECURITY_SCHEME_TYPES: set[str] = {
+    "apiKey",
+    "http",
+    "mutualTLS",
+    "oauth2",
+    "openIdConnect",
+}
+
+
+class SecuritySchemeObject(GenericObject):
+    """
+    Validates the OpenAPI Security Scheme object - §4.8.27
+    """
+
+    # Ensure that passing `in_` to the object works.
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: str
+    description: Optional[str | CommonMark] = None
+    name: Optional[str] = None
+    in_: Optional[str] = Field(default=None, alias="in")
+    scheme: Optional[HTTPAuthenticationScheme] = None
+    bearerFormat: Optional[str] = None
+    flows: Optional[OAuthFlowsObject] = None
+    openIdConnectUrl: Optional[URI] = None
+
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0",
+        section="Security Scheme Object",
+    )
+
+    @model_validator(mode="after")
+    def _validate_after(self: Self) -> Self:
+        """
+        Validates the conditional logic of the security scheme
+        """
+
+        # Security schemes must be one of the valid schemes
+        if self.type not in SECURITY_SCHEME_TYPES:
+            message = f"{self.type} is not a valid Security Scheme type."
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=self._reference)
+            )
+
+        if self.type == "apiKey":
+            if self.name is None or self.name == "":
+                message = "The name of the header, query or cookie parameter to be used is required if the security type is apiKey"  # pylint: disable=line-too-long
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+            if self.in_ not in ("query", "header", "cookie"):
+                message = f"The location, {self.in_} of the API key is not valid."
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type == "http":
+            if self.scheme is None or self.scheme == "":
+                message = "The scheme is required if the security type is http"
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type == "oauth2":
+            if self.flows is None:
+                message = (
+                    "The OAuth Flows Object is required if the security type is oauth2"
+                )
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.type == "openIdConnect":
+            if self.openIdConnectUrl is None or self.openIdConnectUrl == "":
+                message = "The openIdConnectUrl is required if the security type is openIdConnect"  # pylint: disable=line-too-long
+                LogMixin.log(
+                    Log(message=message, type=ValueError, reference=self._reference)
+                )
+
+        if self.flows and self.type != "oauth2":
+            message = "The flows object should only be used with OAuth2"  # pylint: disable=line-too-long
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=self._reference)
+            )
+
+        return self
+
+
+@specification_extensions("x-")
+class DiscriminatorObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.8.25
+    """
+
+    # FIXME: Need post processing to determine whether the property actually exists
+    # FIXME: The component and schema objects need to check that this is being used
+    # properly.
+    mapping: Optional[dict[str, str]] = None
+    propertyName: str
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#discriminator-object",
+        section="Security Scheme Object",
+    )
+
+
+@specification_extensions("x-")
+class XMLObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.8.26
+    """
+
+    name: Optional[str] = None
+    namespace: Optional[URI] = None
+    prefix: Optional[str] = None
+    attribute: Optional[bool] = Field(default=False)
+    wrapped: Optional[bool] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
+        section="Security Scheme Object",
+    )
+
+    @field_validator("namespace", mode="after")
+    @classmethod
+    def _validate_namespace(cls, value: URI) -> URI:
+        if value.type == URIType.RELATIVE:
+            message = "XML namespace {value} cannot be a relative URI"
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=cls._reference)
+            )
+
+        return value
+
+
+type _Requirement = dict[str, list[str]]
+
+
+# NB This is implemented as a RootModel as there are no pre-defined field names.
+class SecurityRequirementObject(RootModel[list[_Requirement] | _Requirement]):
+    """
+    Validates the OpenAPI Specification security requirement object - §4.8.30:
+    """
+
+    # FIXME: The name must be a valid Security Scheme - need to use post-processing
+    # FIXME If the security scheme is of type "oauth2" or "openIdConnect", then the
+    # value must be a list
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/3.1.1.html#security-requirement-object",
+        section="Security Requirement Object",
+    )
+
+
+@specification_extensions("x-")
 class OpenAPIObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.1
@@ -290,7 +794,7 @@ class OpenAPIObject(GenericObject):
     openapi: OpenAPI
     info: InfoObject
     servers: list[ServerObject] = []
-    _reference: ClassVar[Reference] = ReferenceModel(
+    _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
         section="OpenAPI Object",

@@ -5,15 +5,12 @@ Exchange (SPDX) licence list.
 
 import json
 import pathlib
-from typing import Annotated, Optional
 
-from pydantic import AfterValidator
-
+from amati import AmatiValueError, Reference
+from amati.fields import Str as _Str
 from amati.fields.uri import URI
-from amati.logging import Log, LogMixin
-from amati.validators.reference_object import Reference, ReferenceModel
 
-reference: Reference = ReferenceModel(
+reference = Reference(
     title="SPDX License List",
     url="https://spdx.org/licenses/",
 )
@@ -31,57 +28,61 @@ VALID_LICENCES: dict[str, list[str]] = {
 VALID_URLS: list[str] = [url for urls in VALID_LICENCES.values() for url in urls]
 
 
-def _validate_after_spdx_identifier(value: Optional[str]) -> Optional[str]:
+class SPDXIdentifier(_Str):
     """
-    Validate that the licence identifier is a valid SPDX licence.
+    A class representing a valid SPDX license identifier.
 
-    Args:
-        v: The licence identifier to validate
+    This class validates that a string value is a registered SPDX license identifier
+    according to the official SPDX license list. It inherits from _Str to maintain
+    compatibility with string operations while adding SPDX-specific validation.
 
-    Returns:
-        The validated licence identifier or None if not provided
+    SPDX identifiers are standardized short-form identifiers for open source licenses,
+    such as "MIT", "Apache-2.0", or "GPL-3.0-only".
 
-    Raises:
-        ValueError: If the identifier is not a valid SPDX licence
+    Attributes:
+        Inherits all attributes from _Str
+
+    Example:
+        >>> license_id = SPDXIdentifier("MIT")
+        >>> str(license_id)
+        'MIT'
+        >>> SPDXIdentifier("InvalidLicense")  # Raises AmatiValueError
     """
-    if value is None:
-        return None
 
-    if value not in VALID_LICENCES:
-        message = f"{value} is not a valid SPDX licence identifier."
-        LogMixin.log(Log(message=message, type=Warning, reference=reference))
+    def __init__(self, value: str):
 
-    return value
-
-
-SPDXIdentifier = Annotated[
-    Optional[str], AfterValidator(_validate_after_spdx_identifier)
-]
+        if value not in VALID_LICENCES:
+            raise AmatiValueError(
+                f"{value} is not a valid SPDX licence identifier", reference=reference
+            )
 
 
-def _validate_after_spdx_url(value: Optional[URI | str]) -> Optional[URI]:
+class SPDXURL(URI):  # pylint: disable=invalid-name
     """
-    Validate that the licence URL exists in the list of known SPDX licence URLs.
-    Not that the URL is associated with the specific identifier.
+    A class representing a valid SPDX license URL.
 
-    Args:
-        v: The URL to validate
+    This class validates that a URI is associated with an SPDX license in the official
+    SPDX license list. It inherits from URI to maintain compatibility with URI
+    validation and operations while adding SPDX-specific validation.
 
-    Returns:
-        The validated URL or None if not provided
+    SPDX license URLs are the official reference URLs for licenses in the SPDX registry,
+    typically pointing to the canonical text of the license.
 
-    Warns:
-        InconsistencyWarning: If the URL is not associated with any known licence.
+    Attributes:
+        Inherits all attributes from URI
+
+    Example:
+        >>> license_url = SPDXURL("https://www.apache.org/licenses/LICENSE-2.0")
+        >>> license_url.scheme
+        'https'
+        >>> SPDXURL("https://example.com")  # Raises AmatiValueError
     """
-    if value is None:
-        return None
-    if str(value) in VALID_URLS:
-        return value
 
-    message = f"{value} is not associated with any identifier."
-    LogMixin.log(Log(message=message, type=Warning, reference=reference))
+    def __init__(self, value: str):
 
-    return value
+        super().__init__(value)
 
-
-SPDXURL = Annotated[Optional[URI | str], AfterValidator(_validate_after_spdx_url)]
+        if value not in VALID_URLS:
+            raise AmatiValueError(
+                f"{value} is not associated with any identifier.", reference=reference
+            )

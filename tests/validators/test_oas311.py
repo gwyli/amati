@@ -29,7 +29,7 @@ def test_example_object(summary: str, description: str, external_value: AnyUrl):
             summary=summary,
             description=description,
             value=value,
-            externalValue=external_value,
+            externalValue=external_value,  # type: ignore
         )
         assert LogMixin.logs[0].type == ValueError
 
@@ -37,22 +37,27 @@ def test_example_object(summary: str, description: str, external_value: AnyUrl):
 @given(urls(), st.text())
 def test_link_object(operation_ref: AnyUrl, operation_id: str):
     with LogMixin.context():
-        LinkObject(operationRef=operation_ref, operationId=operation_id)
+        LinkObject(operationRef=operation_ref, operationId=operation_id)  # type: ignore
         assert LogMixin.logs[0].type == ValueError
 
 
 @given(st.text(), urls(), st.emails())
 @settings(deadline=1000)
 def test_contact_object(name: str, url: str, email: str):
-    ContactObject(name=name, url=url, email=email)  # type: ignore
+    with LogMixin.context():
+        ContactObject(name=name, url=url, email=email)  # type: ignore
+        assert not LogMixin.logs
 
 
 def test_valid_openapi_object():
     with open("tests/data/good_spec.yaml", "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    model = OpenAPIObject(**data)
-    assert json.loads(model.model_dump_json(exclude_unset=True)) == data
+    with LogMixin.context():
+        model = OpenAPIObject(**data)
+        assert not LogMixin.logs
+
+        assert json.loads(model.model_dump_json(exclude_unset=True)) == data
 
 
 def test_invalid_openapi_object():

@@ -2,52 +2,51 @@
 Tests amati/fields/http_status_codes.py
 """
 
+from typing import Any
+
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
-from pydantic import ValidationError
 
-from amati.fields.http_status_codes import ASSIGNED_HTTP_STATUS_CODES, HTTPStatusCode
-from amati.logging import LogMixin
-from amati.validators.generic import GenericObject
+from amati import AmatiValueError
+from amati.fields.http_status_codes import HTTP_STATUS_CODES, HTTPStatusCode
 from tests import helpers
 
-
-class Model(GenericObject):
-    value: HTTPStatusCode
-
-
-UNASSIGNED_HTTP_STATUS_CODES = set(range(100, 599)) - ASSIGNED_HTTP_STATUS_CODES
+REGISTERED_HTTP_STATUS_CODES = list(HTTP_STATUS_CODES.keys())
+HTTP_STATUS_CODE_RANGES = ["1XX", "2XX", "3XX", "4XX", "5XX"]
 
 
-@given(sampled_from(list(ASSIGNED_HTTP_STATUS_CODES)))
-def test_assigned_status_code(status_code: int):
-    Model(value=status_code)
+@given(sampled_from(REGISTERED_HTTP_STATUS_CODES))
+def test_registered_status_code(value: str):
+    result = HTTPStatusCode(value)
 
+    if HTTP_STATUS_CODES[value] == "Unassigned":
+        assert result.is_assigned is False
 
-@given(sampled_from(list(UNASSIGNED_HTTP_STATUS_CODES)))
-def test_unassigned_status_codes(status_code: int):
-    with LogMixin.context():
-        Model(value=status_code)
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == Warning
-        assert LogMixin.logs[0].reference is not None
+    assert result.is_registered is True
 
 
 @given(integers(max_value=99))
-def test_invalid_status_code_below_range(status_code: int):
-    with pytest.raises(ValidationError):
-        Model(value=status_code)
+def test_invalid_status_code_below_range(value: str):
+    with pytest.raises(AmatiValueError):
+        HTTPStatusCode(value)
 
 
 @given(integers(min_value=600))
-def test_invalid_status_code_above_range(status_code: int):
-    with pytest.raises(ValidationError):
-        Model(value=status_code)
+def test_invalid_status_code_above_range(value: str):
+    with pytest.raises(AmatiValueError):
+        HTTPStatusCode(value)
+
+
+@given(sampled_from(HTTP_STATUS_CODE_RANGES))
+def test_status_code_range(value: str):
+    result = HTTPStatusCode(value)
+
+    assert result.is_registered is False
+    assert result.is_range is True
 
 
 @given(helpers.everything_except(int))
-def test_everything_except_integers(status_code: int):
-    with pytest.raises(ValidationError):
-        Model(value=status_code)
+def test_everything_except_integers(value: Any):
+    with pytest.raises(AmatiValueError):
+        HTTPStatusCode(value)  # type: ignore

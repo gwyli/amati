@@ -2,147 +2,164 @@
 Tests amati/fields/uri.py
 """
 
-from unittest import mock
+import re
 from urllib.parse import urlparse
 
 import pytest
-from abnf.parser import Matches, ParseError, Parser
+from abnf.parser import ParseError
 from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
-from pydantic import ValidationError
 
-from amati.fields.uri import URI, AbsoluteURI, RelativeURI, URIWithVariables
-from amati.validators.generic import GenericObject
+from amati import AmatiValueError
+from amati.fields.uri import URI, URIType, URIWithVariables
+from amati.grammars import rfc6901
 
+ABSOLUTE_URIS = [
+    "https://пример.рф/документы/файл.html",
+    "https://مثال.مصر/صفحة/رئيسية.html",
+    "https://例子.中国/文件/索引.html",
+    "https://דוגמה.ישראל/עמוד/ראשי.html",
+    "https://ตัวอย่าง.ไทย/หน้า/หลัก.html",
+]
 
-class URIModel(GenericObject):
-    uri: URI
+RELATIVE_URIS = [
+    "/київ/вулиця/площа-незалежності.html",
+    "/القاهرة/شارع/الأهرام.html",
+    "/東京/通り/渋谷.html",
+    "/αθήνα/οδός/ακρόπολη.html",
+    "/서울/거리/남대문.html",
+]
 
-
-class AbsoluteURIModel(GenericObject):
-    uri: AbsoluteURI
-
-
-class RelativeURIModel(GenericObject):
-    uri: RelativeURI
-
-
-class URIWithVariablesModel(GenericObject):
-    uri: URIWithVariables
-
-
-def get_uri_path_and_query(uri: str) -> str:
-    """Extract everything after the domain from a URI."""
-    parsed = urlparse(uri)
-    path = parsed.path or "/"
-    query = f"?{parsed.query}" if parsed.query else ""
-    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
-    return f"{path}{query}{fragment}"
-
-
-@given(urls())
-def test_uri_path_extraction(uri: str):
-    result = get_uri_path_and_query(uri)
-    assert result.startswith("/")
+NON_RELATIVE_URIS = [
+    "//пример.бг/софия/страница.html",
+    "//مثال.ایران/تهران/صفحه.html",
+    "//उदाहरण.भारत/दिल्ली/पृष्ठ.html",
+    "//օրինակ.հայ/երեվան/էջ.html",
+    "//উদাহরণ.বাংলা/ঢাকা/পৃষ্ঠা.html",
+]
 
 
-@given(urls())
-def test_absolute_uri_valid(uri: str):
-    AbsoluteURIModel(uri=uri)
+JSON_POINTERS = [
+    "#/київ/вулиця/площа-незалежності.html",
+    "#/القاهرة/شارع/الأهرام.html",
+    "#/東京/通り/渋谷.html",
+    "#/αθήνα/οδός/ακρόπολη.html",
+    "#/서울/거리/남대문.html",
+]
 
 
 @st.composite
 def relative_uris(draw: st.DrawFn) -> str:
-    uri = draw(urls())
-    return get_uri_path_and_query(uri)
+    """
+    Generate relative URIs
+    """
+
+    candidate = draw(urls())
+
+    parsed = urlparse(candidate)
+    # urlparse parses the URI http://a.com// with a path of //, which indicates that
+    # the succeeding item is the authority in RFC 2986 when actual authority/netloc
+    # is removed.
+    path = f"/{parsed.path.lstrip("/")}"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+
+    return f"{path}{query}{fragment}"
 
 
-@given(relative_uris())
-def test_relative_uri_valid(uri: str):
-    RelativeURIModel(uri=uri)
+@st.composite
+def json_pointers(draw: st.DrawFn) -> str:
+
+    while True:
+        pointer = draw(relative_uris())
+        try:
+            candidate = rfc6901.Rule("json-pointer").parse_all(pointer).value
+            break
+        except ParseError:
+            continue
+
+    return f"#{candidate}"
+
+
+@given(st.one_of(urls(), st.sampled_from(ABSOLUTE_URIS)))
+def test_absolute_uri_valid(value: str):
+    result = URI(value)
+    assert result == value
+    assert result.type == URIType.ABSOLUTE
+
+
+@given(st.one_of(relative_uris(), st.sampled_from(RELATIVE_URIS)))
+def test_relative_uri_valid(value: str):
+    result = URI(value)
+    assert result == value
+    assert result.type == URIType.RELATIVE
+
+
+@given(st.one_of(json_pointers(), st.sampled_from(JSON_POINTERS)))
+def test_json_pointer(value: str):
+    result = URI(value)
+    assert result == value
+    assert result.type == URIType.JSON_POINTER
 
 
 @given(urls())
-def test_uri_valid(uri: str):
-    URIModel(uri=uri)
-    get_uri_path_and_query(uri)
-    URIModel(uri=uri)
+def test_json_pointer_invalid(value: str):
+
+    # Guard to prevent valid JSON pointer being tested
+    if value.startswith("/"):  # pragma: no cover
+        return
+
+    value_ = f"#{value}"
+    with pytest.raises(AmatiValueError):
+        URI(value_)
 
 
-def test_auri_validation_uses_correct_rule():
-    with mock.patch("abnf.grammars.rfc3986.Rule") as mock_rule_class:
-        mock_rule = mock.Mock()
-        mock_rule.parse_all.return_value.value = "https://example.com"
-        mock_rule_class.return_value = mock_rule
+@given(st.one_of(urls(), st.sampled_from(NON_RELATIVE_URIS)))
+def test_uri_non_relative(value: str):
 
-        URIModel(uri="https://example.com")
+    # the urls() strategy doesn't necessarily provide absolute URIs
+    candidate: str = f"//{re.split("//", value)[1]}"
 
-        # Verify the correct rule name was used
-        mock_rule_class.assert_called_with("URI")
-
-    with mock.patch("abnf.grammars.rfc3986.Rule") as mock_rule_class:
-        mock_rule = mock.Mock()
-        mock_rule.parse_all.return_value.value = "/example"
-        mock_rule_class.return_value = mock_rule
-
-        RelativeURIModel(uri="/example")
-        mock_rule_class.assert_called_with("relative-ref")
-
-
-def test_rfc3986_parser_errors():
-
-    class MockParser(Parser):
-        def lparse(self, source: str, start: int) -> Matches: ...  # pragma: no cover
-
-    # Create a mock Rule class that raises an exception when parse_all is called
-    mock_rule = mock.Mock()
-    mock_rule.parse_all.side_effect = ParseError(parser=MockParser(), start=1)
-
-    # Mock the Rule constructor to return our mock rule
-    mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule)
-
-    with mock.patch("abnf.grammars.rfc3986.Rule", return_value=mock_rule):
-        # Test that validation fails when parser fails
-        with pytest.raises(ParseError):
-            URIModel(uri="https://example.com")
+    result = URI(candidate)
+    assert result == candidate
+    assert result.type == URIType.NON_RELATIVE
 
 
 def test_uri_none():
-    with pytest.raises(ValueError):
-        URIModel(uri=None)  # type: ignore
+    with pytest.raises(AmatiValueError):
+        URI(None)  # type: ignore
+
+    with pytest.raises(AmatiValueError):
+        URIWithVariables(None)  # type: ignore
 
 
 def test_uri_with_variables_valid():
 
     uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
-    model = URIWithVariablesModel(uri=uri)
-    assert model.uri == uri
+    result = URIWithVariables(uri)
+    assert result == uri
+    assert result.type == URIType.ABSOLUTE
 
     uri = r"/api/v1/users/{user_id}"
-    model = URIWithVariablesModel(uri=uri)
-    assert model.uri == uri
-
-    uri = r"/api/v1/users/{user_id}/"
-    model = URIWithVariablesModel(uri=uri)
-    assert model.uri == uri
+    result = URIWithVariables(uri)
+    assert result == uri
+    assert result.type == URIType.RELATIVE
 
 
 def test_uri_with_variables_invalid():
 
     with pytest.raises(ValueError):
-        URIWithVariablesModel(
-            uri=r"https://{{subdomain}.example.com/api/v1/users/{user_id}"
-        )
+        URIWithVariables(r"https://{{subdomain}.example.com/api/users/{user_id}")
 
-    with pytest.raises((ValueError, ValidationError)):
-        URIWithVariablesModel(uri=r"https://{}.example.com")
+    with pytest.raises(ValueError):
+        URIWithVariables(r"https://{}.example.com")
 
-    with pytest.raises((ValueError, ValidationError)):
-        URIWithVariablesModel(uri=r"/api/v1/users/{user_id}}")
+    with pytest.raises(ValueError):
+        URIWithVariables(r"/api/users/{user_id}}")
 
-    with pytest.raises((ValueError, ValidationError)):
-        URIWithVariablesModel(uri=r"/api/v1/users/{user_id}{abc/")
+    with pytest.raises(ValueError):
+        URIWithVariables(r"/api/users/{user_id}{abc/")
 
-    with pytest.raises((ValueError, ValidationError)):
-        URIWithVariablesModel(uri=r"/api/v1/users/{user_{id}}/")
+    with pytest.raises(ValueError):
+        URIWithVariables(r"/api/users/{user_{id}}/")

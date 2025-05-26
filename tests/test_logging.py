@@ -2,15 +2,15 @@
 Tests amati/logging.py
 """
 
+from amati import Reference, References
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
-from amati.validators.reference_object import Reference, ReferenceModel
 
-reference1: Reference = ReferenceModel(title="Test", url="https://example.com")
+reference1 = Reference(title="Test", url="https://example.com")
 
-reference2: Reference = ReferenceModel(title="Test", url="https://a.com")
+reference2 = Reference(title="Test", url="https://a.com")
 
-references: Reference = [reference1, reference2]
+references: References = [reference1, reference2]
 
 
 class Model1(GenericObject):

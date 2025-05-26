@@ -6,4 +6,4 @@ https://github.com/executablebooks/markdown-it-py looks to be the main
 Python CommonMark parser
 """
 
-CommonMark = str
+type CommonMark = str

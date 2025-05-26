@@ -7,7 +7,6 @@ info:
   license:
     name: MIT
     identifier: MIT
-    url: https://opensource.org/license/mit/
   version: 1.0.0
 servers:
   - url: https://api.example.com/v1
