@@ -71,7 +71,8 @@ def test_media_type_valid(value: str):
 @given(st.text().filter(lambda x: x not in MEDIA_TYPES))
 def test_media_type_invalid(value: str):
 
-    if re.match("[a-zA-Z0-9]+/[a-zA-Z0-9]+", value):
+    # Exists just in case a valid media type is returned
+    if re.match("[a-zA-Z0-9]+/[a-zA-Z0-9]+", value):  # pragma: no cover
         result = MediaType(value)
         assert not result.is_registered
         assert not result.is_range

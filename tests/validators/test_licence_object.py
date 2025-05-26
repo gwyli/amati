@@ -108,7 +108,9 @@ def unassociated_url(identifier: str) -> str:  # type: ignore
     """
 
     while id_ := random.choice(VALID_IDENTIFIERS):
-        if id_ == identifier:
+        # Exist just in case the random choice is the same
+        # as the choice being examined.
+        if id_ == identifier:  # pragma: no cover
             continue
 
         try:
@@ -117,7 +119,9 @@ def unassociated_url(identifier: str) -> str:  # type: ignore
             if choices:
                 return random.choice(choices)
 
-        except IndexError:
+        # Won't always be hit, but some identifiers
+        # don't have any associated URLs
+        except IndexError:  # pragma: no cover
             continue
 
 
