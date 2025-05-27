@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "uv"
+    # Look for `uv.lock` file in the root directory.
+    directory: "/"
+    # Check the registry for updates every day (weekdays)
+    schedule:
+      interval: "daily"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Workflow files stored in the default location of `.github/workflows`
+    # You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
