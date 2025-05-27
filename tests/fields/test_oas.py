@@ -32,8 +32,10 @@ def test_invalid_openapi_version(value: str):
 
 @given(st.sampled_from(OPENAPI_VERSIONS))
 def test_valid_openapi_version(value: str):
-    model = OpenAPIModel(value=value)
-    assert model.value == value
+    with LogMixin.context():
+        model = OpenAPIModel(value=value)
+        assert model.value == value
+        assert not LogMixin.logs
 
 
 def test_valid_runtime_expression():

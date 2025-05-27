@@ -23,7 +23,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
 
@@ -31,16 +31,16 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Formatting
-        uses: uv run black .
+        run: uv run black .
 
       - name: Import sorting
-        uses: uv run isort .
+        run: uv run isort .
 
       - name: Linting
-        run: pylint amati
+        run: uv run pylint amati
       
       - name: Test Linting
-        run: pylint tests
+        run: uv run pylint tests
 
       - name: Testing
         run: uv run pytest --cov
