@@ -31,10 +31,10 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Formatting
-        uses: uv run black .
+        run: uv run black .
 
       - name: Import sorting
-        uses: uv run isort .
+        run: uv run isort .
 
       - name: Linting
         run: pylint amati
