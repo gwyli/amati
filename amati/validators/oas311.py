@@ -30,13 +30,21 @@ from pydantic import (
 from pydantic.json_schema import JsonSchemaValue
 
 from amati import AmatiValueError, Reference
-from amati.fields import URI, HTTPAuthenticationScheme, HTTPStatusCode, MediaType
+from amati.fields import (
+    SPDXURL,
+    URI,
+    Email,
+    HTTPAuthenticationScheme,
+    HTTPStatusCode,
+    MediaType,
+    SPDXIdentifier,
+    URIType,
+    URIWithVariables,
+)
 from amati.fields.commonmark import CommonMark
-from amati.fields.email import Email
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
-from amati.fields.spdx_licences import SPDXURL, VALID_LICENCES, SPDXIdentifier
-from amati.fields.uri import URIType, URIWithVariables
+from amati.fields.spdx_licences import VALID_LICENCES
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
 
@@ -304,7 +312,9 @@ class EncodingObject(GenericObject):
 
         return value
 
+
 type _ResponsesObjectReturnType = "dict[str, ReferenceObject | ResponseObject]"
+
 
 @specification_extensions("x-")
 class ResponsesObject(GenericObject):
@@ -336,19 +346,23 @@ class ResponsesObject(GenericObject):
         Returns:
             The model class to use for validation.
         """
+
+        message = f"{field_name} must be a ResponseObject or ReferenceObject, got {type(value)}"  # pylint: disable=line-too-long
+
         try:
             return ResponseObject.model_validate(value)
         except ValidationError:
             try:
                 return ReferenceObject.model_validate(value)
             except ValidationError as e:
-                raise ValueError(f"Field '{field_name}' failed validation") from e
+                raise ValueError(message, ResponsesObject._reference) from e
 
     @model_validator(mode="before")
     @classmethod
-    def validate_all_fields(
-        cls, data: dict[str, Any]
-    ) -> _ResponsesObjectReturnType:
+    def validate_all_fields(cls, data: dict[str, Any]) -> _ResponsesObjectReturnType:
+        """ 
+        Validates the responses object.
+        """
 
         validated_data: _ResponsesObjectReturnType = {}
 
@@ -365,10 +379,6 @@ class ResponsesObject(GenericObject):
                     validated_data[field_name] = ResponsesObject._choose_model(
                         value, field_name
                     )
-                else:
-                    raise AmatiValueError(
-                        f"Field 'default' must be a ResponseObject or ReferenceObject, got {type(value)}"
-                    )
                 continue
 
             # Otherwise, if the field appears like a valid HTTP status code or a range
@@ -384,7 +394,7 @@ class ResponsesObject(GenericObject):
 
                 continue
 
-            # If the field is not a valid HTTP status code, raise an Exception
+            # If the field is not a valid HTTP status code or "default"
             raise ValueError(f"Invalid type for numeric field '{field_name}'")
 
         return validated_data
