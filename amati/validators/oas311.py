@@ -12,17 +12,25 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 
 """
 
+import re
 from typing import Any, ClassVar, Optional
 from typing_extensions import Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
 from jsonschema.protocols import Validator as JSONSchemaValidator
 from jsonschema.validators import validator_for  # type: ignore
-from pydantic import ConfigDict, Field, RootModel, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    RootModel,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 from pydantic.json_schema import JsonSchemaValue
 
 from amati import AmatiValueError, Reference
-from amati.fields import URI, HTTPAuthenticationScheme, MediaType
+from amati.fields import URI, HTTPAuthenticationScheme, HTTPStatusCode, MediaType
 from amati.fields.commonmark import CommonMark
 from amati.fields.email import Email
 from amati.fields.json import JSON
@@ -295,6 +303,108 @@ class EncodingObject(GenericObject):
             MediaType(media_type.strip())
 
         return value
+
+type _ResponsesObjectReturnType = "dict[str, ReferenceObject | ResponseObject]"
+
+@specification_extensions("x-")
+class ResponsesObject(GenericObject):
+    """
+    Validates the OpenAPI Specification responses object - §4.8.16
+    """
+
+    model_config = ConfigDict(
+        extra="allow",
+    )
+
+    default: "Optional[ResponseObject | ReferenceObject]" = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#responses-object",
+        section="Responses Object",
+    )
+
+    @classmethod
+    def _choose_model(
+        cls, value: Any, field_name: str
+    ) -> "ReferenceObject | ResponseObject":
+        """
+        Choose the model to use for validation based on the type of value.
+
+        Args:
+            value: The value to validate.
+
+        Returns:
+            The model class to use for validation.
+        """
+        try:
+            return ResponseObject.model_validate(value)
+        except ValidationError:
+            try:
+                return ReferenceObject.model_validate(value)
+            except ValidationError as e:
+                raise ValueError(f"Field '{field_name}' failed validation") from e
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_all_fields(
+        cls, data: dict[str, Any]
+    ) -> _ResponsesObjectReturnType:
+
+        validated_data: _ResponsesObjectReturnType = {}
+
+        for field_name, value in data.items():
+
+            # If the value is a specification extension, allow it
+            if field_name.startswith("x-"):
+                validated_data[field_name] = value
+                continue
+
+            # If the value is the fixed field, "default", allow it
+            if field_name == "default":
+                if isinstance(value, dict):
+                    validated_data[field_name] = ResponsesObject._choose_model(
+                        value, field_name
+                    )
+                else:
+                    raise AmatiValueError(
+                        f"Field 'default' must be a ResponseObject or ReferenceObject, got {type(value)}"
+                    )
+                continue
+
+            # Otherwise, if the field appears like a valid HTTP status code or a range
+            if re.match(r"^[1-5]([0-9]{2}|XX)+$", str(field_name)):
+
+                # Double check and raise a value error if not
+                HTTPStatusCode(field_name)
+
+                # and validate as a ResponseObject or ReferenceObject
+                validated_data[field_name] = ResponsesObject._choose_model(
+                    value, field_name
+                )
+
+                continue
+
+            # If the field is not a valid HTTP status code, raise an Exception
+            raise ValueError(f"Invalid type for numeric field '{field_name}'")
+
+        return validated_data
+
+
+@specification_extensions("x-")
+class ResponseObject(GenericObject):
+    """
+    Validates the OpenAPI Specification response object - §4.8.17
+    """
+
+    description: str | CommonMark
+    headers: "Optional[dict[str, HeaderObject | ReferenceObject]]" = None
+    content: Optional[dict[str, MediaTypeObject]] = None
+    links: "Optional[dict[str, LinkObject | ReferenceObject]]" = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#response-object",
+        section="Response Object",
+    )
 
 
 @specification_extensions("x-")
