@@ -44,7 +44,8 @@ class GenericObject(LogMixin, BaseModel):
         for field in data:
             if (
                 field
-                not in self.model_fields  # pylint: disable=unsupported-membership-test
+                # FIXME: https://github.com/ben-alexander/amati/issues/21
+                not in self.model_fields  # pylint: disable=unsupported-membership-test # type: ignore
             ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
                 self.log(
