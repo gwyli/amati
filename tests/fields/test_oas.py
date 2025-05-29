@@ -3,39 +3,22 @@ Tests amati/fields/oas.py
 """
 
 import pytest
-from abnf.parser import ParseError
 from hypothesis import given
 from hypothesis import strategies as st
 
+from amati import AmatiValueError
 from amati.fields.oas import OPENAPI_VERSIONS, OpenAPI, RuntimeExpression
-from amati.logging import LogMixin
-from amati.validators.generic import GenericObject
-
-
-class OpenAPIModel(GenericObject):
-    value: OpenAPI
-
-
-class RuntimExpressionModel(GenericObject):
-    value: RuntimeExpression
 
 
 @given(st.text().filter(lambda x: x not in OPENAPI_VERSIONS))
 def test_invalid_openapi_version(value: str):
-    with LogMixin.context():
-        OpenAPIModel(value=value)
-        assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
-        assert LogMixin.logs[0].reference is not None
+    with pytest.raises(AmatiValueError):
+        OpenAPI(value)
 
 
 @given(st.sampled_from(OPENAPI_VERSIONS))
 def test_valid_openapi_version(value: str):
-    with LogMixin.context():
-        model = OpenAPIModel(value=value)
-        assert model.value == value
-        assert not LogMixin.logs
+    OpenAPI(value)
 
 
 def test_valid_runtime_expression():
@@ -78,7 +61,7 @@ def test_valid_runtime_expression():
     ]
 
     for expression in expressions:
-        assert RuntimExpressionModel(value=expression).value == expression
+        assert RuntimeExpression(expression) == expression
 
 
 def test_invalid_runtime_expression():
@@ -116,6 +99,5 @@ def test_invalid_runtime_expression():
     ]
 
     for expression in expressions:
-        print(expression)
-        with pytest.raises(ParseError):
-            RuntimExpressionModel(value=expression)
+        with pytest.raises(AmatiValueError):
+            RuntimeExpression(expression)
