@@ -5,10 +5,10 @@ Validates a URI according to the RFC3986 ABNF grammar
 import json
 import pathlib
 from enum import Enum
-from typing import Optional
+from typing import Optional, Self
 
-import rfc3987
-from abnf import ParseError
+from abnf import Node, ParseError, Rule
+from abnf.grammars import rfc3986, rfc3987
 
 from amati import AmatiValueError, Reference
 from amati.fields import Str as _Str
@@ -40,54 +40,88 @@ class URIType(str, Enum):
 
 class URI(_Str):
     """
-    Represents a Uniform Resource Identifier (URI) as defined in RFC 3986/3987.
+    A class representing a Uniform Resource Identifier (URI) as defined in
+    RFC 3986/3987.
 
     This class parses and validates URI strings, supporting standard URIs, IRIs
     (Internationalized Resource Identifiers), and JSON pointers. It provides attributes
     for accessing URI components and determining the URI type and validity.
 
+    The class attempts to parse URIs using multiple RFC specifications in order of
+    preference, falling back to less restrictive parsing when necessary.
+
     Attributes:
-        scheme (Optional[str]): The URI scheme component (e.g., "http", "https",
-            "file").
-        authority (Optional[str]): The authority component (typically host/server).
-        path (Optional[str]): The path component of the URI.
-        query (Optional[str]): The query string component.
-        fragment (Optional[str]): The fragment identifier component.
-        is_iri (bool): Whether this is an Internationalized Resource Identifier
-            (RFC 3987).
-        scheme_status (Optional[str]): The registration status of the scheme with IANA,
-            if known. Can be used
-        tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
+        scheme (Optional[Scheme]): The URI scheme component (e.g., "http", "https").
+        authority (Optional[str]): The authority component for standard URIs.
+        iauthority (Optional[str]): The authority component for internationalized IRIs.
+        path (Optional[str]): The path component for standard URIs.
+        ipath (Optional[str]): The path component for internationalized IRIs.
+        query (Optional[str]): The query string component for standard URIs.
+        iquery (Optional[str]): The query string component for internationalized IRIs.
+        fragment (Optional[str]): The fragment identifier for standard URIs.
+        ifragment (Optional[str]): The fragment identifier for internationalized IRIs.
+        is_iri (bool): Whether this is an Internationalized Resource Identifier.
+        tld_registered (bool): Whether the top-level domain is registered with IANA.
     """
 
     scheme: Optional[Scheme] = None
     authority: Optional[str] = None
+    iauthority: Optional[str] = None
     path: Optional[str] = None
+    ipath: Optional[str] = None
     query: Optional[str] = None
+    iquery: Optional[str] = None
     fragment: Optional[str] = None
-    # Is this an RFC 3987 "Internationalized Resource Identifier (IRI)
-    # per RFC 3987
+    ifragment: Optional[str] = None
+    # RFC 3987 Internationalized Resource Identifier (IRI) flag
     is_iri: bool = False
     tld_registered: bool = False
+
+    # Valid path types from RFC 3986 grammar rules
+    _path_types: frozenset[str] = frozenset(
+        [
+            "path-abempty",
+            "path-absolute",
+            "path-noscheme",
+            "path-rootless",
+            "path-empty",
+        ]
+    )
+
+    # Valid internationalized path types from RFC 3987 grammar rules
+    _ipath_types: frozenset[str] = frozenset(
+        [
+            "ipath-abempty",
+            "ipath-absolute",
+            "ipath-noscheme",
+            "ipath-rootless",
+            "ipath-empty",
+        ]
+    )
 
     @property
     def type(self) -> URIType:
         """
-        Determine the type of the URI.
+        Determine the type of the URI based on its components.
 
         This property analyzes the URI components to classify the URI according to the
-        URIType enumeration.
+        URIType enumeration. The classification follows a hierarchical approach:
+        absolute URIs take precedence over non-relative, which take precedence over
+        relative URIs.
 
         Returns:
             URIType: The classified type of the URI (ABSOLUTE, NON_RELATIVE, RELATIVE,
-                     JSON_POINTER, or UNKNOWN).
+                     or JSON_POINTER).
+
+        Raises:
+            TypeError: If the URI has no scheme, authority, or path components.
         """
 
         if self.scheme:
             return URIType.ABSOLUTE
-        if self.authority:
+        if self.authority or self.iauthority:
             return URIType.NON_RELATIVE
-        if self.path:
+        if self.path or self.ipath:
             if str(self).startswith("#"):
                 return URIType.JSON_POINTER
             return URIType.RELATIVE
@@ -105,14 +139,15 @@ class URI(_Str):
 
         Parses the input string according to RFC 3986/3987 grammar rules for URIs/IRIs.
         Handles special cases like JSON pointers (RFC 6901) and performs validation.
-        Sets appropriate attributes based on the parsed components.
+        Attempts multiple parsing strategies in order of preference.
 
         Args:
             value (str): A string representing a URI.
 
         Raises:
-            AmatiValueError: If the input string is not a valid URI, or if essential
-                components are missing.
+            AmatiValueError: If the input string is None, not a valid URI according to
+                any supported RFC specification, is a JSON pointer with invalid syntax,
+                or contains only a fragment without other components.
         """
 
         super().__init__()
@@ -122,10 +157,10 @@ class URI(_Str):
 
         candidate = value
 
-        # The OAS standard is to use a fragment identifier
-        # to indicate that it is a JSON pointer per RFC 6901, e.g.
-        # "$ref": "#/components/schemas/pet".
-        # The hash does not indicate that the URI is a fragment.
+        # Handle JSON pointers as per OpenAPI Specification (OAS) standard.
+        # OAS uses fragment identifiers to indicate JSON pointers per RFC 6901,
+        # e.g., "$ref": "#/components/schemas/pet".
+        # The hash symbol does not indicate a URI fragment in this context.
 
         if value.startswith("#"):
             candidate = value[1:]
@@ -141,35 +176,85 @@ class URI(_Str):
                     ),
                 ) from e
 
-        # Parse as if the candidate were an IRI per RFC 3987.
-        # Raises ValueError if invalid
-        result = rfc3987.parse(candidate)  # type: ignore
+        # Attempt parsing with multiple RFC specifications in order of preference.
+        # Start with most restrictive (RFC 3986 URI) and fall back to more permissive
+        # specifications as needed.
+        rules_to_attempt: list[Rule] = [
+            rfc3986.Rule("URI"),
+            rfc3987.Rule("IRI"),
+            rfc3986.Rule("hier-part"),
+            rfc3987.Rule("ihier-part"),
+            rfc3986.Rule("relative-ref"),
+            rfc3987.Rule("irelative-ref"),
+        ]
 
-        for component, value in result.items():
-            if not value:
+        for rule in rules_to_attempt:
+            try:
+                result = rule.parse_all(candidate)
+            except ParseError:
+                # If the rule fails, continue to the next rule
                 continue
 
-            if component == "scheme":
-                self.__dict__["scheme"] = Scheme(value)
-            else:
-                self.__dict__[component] = value
+            self._add_attributes(result)
 
-        # If an URI/IRI is invalid if only a fragment.
-        if not self.scheme and not self.authority and not self.path:
+            # Mark as IRI if parsed using RFC 3987 rules
+            if rule.__module__ == rfc3987.__name__:
+                self.is_iri = True
+
+            # Successfully parsed - stop attempting other rules
+            break
+
+        # A URI is invalid if it contains only a fragment without scheme, authority,
+        # or path.
+        if (
+            not self.scheme
+            and not self.iauthority
+            and not self.authority
+            and not self.ipath
+            and not self.path
+        ):
             raise AmatiValueError(
                 "{value} does not contain a scheme, authority or path"
             )
 
-        # If valid according to RFC 3987 but not ASCII the candidate is a IRI
-        # not a URI
-        try:
-            candidate.encode("ascii")
-        except UnicodeEncodeError:
-            self.is_iri = True
-
+        # Check if the top-level domain is registered with IANA
         if self.authority:
             tld_candidate = f".{self.authority.split(".")[-1]}"
             self.tld_registered = tld_candidate in TLDS
+        if self.iauthority:
+            tld_candidate = f".{self.iauthority.split(".")[-1]}"
+            self.tld_registered = tld_candidate in TLDS
+
+    def _add_attributes(self: Self, node: Node):
+        """
+        Recursively extract and set attributes from the parsed ABNF grammar tree.
+
+        This method traverses the parsed grammar tree and assigns values to the
+        appropriate class attributes based on the node names and types encountered.
+        Special handling is provided for scheme nodes (converted to Scheme objects)
+        and path nodes (categorized by type).
+
+        Args:
+            node (Node): The current node from the parsed ABNF grammar tree.
+        """
+
+        if node.name in URI.__annotations__.keys():
+            # If the node name is in the URI annotations, set the attribute
+            self.__dict__[node.name] = node.value
+
+        for child in node.children:
+
+            if child.name == "scheme":
+                self.__dict__["scheme"] = Scheme(child.value)
+            if child.name in self._path_types:
+                self.__dict__["path"] = child.value
+            if child.name in self._ipath_types:
+                self.__dict__["ipath"] = child.value
+            elif child.name in URI.__annotations__.keys():
+                self.__dict__[child.name] = child.value
+
+            # Recursively process child nodes (LiteralNode has empty children list)
+            self._add_attributes(child)
 
 
 class URIWithVariables(URI):
