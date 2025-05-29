@@ -2,41 +2,13 @@
 Fields from the OpenAPI Specification (OAS)
 """
 
-from typing import Annotated
+from typing import ClassVar
 
-from pydantic import AfterValidator, Field
+from abnf import ParseError
 
-from amati import Reference
+from amati import AmatiValueError, Reference
+from amati.fields import Str as _Str
 from amati.grammars import oas
-from amati.logging import Log, LogMixin
-
-runtime_expression_reference = Reference(
-    title="OpenAPI Specification v3.1.1",
-    section="Runtime Expressions",
-    url="https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions",
-)
-
-
-def _validate_after_runtime_expression(value: str) -> str:
-    """
-    Validate that the runtime expression is a valid runtime expression.
-
-    Args:
-        value: The runtime expression to validate
-    """
-    return oas.Rule("expression").parse_all(value).value
-
-
-RuntimeExpression = Annotated[
-    str,
-    AfterValidator(_validate_after_runtime_expression),
-]
-
-reference = Reference(
-    title="OpenAPI Initiative Publications",
-    url="https://spec.openapis.org/#openapi-specification",
-    section="OpenAPI Specification ",
-)
 
 OPENAPI_VERSIONS: list[str] = [
     "3.0",
@@ -49,13 +21,57 @@ OPENAPI_VERSIONS: list[str] = [
 ]
 
 
-def _validate_after_openapi(value: str) -> str:
-    if value not in OPENAPI_VERSIONS:
-        message = f"{value} is not a valid OpenAPI version."
-        LogMixin.log(Log(message=message, type=ValueError, reference=reference))
-    return value
+class RuntimeExpression(_Str):
+    """
+    A class representing a runtime expression as defined in the OpenAPI Specification.
+    This class validates the runtime expression format according to the OpenAPI grammar.
+
+    It is validated against the ABNF grammar in the OpenAPI spec.
+    """
+
+    _reference: ClassVar[Reference] = Reference(
+        title="OpenAPI Specification v3.1.1",
+        section="Runtime Expressions",
+        url="https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions",
+    )
+
+    def __init__(self, value: str):
+        """
+        Initialize a RunTimeExpression instance.
+
+        Args:
+            value: The runtime expression to validate
+        """
+
+        try:
+            oas.Rule("expression").parse_all(value)
+        except ParseError as e:
+            raise AmatiValueError(
+                f"{value} is not a valid runtime expression",
+                reference=self._reference,
+            ) from e
 
 
-type OpenAPI = Annotated[  # pylint: disable=invalid-name
-    str, Field(strict=True), AfterValidator(_validate_after_openapi)
-]
+class OpenAPI(_Str):
+    """
+    Represents an OpenAPI version string.s
+    """
+
+    _reference: ClassVar[Reference] = Reference(
+        title="OpenAPI Initiative Publications",
+        url="https://spec.openapis.org/#openapi-specification",
+        section="OpenAPI Specification ",
+    )
+
+    def __init__(self, value: str):
+        """
+        Initialize an OpenAPI instance.
+
+        Args:
+            value: The OpenAPI version string to validate
+        """
+        if value not in OPENAPI_VERSIONS:
+            raise AmatiValueError(
+                f"{value} is not a valid OpenAPI version",
+                reference=self._reference,
+            )

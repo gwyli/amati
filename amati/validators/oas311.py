@@ -360,7 +360,7 @@ class ResponsesObject(GenericObject):
     @model_validator(mode="before")
     @classmethod
     def validate_all_fields(cls, data: dict[str, Any]) -> _ResponsesObjectReturnType:
-        """ 
+        """
         Validates the responses object.
         """
 
