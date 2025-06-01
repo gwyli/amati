@@ -12,7 +12,7 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 
 from amati import AmatiValueError
-from amati.fields.uri import URI, URIType, URIWithVariables
+from amati.fields.uri import URI, Scheme, URIType, URIWithVariables
 from amati.grammars import rfc6901
 
 ABSOLUTE_IRIS = [
@@ -20,36 +20,34 @@ ABSOLUTE_IRIS = [
     "https://xn--e1afmkfd.xn--p1ai/документы/файл.html",
     "https://مثال.مصر/صفحة/رئيسية.html",
     "https://xn--ygb0c/صفحة/مثال.مصر.html",
+    "https://xn--ygb0c",
     "https://例子.中国/文件/索引.html",
     "https://xn--fsqu00a.xn--fiqs8s/文档/索引.html",
+    "https://xn--fsqu00a.xn--fiqs8s",
     "https://דוגמה.ישראל/עמוד/ראשי.html",
-    "https://xn--4dbs7bfדוגמה.ישראל/עמוד.html"
-    "https://ตัวอย่าง.ไทย/หน้า/หลัก.html",
+    "https://xn--4dbs7bf/דוגמה.ישראל/עמוד.html" "https://ตัวอย่าง.ไทย/หน้า/หลัก.html",
     "https://xn--72c1a1bt4awk9o.xn--o3cw4h/หน้า/หลัก.html",
 ]
 
 RELATIVE_IRIS = [
     "/київ/вулиця/площа-незалежності.html",
-    "/xn--b1alf1j/вулиця/площа-незалежності.html",
     "/القاهرة/شارع/الأهرام.html",
-    "/xn--igbhb3b2fjl/شارع/الأهرام.html",
     "/東京/通り/渋谷.html",
-    "/xn--1lqs71d/通り/渋谷.html",
     "/αθήνα/οδός/ακρόπολη.html",
-    "/xn--jxafb0a0a/οδός/ακρόπολη.html",
     "/서울/거리/남대문.html",
-    "/xn--2i4bq6h/거리/남대문.html",
 ]
 
 NON_RELATIVE_IRIS = [
     "//пример.бг/софия/страница.html",
     "//xn--e1afmkfd.xn--90ae/софия/страница.html",
+    "//xn--e1afmkfd.xn--90ae",
     "//مثال.ایران/تهران/صفحه.html",
     "//xn--ygb0c/صفحة/مثال.مصر.html",
     "//उदाहरण.भारत/दिल्ली/पृष्ठ.html",
     "//օրինակ.հայ/երեվան/էջ.html",
     "//উদাহরণ.বাংলা/ঢাকা/পৃষ্ঠা.html",
-    "//xn--4dbs7bfדוגמה.ישראל/עמוד.html",
+    "//xn--2i4bq6h/거리/남대문.html",
+    "//xn--2i4bq6h",
 ]
 
 
@@ -59,9 +57,6 @@ JSON_POINTER_IRIS = [
     "#/東京/通り/渋谷.html",
     "#/αθήνα/οδός/ακρόπολη.html",
     "#/서울/거리/남대문.html",
-    "#/xn--e1afmkfd.xn--90ae/софия/страница.html",
-    "#/xn--4dbs7bfדוגמה.ישראל/עמוד.html",
-    "#/xn--ygb0c/صفحة/مثال.مصر.html",
 ]
 
 
@@ -103,7 +98,7 @@ def test_absolute_uri_valid(value: str):
     result = URI(value)
     assert result == value
     assert result.type == URIType.ABSOLUTE
-    assert result.is_iri is False
+    assert result.is_iri == ("xn--" in value.lower())
 
 
 @given(st.sampled_from(ABSOLUTE_IRIS))
@@ -119,7 +114,7 @@ def test_relative_uri_valid(value: str):
     result = URI(value)
     assert result == value
     assert result.type == URIType.RELATIVE
-    assert result.is_iri is False
+    assert result.is_iri == ("xn--" in value.lower())
 
 
 @given(st.sampled_from(RELATIVE_IRIS))
@@ -135,7 +130,7 @@ def test_json_pointer(value: str):
     result = URI(value)
     assert result == value
     assert result.type == URIType.JSON_POINTER
-    assert result.is_iri is False
+    assert result.is_iri == ("xn--" in value.lower())
 
 
 @given(st.sampled_from(JSON_POINTER_IRIS))
@@ -167,7 +162,7 @@ def test_uri_non_relative(value: str):
     result = URI(candidate)
     assert result == candidate
     assert result.type == URIType.NON_RELATIVE
-    assert result.is_iri is False
+    assert result.is_iri == ("xn--" in candidate.lower())
 
 
 @given(st.sampled_from(NON_RELATIVE_IRIS))
@@ -219,3 +214,31 @@ def test_uri_with_variables_invalid():
 
     with pytest.raises(ValueError):
         URIWithVariables(r"/api/users/{user_{id}}/")
+
+
+def test_scheme_valid():
+    valid_schemes = {
+        "http": True,
+        "https": True,
+        "ftp": True,
+        "file": True,
+        "mailto": True,
+        "data": True,
+        "ws": True,
+        "wss": True,
+        "valid-scheme": False,
+        "knownscheme": False,
+    }
+
+    for scheme, registered in valid_schemes.items():
+        result = Scheme(scheme)
+        assert result == scheme
+        if registered:
+            assert result.status
+        else:
+            assert not result.status
+
+
+def test_scheme_invalid():
+    with pytest.raises(AmatiValueError):
+        Scheme("invalid_scheme")

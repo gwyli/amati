@@ -7,6 +7,7 @@ import pathlib
 from enum import Enum
 from typing import Optional, Self
 
+import idna
 from abnf import Node, ParseError, Rule
 from abnf.grammars import rfc3986, rfc3987
 
@@ -113,6 +114,7 @@ class URI(_Str):
 
     scheme: Optional[Scheme] = None
     authority: Optional[str] = None
+    host: Optional[str] = None
     path: Optional[str] = None
     query: Optional[str] = None
     fragment: Optional[str] = None
@@ -123,6 +125,8 @@ class URI(_Str):
     _attribute_map: dict[str, str] = {
         "authority": "authority",
         "iauthority": "authority",
+        "host": "host",
+        "ihost": "host",
         "path-abempty": "path",
         "path-absolute": "path",
         "path-noscheme": "path",
@@ -240,6 +244,11 @@ class URI(_Str):
             # Mark as IRI if parsed using RFC 3987 rules
             if rule.__module__ == rfc3987.__name__:
                 self.is_iri = True
+            elif self.host:
+                # If the host is IDNA encoded then the URI is an IRI.
+                # IDNA encoded URIs will are valid URIs and will successfully parse
+                # with RFC 3986.
+                self.is_iri = idna.decode(self.host, uts46=True) != self.host.lower()
 
             # Successfully parsed - stop attempting other rules
             break
@@ -270,7 +279,7 @@ class URI(_Str):
 
         for child in node.children:
 
-             # If the node name is in the URI annotations, set the attribute
+            # If the node name is in the URI annotations, set the attribute
             if child.name == "scheme":
                 self.__dict__["scheme"] = Scheme(child.value)
             elif child.name in self._attribute_map:
