@@ -47,16 +47,28 @@ class Scheme(_Str):
         """Initialize a new Scheme instance with validation.
 
         Args:
-            value: The scheme string to validate and store. Must conform
-                to RFC 3986 scheme syntax rules.
+            value: The scheme string
 
         Raises:
-            ParseError: If the provided value does not conform to RFC 3986
+            AmatiValueError: If the provided value does not conform to RFC 3986
                 scheme syntax rules.
         """
+
+        super().__init__()
+
         # Validate the scheme against RFC 3986 syntax rules
         # This will raise ParseError if the scheme is invalid
-        rfc3986.Rule("scheme").parse_all(value)
+        try:
+            rfc3986.Rule("scheme").parse_all(value)
+        except ParseError as e:
+            raise AmatiValueError(
+                f"{value} is not a valid URI scheme",
+                reference=Reference(
+                    title="Uniform Resource Identifier (URI): Generic Syntax",
+                    section="3.1 - Scheme",
+                    url="https://www.rfc-editor.org/rfc/rfc3986#section-3.1",
+                ),
+            ) from e
 
         # Look up the scheme in the IANA registry to get status info
         # Returns None if the scheme is not in the registry
@@ -207,14 +219,14 @@ class URI(_Str):
         # Attempt parsing with multiple RFC specifications in order of preference.
         # Start with most restrictive (RFC 3986 URI) and fall back to more permissive
         # specifications as needed.
-        rules_to_attempt: list[Rule] = [
+        rules_to_attempt: tuple[Rule, ...] = (
             rfc3986.Rule("URI"),
             rfc3987.Rule("IRI"),
             rfc3986.Rule("hier-part"),
             rfc3987.Rule("ihier-part"),
             rfc3986.Rule("relative-ref"),
             rfc3987.Rule("irelative-ref"),
-        ]
+        )
 
         for rule in rules_to_attempt:
             try:
@@ -236,7 +248,7 @@ class URI(_Str):
         # or path.
         if not self.scheme and not self.authority and not self.path:
             raise AmatiValueError(
-                "{value} does not contain a scheme, authority or path"
+                f"{value} does not contain a scheme, authority or path"
             )
 
         # Check if the top-level domain is registered with IANA
@@ -256,19 +268,19 @@ class URI(_Str):
             node: The current node from the parsed ABNF grammar tree.
         """
 
-        # If the node name is in the URI annotations, set the attribute
-        if node.name in self._attribute_map:
-            self.__dict__[self._attribute_map[node.name]] = node.value
-
         for child in node.children:
 
+             # If the node name is in the URI annotations, set the attribute
             if child.name == "scheme":
                 self.__dict__["scheme"] = Scheme(child.value)
             elif child.name in self._attribute_map:
                 self.__dict__[self._attribute_map[child.name]] = child.value
 
-            # Recursively process child nodes (LiteralNode has empty children list)
-            self._add_attributes(child)
+            # If the child is a node with children, recursively add attributes
+            # This is necessary for nodes that have nested structures, such as
+            # the hier-part that may contain subcomponents.
+            if child.children:
+                self._add_attributes(child)
 
 
 class URIWithVariables(URI):

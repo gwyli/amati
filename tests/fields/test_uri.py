@@ -17,26 +17,39 @@ from amati.grammars import rfc6901
 
 ABSOLUTE_IRIS = [
     "https://пример.рф/документы/файл.html",
+    "https://xn--e1afmkfd.xn--p1ai/документы/файл.html",
     "https://مثال.مصر/صفحة/رئيسية.html",
+    "https://xn--ygb0c/صفحة/مثال.مصر.html",
     "https://例子.中国/文件/索引.html",
+    "https://xn--fsqu00a.xn--fiqs8s/文档/索引.html",
     "https://דוגמה.ישראל/עמוד/ראשי.html",
+    "https://xn--4dbs7bfדוגמה.ישראל/עמוד.html"
     "https://ตัวอย่าง.ไทย/หน้า/หลัก.html",
+    "https://xn--72c1a1bt4awk9o.xn--o3cw4h/หน้า/หลัก.html",
 ]
 
 RELATIVE_IRIS = [
     "/київ/вулиця/площа-незалежності.html",
+    "/xn--b1alf1j/вулиця/площа-незалежності.html",
     "/القاهرة/شارع/الأهرام.html",
+    "/xn--igbhb3b2fjl/شارع/الأهرام.html",
     "/東京/通り/渋谷.html",
+    "/xn--1lqs71d/通り/渋谷.html",
     "/αθήνα/οδός/ακρόπολη.html",
+    "/xn--jxafb0a0a/οδός/ακρόπολη.html",
     "/서울/거리/남대문.html",
+    "/xn--2i4bq6h/거리/남대문.html",
 ]
 
 NON_RELATIVE_IRIS = [
     "//пример.бг/софия/страница.html",
+    "//xn--e1afmkfd.xn--90ae/софия/страница.html",
     "//مثال.ایران/تهران/صفحه.html",
+    "//xn--ygb0c/صفحة/مثال.مصر.html",
     "//उदाहरण.भारत/दिल्ली/पृष्ठ.html",
     "//օրինակ.հայ/երեվան/էջ.html",
     "//উদাহরণ.বাংলা/ঢাকা/পৃষ্ঠা.html",
+    "//xn--4dbs7bfדוגמה.ישראל/עמוד.html",
 ]
 
 
@@ -46,6 +59,9 @@ JSON_POINTER_IRIS = [
     "#/東京/通り/渋谷.html",
     "#/αθήνα/οδός/ακρόπολη.html",
     "#/서울/거리/남대문.html",
+    "#/xn--e1afmkfd.xn--90ae/софия/страница.html",
+    "#/xn--4dbs7bfדוגמה.ישראל/עמוד.html",
+    "#/xn--ygb0c/صفحة/مثال.مصر.html",
 ]
 
 
