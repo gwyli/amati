@@ -20,9 +20,6 @@ DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 with open(DATA_DIRECTORY / "schemes.json", "r", encoding="utf-8") as f:
     SCHEMES = json.loads(f.read())
 
-with open(DATA_DIRECTORY / "tlds.json", "r", encoding="utf-8") as f:
-    TLDS = json.loads(f.read())
-
 
 class Scheme(_Str):
     """Represents a URI scheme with validation and status tracking.
@@ -103,7 +100,6 @@ class URI(_Str):
         query: The query string component
         fragment: The fragment identifier
         is_iri: Whether this is an Internationalized Resource Identifier.
-        tld_registered: Whether the top-level domain is registered with IANA.
 
     Example:
         >>> uri = URI("https://example.com/path?query#fragment")
@@ -120,7 +116,6 @@ class URI(_Str):
     fragment: Optional[str] = None
     # RFC 3987 Internationalized Resource Identifier (IRI) flag
     is_iri: bool = False
-    tld_registered: bool = False
 
     _attribute_map: dict[str, str] = {
         "authority": "authority",
@@ -246,8 +241,7 @@ class URI(_Str):
                 self.is_iri = True
             elif self.host:
                 # If the host is IDNA encoded then the URI is an IRI.
-                # IDNA encoded URIs will are valid URIs and will successfully parse
-                # with RFC 3986.
+                # IDNA encoded URIs will successfully parse with RFC 3986
                 self.is_iri = idna.decode(self.host, uts46=True) != self.host.lower()
 
             # Successfully parsed - stop attempting other rules
@@ -259,11 +253,6 @@ class URI(_Str):
             raise AmatiValueError(
                 f"{value} does not contain a scheme, authority or path"
             )
-
-        # Check if the top-level domain is registered with IANA
-        if self.authority:
-            tld_candidate = f".{self.authority.split(".")[-1]}"
-            self.tld_registered = tld_candidate in TLDS
 
     def _add_attributes(self: Self, node: Node):
         """
