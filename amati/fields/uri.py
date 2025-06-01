@@ -24,9 +24,42 @@ with open(DATA_DIRECTORY / "tlds.json", "r", encoding="utf-8") as f:
 
 
 class Scheme(_Str):
+    """Represents a URI scheme with validation and status tracking.
+
+    This class validates URI schemes according to RFC 3986 standards and
+    provides information about their registration status with IANA. It
+    inherits from _Str to provide string-like behavior while adding
+    scheme-specific functionality.
+
+    Attributes:
+        status: The IANA registration status of the scheme. Common values
+            include "Permanent", "Provisional", "Historical", or None for
+            unregistered schemes.
+
+    Example:
+        >>> scheme = Scheme("https")
+        >>> print(scheme.status) # Output: 'Permanent'
+    """
+
     status: Optional[str] = None
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
+        """Initialize a new Scheme instance with validation.
+
+        Args:
+            value: The scheme string to validate and store. Must conform
+                to RFC 3986 scheme syntax rules.
+
+        Raises:
+            ParseError: If the provided value does not conform to RFC 3986
+                scheme syntax rules.
+        """
+        # Validate the scheme against RFC 3986 syntax rules
+        # This will raise ParseError if the scheme is invalid
+        rfc3986.Rule("scheme").parse_all(value)
+
+        # Look up the scheme in the IANA registry to get status info
+        # Returns None if the scheme is not in the registry
         self.status = SCHEMES.get(value, None)
 
 
@@ -51,53 +84,48 @@ class URI(_Str):
     preference, falling back to less restrictive parsing when necessary.
 
     Attributes:
-        scheme (Optional[Scheme]): The URI scheme component (e.g., "http", "https").
-        authority (Optional[str]): The authority component for standard URIs.
-        iauthority (Optional[str]): The authority component for internationalized IRIs.
-        path (Optional[str]): The path component for standard URIs.
-        ipath (Optional[str]): The path component for internationalized IRIs.
-        query (Optional[str]): The query string component for standard URIs.
-        iquery (Optional[str]): The query string component for internationalized IRIs.
-        fragment (Optional[str]): The fragment identifier for standard URIs.
-        ifragment (Optional[str]): The fragment identifier for internationalized IRIs.
-        is_iri (bool): Whether this is an Internationalized Resource Identifier.
-        tld_registered (bool): Whether the top-level domain is registered with IANA.
+        scheme: The URI scheme component (e.g., "http", "https").
+        authority: The authority component.
+        path: The path component
+        query: The query string component
+        fragment: The fragment identifier
+        is_iri: Whether this is an Internationalized Resource Identifier.
+        tld_registered: Whether the top-level domain is registered with IANA.
+
+    Example:
+        >>> uri = URI("https://example.com/path?query#fragment")
+        >>> print(uri.scheme)  # Output: https
+        >>> print(uri.authority)  # Output: example.com
+        >>> print(uri.type)  # Output: URIType.ABSOLUTE
     """
 
     scheme: Optional[Scheme] = None
     authority: Optional[str] = None
-    iauthority: Optional[str] = None
     path: Optional[str] = None
-    ipath: Optional[str] = None
     query: Optional[str] = None
-    iquery: Optional[str] = None
     fragment: Optional[str] = None
-    ifragment: Optional[str] = None
     # RFC 3987 Internationalized Resource Identifier (IRI) flag
     is_iri: bool = False
     tld_registered: bool = False
 
-    # Valid path types from RFC 3986 grammar rules
-    _path_types: frozenset[str] = frozenset(
-        [
-            "path-abempty",
-            "path-absolute",
-            "path-noscheme",
-            "path-rootless",
-            "path-empty",
-        ]
-    )
-
-    # Valid internationalized path types from RFC 3987 grammar rules
-    _ipath_types: frozenset[str] = frozenset(
-        [
-            "ipath-abempty",
-            "ipath-absolute",
-            "ipath-noscheme",
-            "ipath-rootless",
-            "ipath-empty",
-        ]
-    )
+    _attribute_map: dict[str, str] = {
+        "authority": "authority",
+        "iauthority": "authority",
+        "path-abempty": "path",
+        "path-absolute": "path",
+        "path-noscheme": "path",
+        "path-rootless": "path",
+        "path-empty": "path",
+        "ipath-abempty": "path",
+        "ipath-absolute": "path",
+        "ipath-noscheme": "path",
+        "ipath-rootless": "path",
+        "ipath-empty": "path",
+        "query": "query",
+        "iquery": "query",
+        "fragment": "fragment",
+        "ifragment": "fragment",
+    }
 
     @property
     def type(self) -> URIType:
@@ -119,9 +147,9 @@ class URI(_Str):
 
         if self.scheme:
             return URIType.ABSOLUTE
-        if self.authority or self.iauthority:
+        if self.authority:
             return URIType.NON_RELATIVE
-        if self.path or self.ipath:
+        if self.path:
             if str(self).startswith("#"):
                 return URIType.JSON_POINTER
             return URIType.RELATIVE
@@ -142,7 +170,7 @@ class URI(_Str):
         Attempts multiple parsing strategies in order of preference.
 
         Args:
-            value (str): A string representing a URI.
+            value: A string representing a URI.
 
         Raises:
             AmatiValueError: If the input string is None, not a valid URI according to
@@ -206,13 +234,7 @@ class URI(_Str):
 
         # A URI is invalid if it contains only a fragment without scheme, authority,
         # or path.
-        if (
-            not self.scheme
-            and not self.iauthority
-            and not self.authority
-            and not self.ipath
-            and not self.path
-        ):
+        if not self.scheme and not self.authority and not self.path:
             raise AmatiValueError(
                 "{value} does not contain a scheme, authority or path"
             )
@@ -221,9 +243,6 @@ class URI(_Str):
         if self.authority:
             tld_candidate = f".{self.authority.split(".")[-1]}"
             self.tld_registered = tld_candidate in TLDS
-        if self.iauthority:
-            tld_candidate = f".{self.iauthority.split(".")[-1]}"
-            self.tld_registered = tld_candidate in TLDS
 
     def _add_attributes(self: Self, node: Node):
         """
@@ -231,27 +250,22 @@ class URI(_Str):
 
         This method traverses the parsed grammar tree and assigns values to the
         appropriate class attributes based on the node names and types encountered.
-        Special handling is provided for scheme nodes (converted to Scheme objects)
-        and path nodes (categorized by type).
+        Special handling is provided for scheme nodes (converted to Scheme objects).
 
         Args:
-            node (Node): The current node from the parsed ABNF grammar tree.
+            node: The current node from the parsed ABNF grammar tree.
         """
 
-        if node.name in URI.__annotations__.keys():
-            # If the node name is in the URI annotations, set the attribute
-            self.__dict__[node.name] = node.value
+        # If the node name is in the URI annotations, set the attribute
+        if node.name in self._attribute_map:
+            self.__dict__[self._attribute_map[node.name]] = node.value
 
         for child in node.children:
 
             if child.name == "scheme":
                 self.__dict__["scheme"] = Scheme(child.value)
-            if child.name in self._path_types:
-                self.__dict__["path"] = child.value
-            if child.name in self._ipath_types:
-                self.__dict__["ipath"] = child.value
-            elif child.name in URI.__annotations__.keys():
-                self.__dict__[child.name] = child.value
+            elif child.name in self._attribute_map:
+                self.__dict__[self._attribute_map[child.name]] = child.value
 
             # Recursively process child nodes (LiteralNode has empty children list)
             self._add_attributes(child)
@@ -267,17 +281,13 @@ class URIWithVariables(URI):
     but return the original string when called.
 
     Attributes:
-        scheme (Optional[str]): The URI scheme component (e.g., "http", "https",
-            "file").
-        authority (Optional[str]): The authority component (typically host/server).
-        path (Optional[str]): The path component of the URI.
-        query (Optional[str]): The query string component.
-        fragment (Optional[str]): The fragment identifier component.
-        is_iri (bool): Whether this is an Internationalized Resource Identifier
-            (RFC 3987).
-        scheme_status (Optional[str]): The registration status of the scheme with IANA,
-            if known. Can be used
-        tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
+        scheme: The URI scheme component (e.g., "http", "https").
+        authority: The authority component.
+        path: The path component
+        query: The query string component
+        fragment: The fragment identifier
+        is_iri: Whether this is an Internationalized Resource Identifier.
+        tld_registered: Whether the top-level domain is registered with IANA.
 
     Inherits:
         URI: Represents a Uniform Resource Identifier (URI) as defined in RFC 3986/3987.
@@ -293,11 +303,9 @@ class URIWithVariables(URI):
         Args:
             value: The URI to validate
 
-        Returns:
-            The original value, if valid
-
         Raises:
-            ParseError: If the URI is not valid
+            ValueError: If there are unbalanced or embedded braces in the URI
+            AmatiValueError: If the value is None
         """
 
         if value is None:  # type: ignore
