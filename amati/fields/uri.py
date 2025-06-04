@@ -5,10 +5,11 @@ Validates a URI according to the RFC3986 ABNF grammar
 import json
 import pathlib
 from enum import Enum
-from typing import Optional
+from typing import Optional, Self
 
-import rfc3987
-from abnf import ParseError
+import idna
+from abnf import Node, ParseError, Rule
+from abnf.grammars import rfc3986, rfc3987
 
 from amati import AmatiValueError, Reference
 from amati.fields import Str as _Str
@@ -19,14 +20,56 @@ DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 with open(DATA_DIRECTORY / "schemes.json", "r", encoding="utf-8") as f:
     SCHEMES = json.loads(f.read())
 
-with open(DATA_DIRECTORY / "tlds.json", "r", encoding="utf-8") as f:
-    TLDS = json.loads(f.read())
-
 
 class Scheme(_Str):
+    """Represents a URI scheme with validation and status tracking.
+
+    This class validates URI schemes according to RFC 3986 standards and
+    provides information about their registration status with IANA. It
+    inherits from _Str to provide string-like behavior while adding
+    scheme-specific functionality.
+
+    Attributes:
+        status: The IANA registration status of the scheme. Common values
+            include "Permanent", "Provisional", "Historical", or None for
+            unregistered schemes.
+
+    Example:
+        >>> scheme = Scheme("https")
+        >>> print(scheme.status) # Output: 'Permanent'
+    """
+
     status: Optional[str] = None
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
+        """Initialize a new Scheme instance with validation.
+
+        Args:
+            value: The scheme string
+
+        Raises:
+            AmatiValueError: If the provided value does not conform to RFC 3986
+                scheme syntax rules.
+        """
+
+        super().__init__()
+
+        # Validate the scheme against RFC 3986 syntax rules
+        # This will raise ParseError if the scheme is invalid
+        try:
+            rfc3986.Rule("scheme").parse_all(value)
+        except ParseError as e:
+            raise AmatiValueError(
+                f"{value} is not a valid URI scheme",
+                reference=Reference(
+                    title="Uniform Resource Identifier (URI): Generic Syntax",
+                    section="3.1 - Scheme",
+                    url="https://www.rfc-editor.org/rfc/rfc3986#section-3.1",
+                ),
+            ) from e
+
+        # Look up the scheme in the IANA registry to get status info
+        # Returns None if the scheme is not in the registry
         self.status = SCHEMES.get(value, None)
 
 
@@ -40,47 +83,77 @@ class URIType(str, Enum):
 
 class URI(_Str):
     """
-    Represents a Uniform Resource Identifier (URI) as defined in RFC 3986/3987.
+    A class representing a Uniform Resource Identifier (URI) as defined in
+    RFC 3986/3987.
 
     This class parses and validates URI strings, supporting standard URIs, IRIs
     (Internationalized Resource Identifiers), and JSON pointers. It provides attributes
     for accessing URI components and determining the URI type and validity.
 
+    The class attempts to parse URIs using multiple RFC specifications in order of
+    preference, falling back to less restrictive parsing when necessary.
+
     Attributes:
-        scheme (Optional[str]): The URI scheme component (e.g., "http", "https",
-            "file").
-        authority (Optional[str]): The authority component (typically host/server).
-        path (Optional[str]): The path component of the URI.
-        query (Optional[str]): The query string component.
-        fragment (Optional[str]): The fragment identifier component.
-        is_iri (bool): Whether this is an Internationalized Resource Identifier
-            (RFC 3987).
-        scheme_status (Optional[str]): The registration status of the scheme with IANA,
-            if known. Can be used
-        tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
+        scheme: The URI scheme component (e.g., "http", "https").
+        authority: The authority component.
+        path: The path component
+        query: The query string component
+        fragment: The fragment identifier
+        is_iri: Whether this is an Internationalized Resource Identifier.
+
+    Example:
+        >>> uri = URI("https://example.com/path?query#fragment")
+        >>> print(uri.scheme)  # Output: https
+        >>> print(uri.authority)  # Output: example.com
+        >>> print(uri.type)  # Output: URIType.ABSOLUTE
     """
 
     scheme: Optional[Scheme] = None
     authority: Optional[str] = None
+    host: Optional[str] = None
     path: Optional[str] = None
     query: Optional[str] = None
     fragment: Optional[str] = None
-    # Is this an RFC 3987 "Internationalized Resource Identifier (IRI)
-    # per RFC 3987
+    # RFC 3987 Internationalized Resource Identifier (IRI) flag
     is_iri: bool = False
-    tld_registered: bool = False
+
+    _attribute_map: dict[str, str] = {
+        "authority": "authority",
+        "iauthority": "authority",
+        "host": "host",
+        "ihost": "host",
+        "path-abempty": "path",
+        "path-absolute": "path",
+        "path-noscheme": "path",
+        "path-rootless": "path",
+        "path-empty": "path",
+        "ipath-abempty": "path",
+        "ipath-absolute": "path",
+        "ipath-noscheme": "path",
+        "ipath-rootless": "path",
+        "ipath-empty": "path",
+        "query": "query",
+        "iquery": "query",
+        "fragment": "fragment",
+        "ifragment": "fragment",
+    }
 
     @property
     def type(self) -> URIType:
         """
-        Determine the type of the URI.
+        Determine the type of the URI based on its components.
 
         This property analyzes the URI components to classify the URI according to the
-        URIType enumeration.
+        URIType enumeration. The classification follows a hierarchical approach:
+        absolute URIs take precedence over non-relative, which take precedence over
+        relative URIs.
 
         Returns:
             URIType: The classified type of the URI (ABSOLUTE, NON_RELATIVE, RELATIVE,
-                     JSON_POINTER, or UNKNOWN).
+                     or JSON_POINTER).
+
+        Raises:
+            TypeError: If the URI has no scheme, authority, or path components.
         """
 
         if self.scheme:
@@ -105,14 +178,15 @@ class URI(_Str):
 
         Parses the input string according to RFC 3986/3987 grammar rules for URIs/IRIs.
         Handles special cases like JSON pointers (RFC 6901) and performs validation.
-        Sets appropriate attributes based on the parsed components.
+        Attempts multiple parsing strategies in order of preference.
 
         Args:
-            value (str): A string representing a URI.
+            value: A string representing a URI.
 
         Raises:
-            AmatiValueError: If the input string is not a valid URI, or if essential
-                components are missing.
+            AmatiValueError: If the input string is None, not a valid URI according to
+                any supported RFC specification, is a JSON pointer with invalid syntax,
+                or contains only a fragment without other components.
         """
 
         super().__init__()
@@ -122,10 +196,10 @@ class URI(_Str):
 
         candidate = value
 
-        # The OAS standard is to use a fragment identifier
-        # to indicate that it is a JSON pointer per RFC 6901, e.g.
-        # "$ref": "#/components/schemas/pet".
-        # The hash does not indicate that the URI is a fragment.
+        # Handle JSON pointers as per OpenAPI Specification (OAS) standard.
+        # OAS uses fragment identifiers to indicate JSON pointers per RFC 6901,
+        # e.g., "$ref": "#/components/schemas/pet".
+        # The hash symbol does not indicate a URI fragment in this context.
 
         if value.startswith("#"):
             candidate = value[1:]
@@ -141,35 +215,70 @@ class URI(_Str):
                     ),
                 ) from e
 
-        # Parse as if the candidate were an IRI per RFC 3987.
-        # Raises ValueError if invalid
-        result = rfc3987.parse(candidate)  # type: ignore
+        # Attempt parsing with multiple RFC specifications in order of preference.
+        # Start with most restrictive (RFC 3986 URI) and fall back to more permissive
+        # specifications as needed.
+        rules_to_attempt: tuple[Rule, ...] = (
+            rfc3986.Rule("URI"),
+            rfc3987.Rule("IRI"),
+            rfc3986.Rule("hier-part"),
+            rfc3987.Rule("ihier-part"),
+            rfc3986.Rule("relative-ref"),
+            rfc3987.Rule("irelative-ref"),
+        )
 
-        for component, value in result.items():
-            if not value:
+        for rule in rules_to_attempt:
+            try:
+                result = rule.parse_all(candidate)
+            except ParseError:
+                # If the rule fails, continue to the next rule
                 continue
 
-            if component == "scheme":
-                self.__dict__["scheme"] = Scheme(value)
-            else:
-                self.__dict__[component] = value
+            self._add_attributes(result)
 
-        # If an URI/IRI is invalid if only a fragment.
+            # Mark as IRI if parsed using RFC 3987 rules
+            if rule.__module__ == rfc3987.__name__:
+                self.is_iri = True
+            elif self.host:
+                # If the host is IDNA encoded then the URI is an IRI.
+                # IDNA encoded URIs will successfully parse with RFC 3986
+                self.is_iri = idna.decode(self.host, uts46=True) != self.host.lower()
+
+            # Successfully parsed - stop attempting other rules
+            break
+
+        # A URI is invalid if it contains only a fragment without scheme, authority,
+        # or path.
         if not self.scheme and not self.authority and not self.path:
             raise AmatiValueError(
-                "{value} does not contain a scheme, authority or path"
+                f"{value} does not contain a scheme, authority or path"
             )
 
-        # If valid according to RFC 3987 but not ASCII the candidate is a IRI
-        # not a URI
-        try:
-            candidate.encode("ascii")
-        except UnicodeEncodeError:
-            self.is_iri = True
+    def _add_attributes(self: Self, node: Node):
+        """
+        Recursively extract and set attributes from the parsed ABNF grammar tree.
 
-        if self.authority:
-            tld_candidate = f".{self.authority.split(".")[-1]}"
-            self.tld_registered = tld_candidate in TLDS
+        This method traverses the parsed grammar tree and assigns values to the
+        appropriate class attributes based on the node names and types encountered.
+        Special handling is provided for scheme nodes (converted to Scheme objects).
+
+        Args:
+            node: The current node from the parsed ABNF grammar tree.
+        """
+
+        for child in node.children:
+
+            # If the node name is in the URI annotations, set the attribute
+            if child.name == "scheme":
+                self.__dict__["scheme"] = Scheme(child.value)
+            elif child.name in self._attribute_map:
+                self.__dict__[self._attribute_map[child.name]] = child.value
+
+            # If the child is a node with children, recursively add attributes
+            # This is necessary for nodes that have nested structures, such as
+            # the hier-part that may contain subcomponents.
+            if child.children:
+                self._add_attributes(child)
 
 
 class URIWithVariables(URI):
@@ -182,17 +291,13 @@ class URIWithVariables(URI):
     but return the original string when called.
 
     Attributes:
-        scheme (Optional[str]): The URI scheme component (e.g., "http", "https",
-            "file").
-        authority (Optional[str]): The authority component (typically host/server).
-        path (Optional[str]): The path component of the URI.
-        query (Optional[str]): The query string component.
-        fragment (Optional[str]): The fragment identifier component.
-        is_iri (bool): Whether this is an Internationalized Resource Identifier
-            (RFC 3987).
-        scheme_status (Optional[str]): The registration status of the scheme with IANA,
-            if known. Can be used
-        tld_registered (Optional[bool]): Whether the TLD is registered with IANA.
+        scheme: The URI scheme component (e.g., "http", "https").
+        authority: The authority component.
+        path: The path component
+        query: The query string component
+        fragment: The fragment identifier
+        is_iri: Whether this is an Internationalized Resource Identifier.
+        tld_registered: Whether the top-level domain is registered with IANA.
 
     Inherits:
         URI: Represents a Uniform Resource Identifier (URI) as defined in RFC 3986/3987.
@@ -208,11 +313,9 @@ class URIWithVariables(URI):
         Args:
             value: The URI to validate
 
-        Returns:
-            The original value, if valid
-
         Raises:
-            ParseError: If the URI is not valid
+            ValueError: If there are unbalanced or embedded braces in the URI
+            AmatiValueError: If the value is None
         """
 
         if value is None:  # type: ignore

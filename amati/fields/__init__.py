@@ -12,4 +12,4 @@ from amati.fields.http_status_codes import HTTPStatusCode
 from amati.fields.iso9110 import HTTPAuthenticationScheme
 from amati.fields.media import MediaType
 from amati.fields.spdx_licences import SPDXURL, SPDXIdentifier
-from amati.fields.uri import URI, URIType, URIWithVariables
+from amati.fields.uri import URI, Scheme, URIType, URIWithVariables
