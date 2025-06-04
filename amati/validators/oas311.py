@@ -219,6 +219,66 @@ class ServerVariableObject(GenericObject):
 
 
 @specification_extensions("x-")
+class ComponentsObject(GenericObject):
+    """
+    Validates the OpenAPI Specification components object - §4.8.7
+    """
+
+    schemas: Optional[dict[str, "SchemaObject | ReferenceObject"]] = None
+    responses: Optional[dict[str, "ResponseObject | ReferenceObject"]] = None
+    paremeters: Optional[dict[str, "ParameterObject | ReferenceObject"]] = None
+    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
+    requestBodies: Optional[dict[str, "RequestBodyObject | ReferenceObject"]] = None
+    headers: Optional[dict[str, "HeaderObject | ReferenceObject"]] = None
+    securitySchemes: Optional[dict[str, "SecuritySchemeObject | ReferenceObject"]] = (
+        None
+    )
+    links: Optional[dict[str, "LinkObject | ReferenceObject"]] = None
+    callbacks: Optional[dict[str, "CallbackObject | ReferenceObject"]] = None
+    pathItems: Optional[dict[str, "PathItemObject"]] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#components-object",
+        section="Components Object",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_all_fields(
+        cls, data: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
+        """
+        Validates the components object.
+
+        Args:
+            data: The data to validate.
+
+        Returns:
+            The validated components object.
+        """
+
+        pattern: str = r"^[a-zA-Z0-9\.\-_]+$."
+
+        # Validate each field in the components object
+        for field_name, value in data.items():
+            if field_name.startswith("x-"):
+                continue
+
+            if not isinstance(value, dict):  # type: ignore
+                raise ValueError(
+                    f"Invalid type for '{field_name}': expected dict, got {type(value)}"
+                )
+
+            for key in value.keys():
+                if not re.match(pattern, key):
+                    raise ValueError(
+                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}" # pylint: disable=line-too-long
+                    )
+
+        return data
+
+
+@specification_extensions("x-")
 class ServerObject(GenericObject):
     """
     Validates the OpenAPI Specification server object - §4.8.5
@@ -234,17 +294,34 @@ class ServerObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class PathItemObject(GenericObject):
-    """
-    Placeholder whilst other objects are defined.
-    """
+    """Validates the OpenAPI Specification path item object - §4.8.9"""
 
-    pass
+    ref_: Optional[URI] = Field(alias="$ref", default=None)
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    get: "Optional[OperationObject]" = None
+    put: "Optional[OperationObject]" = None
+    post: "Optional[OperationObject]" = None
+    delete: "Optional[OperationObject]" = None
+    options: "Optional[OperationObject]" = None
+    head: "Optional[OperationObject]" = None
+    patch: "Optional[OperationObject]" = None
+    trace: "Optional[OperationObject]" = None
+    servers: "Optional[list[ServerObject]]" = None
+    parameters: "Optional[list[ParameterObject | ReferenceObject]]" = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#path-item-object",
+        section="Path Item Object",
+    )
+
 
 @specification_extensions("x-")
 class OperationObject(GenericObject):
-    """Validates the OpenAPI Specification operation object - §4.8.10
-    """
+    """Validates the OpenAPI Specification operation object - §4.8.10"""
+
     tags: Optional[list[str]] = None
     summary: Optional[str] = None
     description: Optional[str | CommonMark] = None
@@ -269,7 +346,6 @@ class ParameterObject(GenericObject):
     """Validates the OpenAPI Specification parameter object - §4.8.11"""
 
     pass
-
 
 
 @specification_extensions("x-")
