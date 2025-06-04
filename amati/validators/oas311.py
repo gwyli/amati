@@ -233,11 +233,14 @@ class ServerObject(GenericObject):
         section="Server Object",
     )
 
+
 class PathItemObject(GenericObject):
     """
     Placeholder whilst other objects are defined.
     """
+
     pass
+
 
 @specification_extensions("x-")
 class ExternalDocumentationObject(GenericObject):
@@ -420,6 +423,7 @@ class ResponseObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#response-object",
         section="Response Object",
     )
+
 
 @specification_extensions("x-")
 class CallbackObject(GenericObject):
