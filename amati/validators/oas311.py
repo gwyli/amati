@@ -241,6 +241,36 @@ class PathItemObject(GenericObject):
 
     pass
 
+@specification_extensions("x-")
+class OperationObject(GenericObject):
+    """Validates the OpenAPI Specification operation object - §4.8.10
+    """
+    tags: Optional[list[str]] = None
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    externalDocs: "Optional[ExternalDocumentationObject]" = None
+    operationId: Optional[str] = None
+    parameters: "Optional[list[ParameterObject | ReferenceObject]]" = None
+    requestBody: "Optional[RequestBodyObject | ReferenceObject]" = None
+    responses: "Optional[ResponsesObject]" = None
+    callbacks: "Optional[dict[str, CallbackObject | ReferenceObject]]" = None
+    deprecated: Optional[bool] = False
+    security: "Optional[list[SecurityRequirementObject]]" = None
+    servers: "Optional[list[ServerObject]]" = None
+
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#operation-object",
+        section="Operation Object",
+    )
+
+
+class ParameterObject(GenericObject):
+    """Validates the OpenAPI Specification parameter object - §4.8.11"""
+
+    pass
+
+
 
 @specification_extensions("x-")
 class ExternalDocumentationObject(GenericObject):
