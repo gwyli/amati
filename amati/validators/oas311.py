@@ -233,6 +233,11 @@ class ServerObject(GenericObject):
         section="Server Object",
     )
 
+class PathItemObject(GenericObject):
+    """
+    Placeholder whilst other objects are defined.
+    """
+    pass
 
 @specification_extensions("x-")
 class ExternalDocumentationObject(GenericObject):
@@ -415,6 +420,70 @@ class ResponseObject(GenericObject):
         url="https://spec.openapis.org/oas/v3.1.1.html#response-object",
         section="Response Object",
     )
+
+@specification_extensions("x-")
+class CallbackObject(GenericObject):
+    """
+    Validates the OpenAPI Specification callback object - §4.8.18
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    # The keys are runtime expressions that resolve to a URL
+    # The values are Response Objects or Reference Objects
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#callback-object",
+        section="Callback Object",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, PathItemObject]:
+        """
+        Validates the callback object.
+        """
+
+        validated_data: dict[str, PathItemObject] = {}
+
+        # Everything after a { but before a } should be runtime expression
+        pattern: str = r"\{([^}]+)\}"
+
+        for field_name, value in data.items():
+
+            # If the value is a specification extension, allow it
+            if field_name.startswith("x-"):
+                validated_data[field_name] = PathItemObject.model_validate(value)
+                continue
+
+            # Either the field name is a runtime expression, so test this:
+            try:
+                RuntimeExpression(field_name)
+                validated_data[field_name] = PathItemObject.model_validate(value)
+                continue
+            except AmatiValueError:
+                pass
+
+            # Or, the field name is a runtime expression embedded in a string
+            # value per https://spec.openapis.org/oas/latest.html#examples-0
+            matches = re.findall(pattern, field_name)
+
+            for match in matches:
+                try:
+                    RuntimeExpression(match)
+                except AmatiValueError as e:
+                    raise AmatiValueError(
+                        f"Invalid runtime expression '{match}' in field '{field_name}'",
+                        CallbackObject._reference,
+                    ) from e
+
+            if matches:
+                validated_data[field_name] = PathItemObject.model_validate(value)
+            else:
+                # If the field does not contain a valid runtime expression
+                raise ValueError(f"Invalid type for numeric field '{field_name}'")
+
+        return validated_data
 
 
 @specification_extensions("x-")
