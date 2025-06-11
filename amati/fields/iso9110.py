@@ -47,7 +47,9 @@ class HTTPAuthenticationScheme(_Str):
         >>> scheme = HTTPAuthenticationScheme("Bearer")
         >>> str(scheme)
         'Bearer'
-        >>> HTTPAuthenticationScheme("InvalidScheme")  # Raises AmatiValueError
+        >>> HTTPAuthenticationScheme("InvalidScheme") 
+        Traceback (most recent call last):
+        amati.AmatiValueError: message
     """
 
     def __init__(self, value: str):

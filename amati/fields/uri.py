@@ -35,8 +35,8 @@ class Scheme(_Str):
             unregistered schemes.
 
     Example:
-        >>> scheme = Scheme("https")
-        >>> print(scheme.status) # Output: 'Permanent'
+        >>> Scheme("https").status
+        'Permanent'
     """
 
     status: Optional[str] = None
@@ -103,9 +103,12 @@ class URI(_Str):
 
     Example:
         >>> uri = URI("https://example.com/path?query#fragment")
-        >>> print(uri.scheme)  # Output: https
-        >>> print(uri.authority)  # Output: example.com
-        >>> print(uri.type)  # Output: URIType.ABSOLUTE
+        >>> uri.scheme
+        'https'
+        >>> uri.authority
+        'example.com'
+        >>> uri.type
+        <URIType.ABSOLUTE: 'absolute'>
     """
 
     scheme: Optional[Scheme] = None

@@ -46,3 +46,7 @@ relative_files=true
 [tool.pyright]
 reportMissingTypeStubs=false
 typeCheckingMode="strict"
+
+[tool.pytest.ini_options]
+doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
+addopts = "--strict-markers"

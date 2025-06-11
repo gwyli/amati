@@ -46,7 +46,9 @@ class SPDXIdentifier(_Str):
         >>> license_id = SPDXIdentifier("MIT")
         >>> str(license_id)
         'MIT'
-        >>> SPDXIdentifier("InvalidLicense")  # Raises AmatiValueError
+        >>> SPDXIdentifier("InvalidLicense")
+        Traceback (most recent call last):
+        amati.AmatiValueError: message
     """
 
     def __init__(self, value: str):
@@ -75,7 +77,9 @@ class SPDXURL(URI):  # pylint: disable=invalid-name
         >>> license_url = SPDXURL("https://www.apache.org/licenses/LICENSE-2.0")
         >>> license_url.scheme
         'https'
-        >>> SPDXURL("https://example.com")  # Raises AmatiValueError
+        >>> SPDXURL("https://example.com")
+        Traceback (most recent call last):
+        amati.AmatiValueError: message
     """
 
     def __init__(self, value: str):
