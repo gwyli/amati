@@ -46,7 +46,7 @@ jobs:
         run: uv run pytest --cov
 
       - name: Doctests
-        run: uv run pytest --doctest-modules /amati
+        run: uv run pytest --doctest-modules amati/
 
       - name: Coverage comment
         id: coverage_comment
