@@ -272,7 +272,7 @@ class ComponentsObject(GenericObject):
             for key in value.keys():
                 if not re.match(pattern, key):
                     raise ValueError(
-                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}" # pylint: disable=line-too-long
+                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # pylint: disable=line-too-long
                     )
 
         return data
