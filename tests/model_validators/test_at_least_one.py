@@ -14,7 +14,7 @@ class AtLeastOneNoRestrictions(BaseModel):
     name: Optional[str] = None
     age: Optional[int] = None
     music: Optional[list[int]] = None
-    _at_least_one = mv.at_least_one()
+    _at_least_one_of = mv.at_least_one_of()
     _reference: ClassVar[Reference] = Reference(title="test")
 
 
@@ -22,7 +22,7 @@ class AtLeastOneWithRestrictions(BaseModel):
     name: Optional[str] = None
     age: Optional[int] = None
     music: Optional[list[int]] = None
-    _at_least_one = mv.at_least_one(fields=["name", "age"])
+    _at_least_one_of = mv.at_least_one_of(fields=["name", "age"])
     _reference: ClassVar[Reference] = Reference(title="test")
 
 
@@ -30,8 +30,8 @@ class AtLeastOneWithTwoRestrictions(BaseModel):
     name: Optional[str] = None
     age: Optional[int] = None
     music: Optional[list[int]] = None
-    _at_least_one_name = mv.at_least_one(fields=["name"])
-    _at_least_one_age = mv.at_least_one(fields=["age"])
+    _at_least_one_of_name = mv.at_least_one_of(fields=["name"])
+    _at_least_one_of_age = mv.at_least_one_of(fields=["age"])
     _reference: ClassVar[Reference] = Reference(title="test")
 
 
@@ -41,7 +41,7 @@ class AtLeastOneWithTwoRestrictions(BaseModel):
     st.integers(min_value=MIN),
     st.lists(st.integers(min_value=MIN), min_size=1),
 )
-def test_at_least_one_no_restrictions(name: str, age: int, music: list[int]):
+def test_at_least_one_of_no_restrictions(name: str, age: int, music: list[int]):
     """Test when at least one field is not empty. Uses both None and falsy values."""
 
     # Tests with None
@@ -105,9 +105,7 @@ def test_at_least_one_no_restrictions(name: str, age: int, music: list[int]):
     st.integers(min_value=MIN),
     st.lists(st.integers(min_value=MIN), min_size=1),
 )
-def test_at_least_one_with_restrictions(
-    name: str, age: int, music: list[int]
-):
+def test_at_least_one_of_with_restrictions(name: str, age: int, music: list[int]):
     """Test when at least one field is not empty with a field restriction.
     Uses both None and falsy values."""
 
@@ -165,15 +163,14 @@ def test_at_least_one_with_restrictions(
     with pytest.raises(ValidationError):
         AtLeastOneNoRestrictions(name="", age=None, music=[])
 
+
 # Using a min_value forces integers to be not-None
 @given(
     text_excluding_empty_string(),
     st.integers(min_value=MIN),
     st.lists(st.integers(min_value=MIN), min_size=1),
 )
-def test_at_least_one_with_two_restrictions(
-    name: str, age: int, music: list[int]
-):
+def test_at_least_one_of_with_two_restrictions(name: str, age: int, music: list[int]):
     """Test when at least two fields are not empty with a field restriction.
     Uses both None and falsy values."""
 

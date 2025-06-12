@@ -48,7 +48,7 @@ def is_truthy_with_numeric_zero(value: Any) -> bool:
     return bool(value)
 
 
-def at_least_one(
+def at_least_one_of(
     fields: Optional[Sequence[str]] = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure at least one public field is non-empty.
@@ -69,10 +69,12 @@ def at_least_one(
         ValueError: If all public fields are empty after initialization.
 
     Example:
+        >>> from amati import Reference
         >>> class User(GenericObject):
         ...     name: str = ""
         ...     email: str = ""
-        ...     _at_least_one = at_least_one()
+        ...     _at_least_one_of = at_least_one_of()
+        ...     _reference: Reference = Reference(title="test")
         ...
         >>> user = User()
         Traceback (most recent call last):
@@ -83,7 +85,8 @@ def at_least_one(
         ...     name: str = ""
         ...     email: str = ""
         ...     age: int = None
-        ...     _at_least_one = at_least_one(fields=["name", "email"])
+        ...     _at_least_one_of = at_least_one_of(fields=["name", "email"])
+        ...     _reference: Reference = Reference(title="test")
         ...
         >>> user = User()
         Traceback (most recent call last):
@@ -137,7 +140,7 @@ def at_least_one(
     return validate_at_least_one
 
 
-def only_one(
+def only_one_of(
     fields: Optional[Sequence[str]] = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure at most one public field is non-empty.
@@ -159,10 +162,12 @@ def only_one(
             after initialization.
 
     Example:
+        >>> from amati import Reference
         >>> class User(GenericObject):
         ...     email: str = ""
         ...     name: str = ""
-        ...     _only_one = only_one()
+        ...     _only_one_of = only_one_of()
+        ...     _reference: Reference = Reference(title="test")
         ...
         >>> user = User(email="test@example.com")  # Works fine
         >>> user = User(name="123-456-7890")  # Works fine
@@ -174,7 +179,8 @@ def only_one(
         ...     name: str = ""
         ...     email: str = ""
         ...     age: int = None
-        ...     _only_one = only_one(["name", "email"])
+        ...     _only_one_of = only_one_of(["name", "email"])
+        ...     _reference: Reference = Reference(title="test")
         ...
         >>> user = User(name="Bob")  # Works fine
         >>> user = User(email="test@example.com")  # Works fine
@@ -223,6 +229,105 @@ def only_one(
                 self._reference,  # pylint: disable=protected-access # type: ignore
             )
 
+        return self
+
+    return validate_only_one
+
+
+def all_of(
+    fields: Optional[Sequence[str]] = None,
+) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
+    """Factory that adds validation to ensure at most one public field is non-empty.
+
+    This factory adds a Pydantic model validator that checks all public fields
+    (fields not starting with underscore) or a specified subset, and raises
+    a ValueError if more than one of them contain truthy values.
+
+    Args:
+        fields: Optional sequence of field names to check. If provided, only these
+            fields will be validated. If not provided, all public fields will be
+            checked.
+
+    Returns:
+        The validator that ensures at most one public field is non-empty.
+
+    Raises:
+        ValueError: If more than one public field (or specified field) is non-empty
+            after initialization.
+
+    Example:
+        >>> from amati import Reference
+        >>> class User(GenericObject):
+        ...     email: str = ""
+        ...     name: str = ""
+        ...     _all_of = all_of()
+        ...     _reference: Reference = Reference(title="test")
+        ...
+        >>> user = User(email="test@example.com")
+        Traceback (most recent call last):
+        pydantic_core._pydantic_core.ValidationError: message
+        >>> user = User(name="123-456-7890")
+        Traceback (most recent call last):
+        pydantic_core._pydantic_core.ValidationError: message
+        >>> user = User(email="a@b.com", name="123") # Works fine
+
+        >>> class User(GenericObject):
+        ...     name: str = ""
+        ...     email: str = ""
+        ...     age: int = None
+        ...     _all_of = all_of(["name", "email"])
+        ...     _reference: Reference = Reference(title="test")
+        ...
+        >>> user = User(name="Bob")
+        Traceback (most recent call last):
+        pydantic_core._pydantic_core.ValidationError: message
+        >>> user = User(email="test@example.com")
+        Traceback (most recent call last):
+        pydantic_core._pydantic_core.ValidationError: message
+        >>> user = User(name="Bob", email="a@b.com") # Works fine
+        >>> user = User(age=30)
+        Traceback (most recent call last):
+        pydantic_core._pydantic_core.ValidationError: message
+        >>> user = User(name="Bob", age=30)
+        Traceback (most recent call last):
+        pydantic_core._pydantic_core.ValidationError: message
+
+    Note:
+        Only public fields (not starting with '_') are checked. Private fields
+        and computed fields are ignored in the validation.
+    """
+
+    @model_validator(mode="after")
+    def validate_only_one(self: GenericObject) -> Any:
+        """Validate that at most one public field is non-empty."""
+
+        model_fields: dict[str, Any] = self.model_dump()
+
+        options: Sequence[str] = fields or list(model_fields.keys())
+
+        candidates = {
+            name: value
+            for name, value in model_fields.items()
+            if not name.startswith("_") and name in options
+        }
+
+        # Early return if no fields exist (edge case)
+        if not candidates:
+            return self
+
+        falsy: list[str] = []
+
+        # Store fields with a truthy value
+        for name, value in candidates.items():
+            if not is_truthy_with_numeric_zero(value):
+                falsy.append(name)
+
+        if falsy:
+            msg = f"Expected at all fields to have a value, {", ".join(falsy)} did not"
+            raise AmatiValueError(
+                msg,
+                self._reference,  # pylint: disable=protected-access # type: ignore
+            )
         return self
 
     return validate_only_one
