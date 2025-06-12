@@ -1,5 +1,6 @@
 """Generic factories to add repetitive validators to Pydantic models."""
 
+from numbers import Number
 from typing import Any, Optional, Sequence
 
 from pydantic import model_validator
@@ -10,6 +11,41 @@ from pydantic._internal._decorators import (
 
 from amati import AmatiValueError
 from amati.validators.generic import GenericObject
+
+
+def is_truthy_with_numeric_zero(value: Any) -> bool:
+    """Checks if a variable is truthy, treating numeric zero as truthy.
+
+    This function follows standard Python truthiness rules with one exception:
+    any numeric value that equals 0 (e.g., `0`, `0.0`, `0j`) is considered
+    truthy, rather than falsy.
+
+    Args:
+      value: The variable to test for truthiness. Can be of any type.
+
+    Returns:
+      True if the variable is truthy according to the custom rules, False otherwise.
+
+    Example:
+        >>> is_truthy_with_numeric_zero(0)
+        True
+        >>> is_truthy_with_numeric_zero(1)
+        True
+        >>> is_truthy_with_numeric_zero(0.0)
+        True
+        >>> is_truthy_with_numeric_zero([])
+        False
+        >>> is_truthy_with_numeric_zero("Hello")
+        True
+        >>> is_truthy_with_numeric_zero(None)
+        False
+    """
+    # Check if the value is a number and if it's equal to zero.
+    # numbers.Number is used to cover integers, floats, complex numbers, etc.
+    if isinstance(value, Number):
+        return True
+    # For all other cases, revert to standard Python's bool() conversion.
+    return bool(value)
 
 
 def at_least_one(
@@ -84,7 +120,7 @@ def at_least_one(
 
         # Check if at least one public field has a truthy value
         for value in candidates.values():
-            if value:
+            if is_truthy_with_numeric_zero(value):
                 return self
 
         public_fields = "".join(f"{name}, " for name in candidates.keys())
@@ -177,7 +213,7 @@ def only_one(
 
         # Store fields with a truthy value
         for name, value in candidates.items():
-            if value:
+            if is_truthy_with_numeric_zero(value):
                 truthy.append(name)
 
         if len(truthy) != 1:
