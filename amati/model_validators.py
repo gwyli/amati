@@ -48,6 +48,24 @@ def is_truthy_with_numeric_zero(value: Any) -> bool:
     return bool(value)
 
 
+def _get_candidates(
+    self: GenericObject, fields: Optional[Sequence[str]]
+) -> dict[str, Any]:
+    """
+    Helper function to filter down the list of fields of a model to examine.
+    """
+
+    model_fields: dict[str, Any] = self.model_dump()
+
+    options: Sequence[str] = fields or list(model_fields.keys())
+
+    return {
+        name: value
+        for name, value in model_fields.items()
+        if not name.startswith("_") and name in options
+    }
+
+
 def at_least_one_of(
     fields: Optional[Sequence[str]] = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
@@ -64,9 +82,6 @@ def at_least_one_of(
 
     Returns:
         The validator that ensures at least one public field is non-empty.
-
-    Raises:
-        ValueError: If all public fields are empty after initialization.
 
     Example:
         >>> from amati import Reference
@@ -107,18 +122,8 @@ def at_least_one_of(
     def validate_at_least_one(self: GenericObject) -> Any:
         """Validate that at least one public field is non-empty."""
 
-        model_fields: dict[str, Any] = self.model_dump()
-
-        options: Sequence[str] = fields or list(model_fields.keys())
-
-        candidates = {
-            name: value
-            for name, value in model_fields.items()
-            if not name.startswith("_") and name in options
-        }
-
-        # Early return if no fields exist (edge case)
-        if not candidates:
+        # Early return if no fields exist
+        if not (candidates := _get_candidates(self, fields)):
             return self
 
         # Check if at least one public field has a truthy value
@@ -127,10 +132,6 @@ def at_least_one_of(
                 return self
 
         public_fields = "".join(f"{name}, " for name in candidates.keys())
-
-        # If no public fields then exit
-        if not public_fields:
-            return self
 
         msg = f"{public_fields} do not have values, expected at least one."
         LogMixin.log(
@@ -149,11 +150,11 @@ def at_least_one_of(
 def only_one_of(
     fields: Optional[Sequence[str]] = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
-    """Factory that adds validation to ensure at most one public field is non-empty.
+    """Factory that adds validation to ensure one public field is non-empty.
 
     This factory adds a Pydantic model validator that checks all public fields
     (fields not starting with underscore) or a specified subset, and raises
-    a ValueError if more than one of them contain truthy values.
+    a ValueError if more than one, or none, of them contain truthy values.
 
     Args:
         fields: Optional sequence of field names to check. If provided, only these
@@ -161,11 +162,7 @@ def only_one_of(
             checked.
 
     Returns:
-        The validator that ensures at most one public field is non-empty.
-
-    Raises:
-        ValueError: If more than one public field (or specified field) is non-empty
-            after initialization.
+        The validator that ensures at one public field is non-empty.
 
     Example:
         >>> from amati import Reference
@@ -207,18 +204,8 @@ def only_one_of(
     def validate_only_one(self: GenericObject) -> Any:
         """Validate that at most one public field is non-empty."""
 
-        model_fields: dict[str, Any] = self.model_dump()
-
-        options: Sequence[str] = fields or list(model_fields.keys())
-
-        candidates = {
-            name: value
-            for name, value in model_fields.items()
-            if not name.startswith("_") and name in options
-        }
-
-        # Early return if no fields exist (edge case)
-        if not candidates:
+        # Early return if no fields exist
+        if not (candidates := _get_candidates(self, fields)):
             return self
 
         truthy: list[str] = []
@@ -260,10 +247,6 @@ def all_of(
 
     Returns:
         The validator that ensures at most one public field is non-empty.
-
-    Raises:
-        ValueError: If more than one public field (or specified field) is non-empty
-            after initialization.
 
     Example:
         >>> from amati import Reference
@@ -311,23 +294,13 @@ def all_of(
     def validate_only_one(self: GenericObject) -> Any:
         """Validate that at most one public field is non-empty."""
 
-        model_fields: dict[str, Any] = self.model_dump()
-
-        options: Sequence[str] = fields or list(model_fields.keys())
-
-        candidates = {
-            name: value
-            for name, value in model_fields.items()
-            if not name.startswith("_") and name in options
-        }
-
-        # Early return if no fields exist (edge case)
-        if not candidates:
+        # Early return if no fields exist
+        if not (candidates := _get_candidates(self, fields)):
             return self
 
         falsy: list[str] = []
 
-        # Store fields with a truthy value
+        # Store fields with a falsy value
         for name, value in candidates.items():
             if not is_truthy_with_numeric_zero(value):
                 falsy.append(name)

@@ -46,6 +46,7 @@ from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import VALID_LICENCES
 from amati.logging import Log, LogMixin
+from amati import model_validators as mv
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 TITLE = "OpenAPI Specification v3.1.1"
@@ -93,6 +94,8 @@ class LicenceObject(GenericObject):
         section="License Object",
     )
 
+    _not_url_and_identifier = mv.only_one_of(["url", "identifier"])
+
     @model_validator(mode="after")
     def check_uri_associated_with_identifier(self: Self) -> Self:
         """
@@ -104,27 +107,7 @@ class LicenceObject(GenericObject):
         Returns:
             The validated licence object
         """
-
-        # There are 4 cases
-        # 1. No URL or identifier - invalid
-        # 2. Identifier only - covered in type checking
-        # 3. URI only - should warn if not SPDX
-        # 4. Both Identifier and URI, technically invalid, but should check if
-        # consistent
-
-        # Case 1
-        if not self.url and not self.identifier:
-            LogMixin.log(
-                Log(
-                    message="A Licence object requires a URL or an Identifier.",  # pylint: disable=line-too-long
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-            return self
-
-        # Case 3
+        # URI only - should warn if not SPDX
         if self.url:
             try:
                 SPDXURL(self.url)
@@ -137,25 +120,20 @@ class LicenceObject(GenericObject):
                     )
                 )
 
-        # Case 4
-
-        if self.url and self.identifier:
+        # Both Identifier and URI, technically invalid, but should check if
+        # consistent
+        if (
+            self.url
+            and self.identifier
+            and str(self.url) not in VALID_LICENCES[self.identifier]
+        ):
             LogMixin.log(
                 Log(
-                    message="The Identifier and URL are mutually exclusive",
+                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
                     type=Warning,
                     reference=self._reference,
                 )
             )
-
-            if str(self.url) not in VALID_LICENCES[self.identifier]:
-                LogMixin.log(
-                    Log(
-                        message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
-                        type=Warning,
-                        reference=self._reference,
-                    )
-                )
 
         return self
 
@@ -650,24 +628,7 @@ class ExampleObject(GenericObject):
         section="Example Object",
     )
 
-    @model_validator(mode="after")
-    def check_values_mutually_exclusive(self: Self) -> Self:
-        """
-        Validate that only one of value or externalValue is provided.
-
-        Returns:
-            The validated example object
-        """
-        if self.value is not None and self.externalValue is not None:
-            LogMixin.log(
-                Log(
-                    message="Only one of value or externalValue can be provided",
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-        return self
+    _not_value_and_external_value = mv.only_one_of(["value", "externalValue"])
 
 
 @specification_extensions("x-")
@@ -688,24 +649,9 @@ class LinkObject(GenericObject):
         section="Link Object",
     )
 
-    @model_validator(mode="after")
-    def _validate_operation_ref_id_mutually_exclusive(self: Self) -> Self:
-        """
-        Validate that only one of operationRef or operationId is provided.
-
-        Returns:
-            The validated link object
-        """
-        if self.operationRef is not None and self.operationId is not None:
-            LogMixin.log(
-                Log(
-                    message="Only one of operationRef or operationId can be provided",
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-        return self
+    _not_operationref_and_operationid = mv.only_one_of(
+        fields=["operationRef", "operationId"]
+    )
 
 
 @specification_extensions("x-")
@@ -737,23 +683,7 @@ class HeaderObject(GenericObject):
         section="Link Object",
     )
 
-    @model_validator(mode="after")
-    def _validate_afer(self: Self) -> Self:
-        """
-        Validates that a content and schema header are not
-        both provided in a single header object.
-        """
-
-        if self.schema_ is not None and self.content is not None:
-            LogMixin.log(
-                Log(
-                    message="Only one of content and schema can be provided",
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-        return self
+    _not_schema_and_content = mv.only_one_of(["schema_", "content"])
 
 
 class SchemaObject(GenericObject):

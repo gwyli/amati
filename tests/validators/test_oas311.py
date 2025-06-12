@@ -20,6 +20,8 @@ from amati.validators.oas311 import (
     OpenAPIObject,
 )
 
+from tests.helpers import text_excluding_empty_string
+
 
 @given(st.text(), st.text(), urls())
 def test_example_object(summary: str, description: str, external_value: AnyUrl):
@@ -34,7 +36,7 @@ def test_example_object(summary: str, description: str, external_value: AnyUrl):
         assert LogMixin.logs[0].type == ValueError
 
 
-@given(urls(), st.text())
+@given(urls(), text_excluding_empty_string())
 def test_link_object(operation_ref: AnyUrl, operation_id: str):
     with LogMixin.context():
         LinkObject(operationRef=operation_ref, operationId=operation_id)  # type: ignore
