@@ -1,10 +1,17 @@
-from typing import ClassVar, Optional
-from sys import float_info
-from pydantic import BaseModel, ValidationError
-from hypothesis import given, strategies as st
-import pytest
-from amati import model_validators as mv, Reference
+"""
+Tests amati.model_validators.only_one_of
+"""
 
+from sys import float_info
+from typing import ClassVar, Optional
+
+from hypothesis import given
+from hypothesis import strategies as st
+from pydantic import BaseModel
+
+from amati import Reference
+from amati.logging import LogMixin
+from amati import model_validators as mv
 from tests.helpers import text_excluding_empty_string
 
 MIN = int(float_info.min)
@@ -36,17 +43,21 @@ def test_only_one_of_no_restrictions(name: str, age: int, music: list[int]):
     """Test when at least one field is not empty. Uses both None and falsy values."""
 
     # Tests with None
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name=name, age=age, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name=None, age=age, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name=name, age=None, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name=name, age=age, music=None)
+        assert LogMixin.logs
 
     model = OnlyOneNoRestrictions(name=None, age=None, music=music)
     assert model.music
@@ -58,14 +69,17 @@ def test_only_one_of_no_restrictions(name: str, age: int, music: list[int]):
     assert model.age == age
 
     # Tests with falsy values
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name="", age=age, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name=name, age=None, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneNoRestrictions(name=name, age=age, music=[])
+        assert LogMixin.logs
 
     model = OnlyOneNoRestrictions(name="", age=None, music=music)
     assert model.music
@@ -77,17 +91,21 @@ def test_only_one_of_no_restrictions(name: str, age: int, music: list[int]):
     assert model.age == age
 
     # Test when no fields are provided
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name=None, age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name="", age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name=None, age=None, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name="", age=None, music=[])
+        assert LogMixin.logs
 
 
 # Using a min_value forces integers to be not-None
@@ -101,8 +119,9 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
     Uses both None and falsy values."""
 
     # Tests with None
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneWithRestrictions(name=name, age=age, music=music)
+        assert LogMixin.logs
 
     model = OnlyOneWithRestrictions(name=None, age=age, music=music)
     assert model.age == age and model.music
@@ -110,11 +129,13 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
     model = OnlyOneWithRestrictions(name=name, age=None, music=music)
     assert model.name and model.music
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneWithRestrictions(name=name, age=age, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneWithRestrictions(name=None, age=None, music=music)
+        assert LogMixin.logs
 
     model = OnlyOneWithRestrictions(name=name, age=None, music=None)
     assert model.name
@@ -129,11 +150,13 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
     model = OnlyOneWithRestrictions(name=name, age=None, music=music)
     assert model.name and model.music
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneWithRestrictions(name=name, age=age, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = OnlyOneWithRestrictions(name="", age=None, music=music)
+        assert LogMixin.logs
 
     model = OnlyOneWithRestrictions(name=name, age=None, music=[])
     assert model.name
@@ -142,14 +165,18 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
     assert model.age == age
 
     # Test when no fields are provided
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name=None, age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name="", age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name=None, age=None, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         OnlyOneNoRestrictions(name="", age=None, music=[])
+        assert LogMixin.logs

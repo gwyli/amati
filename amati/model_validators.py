@@ -9,7 +9,7 @@ from pydantic._internal._decorators import (
     PydanticDescriptorProxy,
 )
 
-from amati import AmatiValueError
+from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 
 
@@ -132,10 +132,16 @@ def at_least_one_of(
         if not public_fields:
             return self
 
-        raise AmatiValueError(
-            f"{public_fields} do not have values, expected at least one.",
-            self._reference,  # pylint: disable=protected-access # type: ignore
+        msg = f"{public_fields} do not have values, expected at least one."
+        LogMixin.log(
+            Log(
+                message=msg,
+                type=ValueError,
+                reference=self._reference,  # pylint: disable=protected-access # type: ignore
+            )
         )
+
+        return self
 
     return validate_at_least_one
 
@@ -224,9 +230,13 @@ def only_one_of(
 
         if len(truthy) != 1:
             msg = f"Expected at most one field to have a value, {", ".join(truthy)} did"
-            raise AmatiValueError(
-                msg,
-                self._reference,  # pylint: disable=protected-access # type: ignore
+
+            LogMixin.log(
+                Log(
+                    message=msg,
+                    type=ValueError,
+                    reference=self._reference,  # pylint: disable=protected-access # type: ignore
+                )
             )
 
         return self
@@ -324,10 +334,15 @@ def all_of(
 
         if falsy:
             msg = f"Expected at all fields to have a value, {", ".join(falsy)} did not"
-            raise AmatiValueError(
-                msg,
-                self._reference,  # pylint: disable=protected-access # type: ignore
+
+            LogMixin.log(
+                Log(
+                    message=msg,
+                    type=ValueError,
+                    reference=self._reference,  # pylint: disable=protected-access # type: ignore
+                )
             )
+
         return self
 
     return validate_only_one

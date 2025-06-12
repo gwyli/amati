@@ -1,10 +1,17 @@
-from typing import ClassVar, Optional
-from sys import float_info
-from pydantic import BaseModel, ValidationError
-from hypothesis import given, strategies as st
-import pytest
-from amati import model_validators as mv, Reference
+"""
+Tests amati.model_validators.at_least_one_of
+"""
 
+from sys import float_info
+from typing import ClassVar, Optional
+
+from hypothesis import given
+from hypothesis import strategies as st
+from pydantic import BaseModel
+
+from amati import Reference
+from amati.logging import LogMixin
+from amati import model_validators as mv
 from tests.helpers import text_excluding_empty_string
 
 MIN = int(float_info.min)
@@ -86,17 +93,21 @@ def test_at_least_one_of_no_restrictions(name: str, age: int, music: list[int]):
     assert model.age == age
 
     # Test when no fields are provided
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name=None, age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name="", age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name=None, age=None, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name="", age=None, music=[])
+        assert LogMixin.logs
 
 
 # Using a min_value forces integers to be not-None
@@ -122,8 +133,9 @@ def test_at_least_one_of_with_restrictions(name: str, age: int, music: list[int]
     model = AtLeastOneWithRestrictions(name=name, age=age, music=None)
     assert model.name and model.age == age
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithRestrictions(name=None, age=None, music=music)
+        assert LogMixin.logs
 
     model = AtLeastOneWithRestrictions(name=name, age=None, music=None)
     assert model.name
@@ -141,8 +153,9 @@ def test_at_least_one_of_with_restrictions(name: str, age: int, music: list[int]
     model = AtLeastOneWithRestrictions(name=name, age=age, music=[])
     assert model.name and model.age == age
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithRestrictions(name="", age=None, music=music)
+        assert LogMixin.logs
 
     model = AtLeastOneWithRestrictions(name=name, age=None, music=[])
     assert model.name
@@ -151,17 +164,21 @@ def test_at_least_one_of_with_restrictions(name: str, age: int, music: list[int]
     assert model.age == age
 
     # Test when no fields are provided
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name=None, age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name="", age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name=None, age=None, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         AtLeastOneNoRestrictions(name="", age=None, music=[])
+        assert LogMixin.logs
 
 
 # Using a min_value forces integers to be not-None
@@ -178,52 +195,66 @@ def test_at_least_one_of_with_two_restrictions(name: str, age: int, music: list[
     model = AtLeastOneWithTwoRestrictions(name=name, age=age, music=music)
     assert model.name and model.age == age and model.music
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=None, age=age, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=music)
+        assert LogMixin.logs
 
     model = AtLeastOneWithTwoRestrictions(name=name, age=age, music=None)
     assert model.name and model.age == age
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=None, age=None, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=None, age=age, music=None)
+        assert LogMixin.logs
 
     # Tests with falsy values
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name="", age=age, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=music)
+        assert LogMixin.logs
 
     model = AtLeastOneWithTwoRestrictions(name=name, age=age, music=[])
     assert model.name and model.age == age
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name="", age=None, music=music)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
+    with LogMixin.context():
         model = AtLeastOneWithTwoRestrictions(name="", age=age, music=[])
+        assert LogMixin.logs
 
     # Test when no fields are provided
-    with pytest.raises(ValidationError):
-        AtLeastOneNoRestrictions(name=None, age=None, music=None)
+    with LogMixin.context():
+        AtLeastOneWithTwoRestrictions(name=None, age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
-        AtLeastOneNoRestrictions(name="", age=None, music=None)
+    with LogMixin.context():
+        AtLeastOneWithTwoRestrictions(name="", age=None, music=None)
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
-        AtLeastOneNoRestrictions(name=None, age=None, music=[])
+    with LogMixin.context():
+        AtLeastOneWithTwoRestrictions(name=None, age=None, music=[])
+        assert LogMixin.logs
 
-    with pytest.raises(ValidationError):
-        AtLeastOneNoRestrictions(name="", age=None, music=[])
+    with LogMixin.context():
+        AtLeastOneWithTwoRestrictions(name="", age=None, music=[])
+        assert LogMixin.logs
