@@ -1,11 +1,15 @@
 """Generic factories to add repetitive validators to Pydantic models."""
 
 from typing import Any, Optional, Sequence
-from pydantic import BaseModel, model_validator
+
+from pydantic import model_validator
 from pydantic._internal._decorators import (
-    PydanticDescriptorProxy,
     ModelValidatorDecoratorInfo,
+    PydanticDescriptorProxy,
 )
+
+from amati import AmatiValueError
+from amati.validators.generic import GenericObject
 
 
 def at_least_one(
@@ -29,7 +33,7 @@ def at_least_one(
         ValueError: If all public fields are empty after initialization.
 
     Example:
-        >>> class User(BaseModel):
+        >>> class User(GenericObject):
         ...     name: str = ""
         ...     email: str = ""
         ...     _at_least_one = at_least_one()
@@ -39,7 +43,7 @@ def at_least_one(
         pydantic_core._pydantic_core.ValidationError: message
         >>> user = User(name="John")  # Works fine
 
-        >>> class User(BaseModel):
+        >>> class User(GenericObject):
         ...     name: str = ""
         ...     email: str = ""
         ...     age: int = None
@@ -61,7 +65,7 @@ def at_least_one(
 
     # Create the validator function with proper binding
     @model_validator(mode="after")
-    def validate_at_least_one(self: BaseModel) -> Any:
+    def validate_at_least_one(self: GenericObject) -> Any:
         """Validate that at least one public field is non-empty."""
 
         model_fields: dict[str, Any] = self.model_dump()
@@ -89,7 +93,10 @@ def at_least_one(
         if not public_fields:
             return self
 
-        raise ValueError(f"{public_fields} do not have values, expected at least one.")
+        raise AmatiValueError(
+            f"{public_fields} do not have values, expected at least one.",
+            self._reference,  # pylint: disable=protected-access # type: ignore
+        )
 
     return validate_at_least_one
 
@@ -116,7 +123,7 @@ def only_one(
             after initialization.
 
     Example:
-        >>> class User(BaseModel):
+        >>> class User(GenericObject):
         ...     email: str = ""
         ...     name: str = ""
         ...     _only_one = only_one()
@@ -127,7 +134,7 @@ def only_one(
         Traceback (most recent call last):
         pydantic_core._pydantic_core.ValidationError: message
 
-        >>> class User(BaseModel):
+        >>> class User(GenericObject):
         ...     name: str = ""
         ...     email: str = ""
         ...     age: int = None
@@ -149,7 +156,7 @@ def only_one(
     """
 
     @model_validator(mode="after")
-    def validate_only_one(self: BaseModel) -> Any:
+    def validate_only_one(self: GenericObject) -> Any:
         """Validate that at most one public field is non-empty."""
 
         model_fields: dict[str, Any] = self.model_dump()
@@ -174,10 +181,11 @@ def only_one(
                 truthy.append(name)
 
         if len(truthy) != 1:
-            msg = (
-                f"Expected at most one field to have a value, {", ".join(truthy)} did"
+            msg = f"Expected at most one field to have a value, {", ".join(truthy)} did"
+            raise AmatiValueError(
+                msg,
+                self._reference,  # pylint: disable=protected-access # type: ignore
             )
-            raise ValueError(msg)
 
         return self
 
