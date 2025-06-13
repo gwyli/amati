@@ -13,6 +13,28 @@ from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject
 
 
+class UnknownValue:
+    """
+    Sentinel singleton to represent the existence of a value.
+    """
+
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __repr__(self):
+        return "UNKNOWN"
+
+    def __str__(self):
+        return "UNKNOWN"
+
+
+UNKNOWN = UnknownValue()
+
+
 def is_truthy_with_numeric_zero(value: Any) -> bool:
     """Checks if a variable is truthy, treating numeric zero as truthy.
 
@@ -325,7 +347,7 @@ def all_of(
 
 def if_then(
     conditions: dict[str, Any] | None = None,
-    consequences: dict[str, Any] | None = None,
+    consequences: dict[str, Any | UnknownValue] | None = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure if-then relationships between fields.
 
@@ -385,7 +407,12 @@ def if_then(
             return self
 
         for field, value in consequences.items():
-            if not value == (actual := model_fields.get(field)):
+            actual = model_fields.get(field)
+
+            if value == UNKNOWN and is_truthy_with_numeric_zero(actual):
+                continue
+
+            if not value == actual:
                 LogMixin.log(
                     Log(
                         message=f"Expected {field} to be {value} found {actual}",

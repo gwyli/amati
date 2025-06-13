@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from amati import Reference
 from amati.logging import LogMixin
-from amati.model_validators import if_then
+from amati.model_validators import UNKNOWN, if_then
 
 
 class ModelNoConditions(BaseModel):
@@ -29,6 +29,30 @@ class ModelWithMultipleConditions(BaseModel):
     _if_then = if_then(
         conditions={"role": "manager", "department": "finance"},
         consequences={"can_approve": True},
+    )
+    _reference: Reference = Reference(title="test")
+
+
+# Add new test class after existing classes
+class ModelWithUnknownConditions(BaseModel):
+    role: str = ""
+    permission: bool = False
+    notify: bool = False
+    _if_then = if_then(
+        conditions={"role": "admin"},
+        consequences={"permission": True, "notify": UNKNOWN},
+    )
+    _reference: Reference = Reference(title="test")
+
+
+class ModelWithMultipleUnknownConditions(BaseModel):
+    role: str = ""
+    department: str = ""
+    can_approve: bool = False
+    can_edit: bool = False
+    _if_then = if_then(
+        conditions={"role": "manager", "department": "finance"},
+        consequences={"can_approve": True, "can_edit": UNKNOWN},
     )
     _reference: Reference = Reference(title="test")
 
@@ -137,3 +161,67 @@ def test_multiple_conditions_property_based(
             assert "Expected can_approve to be True" in LogMixin.logs[0].message
         else:
             assert len(LogMixin.logs) == 0
+
+
+# Add new test functions before property-based tests
+def test_unknown_consequence_any_value():
+    """Test that UNKNOWN consequence allows any value when conditions are met."""
+    with LogMixin.context():
+        # Should pass with notify=True
+        model = ModelWithUnknownConditions(role="admin", permission=True, notify=True)
+        assert not LogMixin.logs
+        assert model.notify is True
+
+        # Should also pass with notify=False
+        model = ModelWithUnknownConditions(role="admin", permission=True, notify=False)
+        assert not LogMixin.logs
+        assert model.notify is False
+
+
+def test_unknown_consequence_conditions_not_met():
+    """Test that UNKNOWN consequence is ignored when conditions are not met."""
+    with LogMixin.context():
+        model = ModelWithUnknownConditions(role="user", permission=False, notify=False)
+        assert not LogMixin.logs
+        assert model.notify is False
+
+
+def test_multiple_conditions_unknown_consequence():
+    """Test multiple conditions with UNKNOWN consequence."""
+    with LogMixin.context():
+        # Should pass with can_edit=True
+        model = ModelWithMultipleUnknownConditions(
+            role="manager", department="finance", can_approve=True, can_edit=True
+        )
+        assert not LogMixin.logs
+        assert model.can_edit is True
+
+        # Should also pass with can_edit=False
+        model = ModelWithMultipleUnknownConditions(
+            role="manager", department="finance", can_approve=True, can_edit=False
+        )
+        assert not LogMixin.logs
+        assert model.can_edit is False
+
+
+# Add to existing property-based test or create new one
+@given(
+    role=st.sampled_from(["admin", "user"]),
+    permission=st.booleans(),
+    notify=st.booleans(),
+)
+def test_unknown_property_based(role: str, permission: bool, notify: bool):
+    """Property-based test for UNKNOWN consequences."""
+    with LogMixin.context():
+        model = ModelWithUnknownConditions(
+            role=role, permission=permission, notify=notify
+        )
+
+        if role == "admin" and not permission:
+            assert len(LogMixin.logs) == 1
+            assert "Expected permission to be True" in LogMixin.logs[0].message
+        else:
+            assert len(LogMixin.logs) == 0
+            if role == "admin":
+                # When conditions are met, notify can be any value
+                assert model.notify == notify
