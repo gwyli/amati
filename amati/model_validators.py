@@ -321,3 +321,79 @@ def all_of(
         return self
 
     return validate_only_one
+
+
+def if_then(
+    conditions: dict[str, Any] | None = None,
+    consequences: dict[str, Any] | None = None,
+) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
+    """Factory that adds validation to ensure if-then relationships between fields.
+
+    This factory adds a Pydantic model validator that checks if certain field conditions
+    are met, and if so, validates that other fields have specific values. This creates
+    an if-then relationship between model fields.
+
+    Args:
+        conditions: Dictionary mapping field names to their required values that trigger
+            the validation. All conditions must be met for the consequences to be
+            checked.
+        consequences: Dictionary mapping field names to their required values that must
+            be true when the conditions are met.
+
+    Returns:
+        A validator that ensures the if-then relationship between fields is maintained.
+
+    Raises:
+        ValueError: If a condition and consequence are not present
+
+    Example:
+        >>> from amati import Reference
+        >>> LogMixin.logs = []
+        >>>
+        >>> class User(GenericObject):
+        ...     role: str = ""
+        ...     can_edit: bool = False
+        ...     _if_admin = if_then(
+        ...         conditions={"role": "admin"},
+        ...         consequences={"can_edit": True}
+        ...     )
+        ...     _reference: Reference = Reference(title="test")
+        ...
+        >>> user = User(role="admin", can_edit=True)  # Works fine
+        >>> assert not LogMixin.logs
+        >>> user = User(role="admin", can_edit=False)  # Fails validation
+        >>> assert len(LogMixin.logs) == 1
+        >>> user = User(role="user", can_edit=False)  # Works fine
+        >>> assert len(LogMixin.logs) == 1
+    """
+
+    @model_validator(mode="after")
+    def validate_if_then(self: GenericObject) -> Any:
+
+        if not conditions or not consequences:
+            raise ValueError(
+                "A condition and a consequence must be "
+                f"present to validate {self.__class__.__name__}"
+            )
+
+        model_fields: dict[str, Any] = self.model_dump()
+
+        candidates = {k: v for k, v in model_fields.items() if k in conditions}
+
+        # Conditions not met for validation to occur
+        if not all(conditions[k] == v for k, v in candidates.items()):
+            return self
+
+        for field, value in consequences.items():
+            if not value == (actual := model_fields.get(field)):
+                LogMixin.log(
+                    Log(
+                        message=f"Expected {field} to be {value} found {actual}",
+                        type=ValueError,
+                        reference=self._reference,  # pylint: disable=protected-access # type: ignore
+                    )
+                )
+
+        return self
+
+    return validate_if_then
