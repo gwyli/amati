@@ -85,31 +85,32 @@ def at_least_one_of(
 
     Example:
         >>> from amati import Reference
+        >>> LogMixin.logs = []
+        >>>
         >>> class User(GenericObject):
         ...     name: str = ""
-        ...     email: str = ""
+        ...     email: str = None
         ...     _at_least_one_of = at_least_one_of()
         ...     _reference: Reference = Reference(title="test")
         ...
         >>> user = User()
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
-        >>> user = User(name="John")  # Works fine
+        >>> assert len(LogMixin.logs) == 1
+        >>> LogMixin.logs = []
 
         >>> class User(GenericObject):
         ...     name: str = ""
-        ...     email: str = ""
+        ...     email: str = None
         ...     age: int = None
         ...     _at_least_one_of = at_least_one_of(fields=["name", "email"])
         ...     _reference: Reference = Reference(title="test")
         ...
-        >>> user = User()
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
+        >>>
         >>> user = User(name="John")  # Works fine
+        >>> assert not LogMixin.logs
+        >>> user = User()
+        >>> assert len(LogMixin.logs) == 1
         >>> user = User(age=30)
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
+        >>> assert len(LogMixin.logs) == 2
 
 
     Note:
@@ -131,7 +132,7 @@ def at_least_one_of(
             if is_truthy_with_numeric_zero(value):
                 return self
 
-        public_fields = "".join(f"{name}, " for name in candidates.keys())
+        public_fields = ", ".join(f"{name}" for name in candidates.keys())
 
         msg = f"{public_fields} do not have values, expected at least one."
         LogMixin.log(
@@ -166,6 +167,8 @@ def only_one_of(
 
     Example:
         >>> from amati import Reference
+        >>> LogMixin.logs = []
+        >>>
         >>> class User(GenericObject):
         ...     email: str = ""
         ...     name: str = ""
@@ -174,9 +177,10 @@ def only_one_of(
         ...
         >>> user = User(email="test@example.com")  # Works fine
         >>> user = User(name="123-456-7890")  # Works fine
+        >>> assert not LogMixin.logs
         >>> user = User(email="a@b.com", name="123")
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
+        >>> assert LogMixin.logs
+        >>> LogMixin.logs = []
 
         >>> class User(GenericObject):
         ...     name: str = ""
@@ -187,13 +191,12 @@ def only_one_of(
         ...
         >>> user = User(name="Bob")  # Works fine
         >>> user = User(email="test@example.com")  # Works fine
-        >>> user = User(name="Bob", email="a@b.com")
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
-        >>> user = User(age=30)
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
         >>> user = User(name="Bob", age=30)  # Works fine
+        >>> assert not LogMixin.logs
+        >>> user = User(name="Bob", email="a@b.com")
+        >>> assert len(LogMixin.logs) == 1
+        >>> user = User(age=30)
+        >>> assert len(LogMixin.logs) == 2
 
     Note:
         Only public fields (not starting with '_') are checked. Private fields
@@ -250,19 +253,20 @@ def all_of(
 
     Example:
         >>> from amati import Reference
+        >>> LogMixin.logs = []
+        >>>
         >>> class User(GenericObject):
         ...     email: str = ""
         ...     name: str = ""
         ...     _all_of = all_of()
         ...     _reference: Reference = Reference(title="test")
         ...
-        >>> user = User(email="test@example.com")
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
-        >>> user = User(name="123-456-7890")
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
         >>> user = User(email="a@b.com", name="123") # Works fine
+        >>> assert not LogMixin.logs
+        >>> user = User(email="test@example.com")
+        >>> assert len(LogMixin.logs) == 1
+        >>> user = User(name="123-456-7890")
+        >>> assert len(LogMixin.logs) == 2
 
         >>> class User(GenericObject):
         ...     name: str = ""
@@ -271,19 +275,17 @@ def all_of(
         ...     _all_of = all_of(["name", "email"])
         ...     _reference: Reference = Reference(title="test")
         ...
-        >>> user = User(name="Bob")
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
-        >>> user = User(email="test@example.com")
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
+        >>> LogMixin.logs = []
         >>> user = User(name="Bob", email="a@b.com") # Works fine
+        >>> assert not LogMixin.logs
+        >>> user = User(name="Bob")
+        >>> assert len(LogMixin.logs) == 1
+        >>> user = User(email="test@example.com")
+        >>> assert len(LogMixin.logs) == 2
         >>> user = User(age=30)
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
+        >>> assert len(LogMixin.logs) == 3
         >>> user = User(name="Bob", age=30)
-        Traceback (most recent call last):
-        pydantic_core._pydantic_core.ValidationError: message
+        >>> assert len(LogMixin.logs) == 4
 
     Note:
         Only public fields (not starting with '_') are checked. Private fields

@@ -30,6 +30,7 @@ from pydantic import (
 from pydantic.json_schema import JsonSchemaValue
 
 from amati import AmatiValueError, Reference
+from amati import model_validators as mv
 from amati.fields import (
     SPDXURL,
     URI,
@@ -46,7 +47,6 @@ from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.fields.spdx_licences import VALID_LICENCES
 from amati.logging import Log, LogMixin
-from amati import model_validators as mv
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 TITLE = "OpenAPI Specification v3.1.1"

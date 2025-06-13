@@ -19,7 +19,6 @@ from amati.validators.oas311 import (
     LinkObject,
     OpenAPIObject,
 )
-
 from tests.helpers import text_excluding_empty_string
 
 

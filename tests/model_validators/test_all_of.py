@@ -10,11 +10,15 @@ from hypothesis import strategies as st
 from pydantic import BaseModel
 
 from amati import Reference
-from amati.logging import LogMixin
 from amati import model_validators as mv
+from amati.logging import LogMixin
 from tests.helpers import text_excluding_empty_string
 
 MIN = int(float_info.min)
+
+
+class EmptyObject(BaseModel):
+    _at_least_one_of = mv.at_least_one_of()
 
 
 class AllNoRestrictions(BaseModel):
@@ -31,6 +35,12 @@ class AllWithRestrictions(BaseModel):
     music: Optional[list[int]] = None
     _all_of = mv.all_of(fields=["name", "age"])
     _reference: ClassVar[Reference] = Reference(title="test")
+
+
+def test_empty_object():
+    with LogMixin.context():
+        EmptyObject()
+        assert not LogMixin.logs
 
 
 # Using a min_value forces integers to be not-None
