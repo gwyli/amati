@@ -45,6 +45,9 @@ jobs:
       - name: Testing
         run: uv run pytest --cov
 
+      - name: Doctests
+        run: uv run pytest --doctest-modules amati/
+
       - name: Coverage comment
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@v3

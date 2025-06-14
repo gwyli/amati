@@ -30,6 +30,7 @@ from pydantic import (
 from pydantic.json_schema import JsonSchemaValue
 
 from amati import AmatiValueError, Reference
+from amati import model_validators as mv
 from amati.fields import (
     SPDXURL,
     URI,
@@ -93,6 +94,8 @@ class LicenceObject(GenericObject):
         section="License Object",
     )
 
+    _not_url_and_identifier = mv.only_one_of(["url", "identifier"])
+
     @model_validator(mode="after")
     def check_uri_associated_with_identifier(self: Self) -> Self:
         """
@@ -104,27 +107,7 @@ class LicenceObject(GenericObject):
         Returns:
             The validated licence object
         """
-
-        # There are 4 cases
-        # 1. No URL or identifier - invalid
-        # 2. Identifier only - covered in type checking
-        # 3. URI only - should warn if not SPDX
-        # 4. Both Identifier and URI, technically invalid, but should check if
-        # consistent
-
-        # Case 1
-        if not self.url and not self.identifier:
-            LogMixin.log(
-                Log(
-                    message="A Licence object requires a URL or an Identifier.",  # pylint: disable=line-too-long
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-            return self
-
-        # Case 3
+        # URI only - should warn if not SPDX
         if self.url:
             try:
                 SPDXURL(self.url)
@@ -137,25 +120,20 @@ class LicenceObject(GenericObject):
                     )
                 )
 
-        # Case 4
-
-        if self.url and self.identifier:
+        # Both Identifier and URI, technically invalid, but should check if
+        # consistent
+        if (
+            self.url
+            and self.identifier
+            and str(self.url) not in VALID_LICENCES[self.identifier]
+        ):
             LogMixin.log(
                 Log(
-                    message="The Identifier and URL are mutually exclusive",
+                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
                     type=Warning,
                     reference=self._reference,
                 )
             )
-
-            if str(self.url) not in VALID_LICENCES[self.identifier]:
-                LogMixin.log(
-                    Log(
-                        message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
-                        type=Warning,
-                        reference=self._reference,
-                    )
-                )
 
         return self
 
@@ -219,6 +197,66 @@ class ServerVariableObject(GenericObject):
 
 
 @specification_extensions("x-")
+class ComponentsObject(GenericObject):
+    """
+    Validates the OpenAPI Specification components object - §4.8.7
+    """
+
+    schemas: Optional[dict[str, "SchemaObject | ReferenceObject"]] = None
+    responses: Optional[dict[str, "ResponseObject | ReferenceObject"]] = None
+    paremeters: Optional[dict[str, "ParameterObject | ReferenceObject"]] = None
+    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
+    requestBodies: Optional[dict[str, "RequestBodyObject | ReferenceObject"]] = None
+    headers: Optional[dict[str, "HeaderObject | ReferenceObject"]] = None
+    securitySchemes: Optional[dict[str, "SecuritySchemeObject | ReferenceObject"]] = (
+        None
+    )
+    links: Optional[dict[str, "LinkObject | ReferenceObject"]] = None
+    callbacks: Optional[dict[str, "CallbackObject | ReferenceObject"]] = None
+    pathItems: Optional[dict[str, "PathItemObject"]] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#components-object",
+        section="Components Object",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_all_fields(
+        cls, data: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
+        """
+        Validates the components object.
+
+        Args:
+            data: The data to validate.
+
+        Returns:
+            The validated components object.
+        """
+
+        pattern: str = r"^[a-zA-Z0-9\.\-_]+$."
+
+        # Validate each field in the components object
+        for field_name, value in data.items():
+            if field_name.startswith("x-"):
+                continue
+
+            if not isinstance(value, dict):  # type: ignore
+                raise ValueError(
+                    f"Invalid type for '{field_name}': expected dict, got {type(value)}"
+                )
+
+            for key in value.keys():
+                if not re.match(pattern, key):
+                    raise ValueError(
+                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # pylint: disable=line-too-long
+                    )
+
+        return data
+
+
+@specification_extensions("x-")
 class ServerObject(GenericObject):
     """
     Validates the OpenAPI Specification server object - §4.8.5
@@ -234,10 +272,56 @@ class ServerObject(GenericObject):
     )
 
 
+@specification_extensions("x-")
 class PathItemObject(GenericObject):
-    """
-    Placeholder whilst other objects are defined.
-    """
+    """Validates the OpenAPI Specification path item object - §4.8.9"""
+
+    ref_: Optional[URI] = Field(alias="$ref", default=None)
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    get: "Optional[OperationObject]" = None
+    put: "Optional[OperationObject]" = None
+    post: "Optional[OperationObject]" = None
+    delete: "Optional[OperationObject]" = None
+    options: "Optional[OperationObject]" = None
+    head: "Optional[OperationObject]" = None
+    patch: "Optional[OperationObject]" = None
+    trace: "Optional[OperationObject]" = None
+    servers: "Optional[list[ServerObject]]" = None
+    parameters: "Optional[list[ParameterObject | ReferenceObject]]" = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#path-item-object",
+        section="Path Item Object",
+    )
+
+
+@specification_extensions("x-")
+class OperationObject(GenericObject):
+    """Validates the OpenAPI Specification operation object - §4.8.10"""
+
+    tags: Optional[list[str]] = None
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    externalDocs: "Optional[ExternalDocumentationObject]" = None
+    operationId: Optional[str] = None
+    parameters: "Optional[list[ParameterObject | ReferenceObject]]" = None
+    requestBody: "Optional[RequestBodyObject | ReferenceObject]" = None
+    responses: "Optional[ResponsesObject]" = None
+    callbacks: "Optional[dict[str, CallbackObject | ReferenceObject]]" = None
+    deprecated: Optional[bool] = False
+    security: "Optional[list[SecurityRequirementObject]]" = None
+    servers: "Optional[list[ServerObject]]" = None
+
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#operation-object",
+        section="Operation Object",
+    )
+
+
+class ParameterObject(GenericObject):
+    """Validates the OpenAPI Specification parameter object - §4.8.11"""
 
     pass
 
@@ -544,24 +628,7 @@ class ExampleObject(GenericObject):
         section="Example Object",
     )
 
-    @model_validator(mode="after")
-    def check_values_mutually_exclusive(self: Self) -> Self:
-        """
-        Validate that only one of value or externalValue is provided.
-
-        Returns:
-            The validated example object
-        """
-        if self.value is not None and self.externalValue is not None:
-            LogMixin.log(
-                Log(
-                    message="Only one of value or externalValue can be provided",
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-        return self
+    _not_value_and_external_value = mv.only_one_of(["value", "externalValue"])
 
 
 @specification_extensions("x-")
@@ -582,24 +649,9 @@ class LinkObject(GenericObject):
         section="Link Object",
     )
 
-    @model_validator(mode="after")
-    def _validate_operation_ref_id_mutually_exclusive(self: Self) -> Self:
-        """
-        Validate that only one of operationRef or operationId is provided.
-
-        Returns:
-            The validated link object
-        """
-        if self.operationRef is not None and self.operationId is not None:
-            LogMixin.log(
-                Log(
-                    message="Only one of operationRef or operationId can be provided",
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-        return self
+    _not_operationref_and_operationid = mv.only_one_of(
+        fields=["operationRef", "operationId"]
+    )
 
 
 @specification_extensions("x-")
@@ -631,23 +683,7 @@ class HeaderObject(GenericObject):
         section="Link Object",
     )
 
-    @model_validator(mode="after")
-    def _validate_afer(self: Self) -> Self:
-        """
-        Validates that a content and schema header are not
-        both provided in a single header object.
-        """
-
-        if self.schema_ is not None and self.content is not None:
-            LogMixin.log(
-                Log(
-                    message="Only one of content and schema can be provided",
-                    type=ValueError,
-                    reference=self._reference,
-                )
-            )
-
-        return self
+    _not_schema_and_content = mv.only_one_of(["schema_", "content"])
 
 
 class SchemaObject(GenericObject):
@@ -729,65 +765,58 @@ class SchemaObject(GenericObject):
         return self
 
 
+OAUTH_FLOW_TYPES: set[str] = {
+    "implicit",
+    "authorizationCode",
+    "clientCredentials",
+    "password",
+}
+
+
 @specification_extensions("x-")
 class OAuthFlowObject(GenericObject):
     """
     Validates the OpenAPI OAuth Flow object - §4.8.29
     """
 
+    type: Optional[str] = None
     authorizationUrl: Optional[URI] = None
     tokenUrl: Optional[URI] = None
     refreshUrl: Optional[URI] = None
     scopes: dict[str, str] = {}
-    type: Optional[str] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
         section="OAuth Flow Object",
     )
 
-    @model_validator(mode="after")
-    def _validate_after(self: Self) -> Self:
-        """
-        Validates that the correct type of OAuth2 flow has the correct fields.
-        """
-        if self.type == "implicit":
-            if not self.authorizationUrl:
-                message = f"{self.type} requires an authorizationUrl."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
-            if self.tokenUrl:
-                message = f"{self.type} must not have a tokenUrl."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
-        if self.type == "authorizationCode":
-            if not self.authorizationUrl:
-                message = f"{self.type} requires an authorizationUrl."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
-            if not self.tokenUrl:
-                message = f"{self.type} requires a tokenUrl."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
+    _implicit_has_authorization_url = mv.if_then(
+        conditions={"type": "implicit"},
+        consequences={"authorizationUrl": mv.UNKNOWN},
+    )
 
-        if self.type in ("clientCredentials", "password"):
+    _token_url_not_implicit = mv.if_then(
+        conditions={"tokenUrl": mv.UNKNOWN},
+        consequences={"type": OAUTH_FLOW_TYPES ^ {"implicit"}},
+    )
 
-            if self.authorizationUrl:
-                message = f"{self.type} must not have an authorizationUrl."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
-            if not self.tokenUrl:
-                message = f"{self.type} requires a tokenUrl."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
+    _authorization_code_has_urls = mv.if_then(
+        conditions={"type": "authorizationCode"},
+        consequences={"authorizationUrl": mv.UNKNOWN, "tokenUrl": mv.UNKNOWN},
+    )
 
-        return self
+    _authorization_url_not_credentials_password = mv.if_then(
+        conditions={"authorizationUrl": mv.UNKNOWN},
+        consequences={"type": OAUTH_FLOW_TYPES ^ {"clientCredentials", "password"}},
+    )
+
+    _client_credentials_has_token = mv.if_then(
+        conditions={"type": "clientCredentials"},
+        consequences={"tokenUrl": mv.UNKNOWN},
+    )
+    _password_has_token = mv.if_then(
+        conditions={"type": "password"}, consequences={"tokenUrl": mv.UNKNOWN}
+    )
 
 
 @specification_extensions("-x")
@@ -817,8 +846,13 @@ class OAuthFlowsObject(GenericObject):
         OAuthFlowObject so that additional validation can be done on this object.
         """
 
-        for k in data.keys():
-            data[k].type = k
+        for k, v in data.items():
+
+            if isinstance(v, OAuthFlowObject):
+                raise NotImplementedError("Must pass a dict")
+
+            if v:
+                data[k]["type"] = k
 
         return data
 
@@ -855,61 +889,32 @@ class SecuritySchemeObject(GenericObject):
         section="Security Scheme Object",
     )
 
-    @model_validator(mode="after")
-    def _validate_after(self: Self) -> Self:
-        """
-        Validates the conditional logic of the security scheme
-        """
+    _type_in_enum = mv.if_then(
+        conditions={"type": mv.UNKNOWN}, consequences={"type": SECURITY_SCHEME_TYPES}
+    )
 
-        # Security schemes must be one of the valid schemes
-        if self.type not in SECURITY_SCHEME_TYPES:
-            message = f"{self.type} is not a valid Security Scheme type."
-            LogMixin.log(
-                Log(message=message, type=ValueError, reference=self._reference)
-            )
+    _apikey_has_name_and_in = mv.if_then(
+        conditions={"type": "apiKey"},
+        consequences={"name": mv.UNKNOWN, "in_": ("query", "header", "cookie")},
+    )
 
-        if self.type == "apiKey":
-            if self.name is None or self.name == "":
-                message = "The name of the header, query or cookie parameter to be used is required if the security type is apiKey"  # pylint: disable=line-too-long
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
-            if self.in_ not in ("query", "header", "cookie"):
-                message = f"The location, {self.in_} of the API key is not valid."
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
+    _http_has_scheme = mv.if_then(
+        conditions={"type": "http"}, consequences={"scheme": mv.UNKNOWN}
+    )
 
-        if self.type == "http":
-            if self.scheme is None or self.scheme == "":
-                message = "The scheme is required if the security type is http"
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
+    _oauth2_has_flows = mv.if_then(
+        conditions={"type": "oauth2"}, consequences={"flows": mv.UNKNOWN}
+    )
 
-        if self.type == "oauth2":
-            if self.flows is None:
-                message = (
-                    "The OAuth Flows Object is required if the security type is oauth2"
-                )
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
+    _open_id_connect_has_url = mv.if_then(
+        conditions={"type": "openIdConnect"},
+        consequences={"openIdConnectUrl": mv.UNKNOWN},
+    )
 
-        if self.type == "openIdConnect":
-            if self.openIdConnectUrl is None or self.openIdConnectUrl == "":
-                message = "The openIdConnectUrl is required if the security type is openIdConnect"  # pylint: disable=line-too-long
-                LogMixin.log(
-                    Log(message=message, type=ValueError, reference=self._reference)
-                )
-
-        if self.flows and self.type != "oauth2":
-            message = "The flows object should only be used with OAuth2"  # pylint: disable=line-too-long
-            LogMixin.log(
-                Log(message=message, type=ValueError, reference=self._reference)
-            )
-
-        return self
+    _flows_not_oauth2 = mv.if_then(
+        conditions={"flows": None},
+        consequences={"type": SECURITY_SCHEME_TYPES ^ {"oauth2"}},
+    )
 
 
 @specification_extensions("x-")

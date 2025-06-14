@@ -1,6 +1,6 @@
 """
 Tests amati/validators/oas311.py - ServerVariableObject
-and the sub-objects OAuthFlowsObject and OAuthFlowObject
+and the sub-objects OAuthFlowsObject
 """
 
 import pytest
@@ -14,7 +14,6 @@ from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES
 from amati.logging import LogMixin
 from amati.validators.oas311 import (
     SECURITY_SCHEME_TYPES,
-    OAuthFlowObject,
     OAuthFlowsObject,
     SecuritySchemeObject,
 )
@@ -140,12 +139,15 @@ def test_oauth_flows_implicit_valid(
 ):
     with LogMixin.context():
         OAuthFlowsObject(
-            implicit=OAuthFlowObject(
-                authorizationUrl=authorization_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "implicit": {
+                    "authorizationUrl": authorization_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
+
         assert not LogMixin.logs
 
 
@@ -160,13 +162,16 @@ def test_oauth_flows_implicit_invalid(
 ):
     with LogMixin.context():
         OAuthFlowsObject(
-            implicit=OAuthFlowObject(
-                authorizationUrl=authorization_url,
-                tokenUrl=token_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "implicit": {
+                    "authorizationUrl": authorization_url,
+                    "tokenUrl": token_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
+
         assert LogMixin.logs
 
 
@@ -181,12 +186,14 @@ def test_oauth_flows_authorization_code_valid(
 ):
     with LogMixin.context():
         OAuthFlowsObject(
-            authorizationCode=OAuthFlowObject(
-                authorizationUrl=authorization_url,
-                tokenUrl=token_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "authorizationCode": {
+                    "authorizationUrl": authorization_url,
+                    "tokenUrl": token_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
         assert not LogMixin.logs
 
@@ -201,16 +208,24 @@ def test_oauth_flows_authorization_code_invalid(
 ):
     with LogMixin.context():
         OAuthFlowsObject(
-            authorizationCode=OAuthFlowObject(
-                authorizationUrl=uri, refreshUrl=refresh_url, scopes=scopes
-            )
+            **{
+                "authorizationCode": {
+                    "authorizationUrl": uri,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
         assert LogMixin.logs
     with LogMixin.context():
         OAuthFlowsObject(
-            authorizationCode=OAuthFlowObject(
-                tokenUrl=uri, refreshUrl=refresh_url, scopes=scopes
-            )
+            **{
+                "authorizationCode": {
+                    "tokenUrl": uri,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
         assert LogMixin.logs
 
@@ -225,20 +240,25 @@ def test_oauth_flows_client_and_password_valid(
 ):
     with LogMixin.context():
         OAuthFlowsObject(
-            clientCredentials=OAuthFlowObject(
-                tokenUrl=token_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "clientCredentials": {
+                    "tokenUrl": token_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
+
         assert not LogMixin.logs
     with LogMixin.context():
         OAuthFlowsObject(
-            password=OAuthFlowObject(
-                tokenUrl=token_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "password": {
+                    "tokenUrl": token_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
         assert not LogMixin.logs
 
@@ -254,21 +274,25 @@ def test_oauth_flows_client_and_password_invalid(
 ):
     with LogMixin.context():
         OAuthFlowsObject(
-            clientCredentials=OAuthFlowObject(
-                authorizationUrl=authorization_url,
-                tokenUrl=token_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "clientCredentials": {
+                    "authorizationUrl": authorization_url,
+                    "tokenUrl": token_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
         assert LogMixin.logs
     with LogMixin.context():
         OAuthFlowsObject(
-            password=OAuthFlowObject(
-                authorizationUrl=authorization_url,
-                tokenUrl=token_url,
-                refreshUrl=refresh_url,
-                scopes=scopes,
-            )
+            **{
+                "password": {
+                    "authorizationUrl": authorization_url,
+                    "tokenUrl": token_url,
+                    "refreshUrl": refresh_url,
+                    "scopes": scopes,
+                }
+            }  # type: ignore
         )
         assert LogMixin.logs
