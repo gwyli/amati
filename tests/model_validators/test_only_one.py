@@ -18,7 +18,8 @@ MIN = int(float_info.min)
 
 
 class EmptyObject(BaseModel):
-    _at_least_one_of = mv.at_least_one_of()
+    _only_one = mv.only_one_of(fields=[])
+    _reference: Reference = Reference(title="test")
 
 
 class OnlyOneNoRestrictions(BaseModel):

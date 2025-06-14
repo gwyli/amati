@@ -18,7 +18,8 @@ MIN = int(float_info.min)
 
 
 class EmptyObject(BaseModel):
-    _at_least_one_of = mv.at_least_one_of()
+    _at_least_one_of = mv.all_of()
+    _reference: Reference = Reference(title="test")
 
 
 class AllNoRestrictions(BaseModel):

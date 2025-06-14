@@ -1,5 +1,6 @@
 """Generic factories to add repetitive validators to Pydantic models."""
 
+from collections.abc import Iterable
 from numbers import Number
 from typing import Any, Optional, Sequence
 
@@ -25,10 +26,10 @@ class UnknownValue:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "UNKNOWN"
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "UNKNOWN"
 
 
@@ -390,7 +391,7 @@ def if_then(
     """
 
     @model_validator(mode="after")
-    def validate_if_then(self: GenericObject) -> Any:
+    def validate_if_then(self: GenericObject) -> GenericObject:
 
         if not conditions or not consequences:
             raise ValueError(
@@ -402,24 +403,35 @@ def if_then(
 
         candidates = {k: v for k, v in model_fields.items() if k in conditions}
 
-        # Conditions not met for validation to occur
-        if not all(conditions[k] == v for k, v in candidates.items()):
-            return self
+        for k, v in candidates.items():
+            # Unfulfilled condition
+            if not conditions[k] in (v, UNKNOWN):
+                return self
+
+            # None and UNKNOWN are opposites
+            if v is None and conditions[k] == UNKNOWN:
+                return self
 
         for field, value in consequences.items():
             actual = model_fields.get(field)
 
+            if (iterable := isinstance(value, Iterable)) and actual in value:
+                continue
+
             if value == UNKNOWN and is_truthy_with_numeric_zero(actual):
                 continue
 
-            if not value == actual:
-                LogMixin.log(
-                    Log(
-                        message=f"Expected {field} to be {value} found {actual}",
-                        type=ValueError,
-                        reference=self._reference,  # pylint: disable=protected-access # type: ignore
-                    )
+            if value == actual:
+                continue
+
+            LogMixin.log(
+                Log(
+                    message=f"Expected {field} to be {"in " if iterable else ""}"
+                    f"{value} found {actual}",
+                    type=ValueError,
+                    reference=self._reference,  # pylint: disable=protected-access # type: ignore
                 )
+            )
 
         return self
 

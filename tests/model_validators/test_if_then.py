@@ -12,7 +12,8 @@ from amati.model_validators import UNKNOWN, if_then
 
 class ModelNoConditions(BaseModel):
     field: str = ""
-    _if_then = if_then()
+    x = if_then()
+    _reference: Reference = Reference(title="test")
 
 
 class ModelWithConditions(BaseModel):
@@ -53,6 +54,27 @@ class ModelWithMultipleUnknownConditions(BaseModel):
     _if_then = if_then(
         conditions={"role": "manager", "department": "finance"},
         consequences={"can_approve": True, "can_edit": UNKNOWN},
+    )
+    _reference: Reference = Reference(title="test")
+
+
+class ModelWithIterableConditions(BaseModel):
+    role: str = ""
+    status: str = ""
+    _if_then = if_then(
+        conditions={"role": "admin"}, consequences={"status": ["active", "pending"]}
+    )
+    _reference: Reference = Reference(title="test")
+
+
+class ModelWithMultipleIterableConditions(BaseModel):
+    role: str = ""
+    department: str = ""
+    status: str = ""
+    level: int = 0
+    _if_then = if_then(
+        conditions={"role": "manager", "department": "finance"},
+        consequences={"status": ["active", "pending"], "level": [1, 2, 3]},
     )
     _reference: Reference = Reference(title="test")
 
@@ -225,3 +247,117 @@ def test_unknown_property_based(role: str, permission: bool, notify: bool):
             if role == "admin":
                 # When conditions are met, notify can be any value
                 assert model.notify == notify
+
+
+# Add after existing test functions
+def test_iterable_consequence_valid():
+    """Test that validation passes when value is in iterable consequence."""
+    with LogMixin.context():
+        # Should pass with status in allowed values
+        model = ModelWithIterableConditions(role="admin", status="active")
+        assert not LogMixin.logs
+        assert model.status == "active"
+
+        model = ModelWithIterableConditions(role="admin", status="pending")
+        assert not LogMixin.logs
+        assert model.status == "pending"
+
+
+def test_iterable_consequence_invalid():
+    """Test that validation fails when value not in iterable consequence."""
+    with LogMixin.context():
+        ModelWithIterableConditions(role="admin", status="inactive")
+        assert len(LogMixin.logs) == 1
+        assert (
+            "Expected status to be in ['active', 'pending'] found inactive"
+            in LogMixin.logs[0].message
+        )
+
+
+def test_iterable_consequence_conditions_not_met():
+    """Test that validation passes when conditions not met, regardless of value."""
+    with LogMixin.context():
+        model = ModelWithIterableConditions(role="user", status="whatever")
+        assert not LogMixin.logs
+        assert model.status == "whatever"
+
+
+def test_multiple_iterable_consequences_valid():
+    """Test that validation passes when all values are in their respective iterables."""
+    with LogMixin.context():
+        model = ModelWithMultipleIterableConditions(
+            role="manager", department="finance", status="active", level=2
+        )
+        assert not LogMixin.logs
+        assert model.status == "active"
+        assert model.level == 2
+
+
+def test_multiple_iterable_consequences_partial_invalid():
+    """Test that validation fails when any value is not in its iterable."""
+    with LogMixin.context():
+        # Invalid status
+        ModelWithMultipleIterableConditions(
+            role="manager", department="finance", status="inactive", level=2
+        )
+        assert len(LogMixin.logs) == 1
+        LogMixin.logs.clear()
+
+        # Invalid level
+        ModelWithMultipleIterableConditions(
+            role="manager", department="finance", status="active", level=4
+        )
+        assert len(LogMixin.logs) == 1
+
+
+@given(
+    role=st.sampled_from(["admin", "user"]),
+    status=st.sampled_from(["active", "pending", "inactive", "suspended"]),
+)
+def test_iterable_property_based(role: str, status: str):
+    """Property-based test for iterable consequences."""
+    with LogMixin.context():
+        model = ModelWithIterableConditions(role=role, status=status)
+
+        if role == "admin" and status not in ["active", "pending"]:
+            assert len(LogMixin.logs) == 1
+            assert (
+                f"Expected status to be in ['active', 'pending'] found {status}"
+                in LogMixin.logs[0].message
+            )
+        else:
+            assert len(LogMixin.logs) == 0
+            if role == "admin":
+                assert model.status in ["active", "pending"]
+
+
+def test_if_then_none_unknown_condition():
+    """Test if_then when a field is None but condition expects UNKNOWN."""
+
+    class ConditionalModel(BaseModel):
+        status: str | None = None
+        result: bool = False
+        _if_then = if_then(
+            conditions={"status": UNKNOWN}, consequences={"result": True}
+        )
+        _reference: Reference = Reference(title="test")
+
+    with LogMixin.context():
+        ConditionalModel()
+        assert not LogMixin.logs  # Should early return due to None vs UNKNOWN check
+
+
+def test_if_then_unfulfilled_condition():
+    """Test if_then when a field is None but condition expects UNKNOWN."""
+
+    class ConditionalModel(BaseModel):
+        status: str = "Present"
+        result: bool = False
+        _if_then = if_then(
+            conditions={"status": "Not Present"}, consequences={"result": True}
+        )
+        _reference: Reference = Reference(title="test")
+
+    with LogMixin.context():
+        ConditionalModel()
+        assert not LogMixin.logs
