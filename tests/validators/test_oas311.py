@@ -91,10 +91,8 @@ def test_petstore():
         ]
 
     in_ = json.dumps(data, sort_keys=True)
-    out_ = json.dumps(
-        json.loads(model.model_dump_json(exclude_unset=True, by_alias=True)),
-        sort_keys=True,
-    )
+    dump = model.model_dump_json(exclude_unset=True, by_alias=True)
+    out_ = json.dumps(json.loads(dump), sort_keys=True)
 
     assert in_ == out_
 
