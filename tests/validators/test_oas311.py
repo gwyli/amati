@@ -11,9 +11,9 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import AnyUrl, ValidationError
 
-from amati import _resolve_forward_references
+from amati import Reference, _resolve_forward_references
 from amati.fields.json import JSON
-from amati.logging import LogMixin
+from amati.logging import Log, LogMixin
 from amati.validators import oas311
 from tests.helpers import text_excluding_empty_string
 
@@ -61,11 +61,34 @@ def test_valid_openapi_object():
 
         assert json.loads(model.model_dump_json(exclude_unset=True)) == data
 
+
+def test_petstore():
+    _resolve_forward_references.resolve_forward_references(oas311)
+
     with open("tests/data/openapi.yaml", "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)        
+        data = yaml.safe_load(f)
     with LogMixin.context():
         model = oas311.OpenAPIObject(**data)
-        assert not LogMixin.logs
+        assert LogMixin.logs == [
+            Log(
+                message="https://www.apache.org/licenses/LICENSE-2.0.html is not a valid SPDX URL",  # pylint: disable=line-too-long
+                type=Warning,
+                reference=Reference(
+                    title="OpenAPI Specification v3.1.1",
+                    section="License Object",
+                    url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
+                ),
+            ),
+            Log(
+                message="https://www.apache.org/licenses/LICENSE-2.0.html is not a valid SPDX URL",  # pylint: disable=line-too-long
+                type=Warning,
+                reference=Reference(
+                    title="OpenAPI Specification v3.1.1",
+                    section="License Object",
+                    url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
+                ),
+            ),
+        ]
 
         assert json.loads(model.model_dump_json(exclude_unset=True)) == data
 

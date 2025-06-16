@@ -18,6 +18,7 @@ from typing import (
 )
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
+from pydantic_core._pydantic_core import PydanticUndefined
 
 from amati import Reference
 from amati.logging import Log, LogMixin
@@ -36,13 +37,16 @@ class GenericObject(LogMixin, BaseModel):
 
         super().__init__(**data)
 
-        if "extra" in self.model_config:
+        if self.model_config.get("extra") == "allow":
             return
 
         # If extra fields aren't allowed log those that aren't going to be added
         # to the model.
         for field in data:
-            if field not in self.model_dump().keys():
+            if (
+                field not in self.model_dump().keys()
+                and field not in self.get_field_aliases()
+            ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
                 self.log(
                     Log(
@@ -55,16 +59,21 @@ class GenericObject(LogMixin, BaseModel):
         if not self.model_extra:
             return
 
-        excess_fields: set[str] = set()
+        if self.__private_attributes__["_extra_field_pattern"] == PrivateAttr(
+            PydanticUndefined
+        ):
+            return
 
         # Any extra fields are allowed
         if self._extra_field_pattern is None:
             return
-        else:
-            pattern: Pattern[str] = re.compile(self._extra_field_pattern)
-            excess_fields.update(
-                key for key in self.model_extra.keys() if not pattern.match(key)
-            )
+
+        excess_fields: set[str] = set()
+
+        pattern: Pattern[str] = re.compile(self._extra_field_pattern)
+        excess_fields.update(
+            key for key in self.model_extra.keys() if not pattern.match(key)
+        )
 
         for field in excess_fields:
             message = f"{field} is not a valid field for {self.__repr_name__()}."
@@ -74,6 +83,23 @@ class GenericObject(LogMixin, BaseModel):
                     type=ValueError,
                 )
             )
+
+    def get_field_aliases(self) -> list[str]:
+        """
+        Gets a list of aliases for confirming whether extra
+        fields are allowed.
+
+        Returns:
+            A list of field aliases for the class.
+        """
+
+        aliases: list[str] = []
+
+        for field_info in self.__class__.model_fields.values():
+            if field_info.alias:
+                aliases.append(field_info.alias)
+
+        return aliases
 
 
 T = TypeVar("T", bound=GenericObject)

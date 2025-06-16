@@ -286,7 +286,7 @@ class ExternalDocumentationObject(GenericObject):
     )
 
 
-@specification_extensions("x-")
+@specification_extensions(".*")
 class PathsObject(GenericObject):
     """Validates the OpenAPI Specification paths object - §4.8.8"""
 
@@ -295,9 +295,20 @@ class PathsObject(GenericObject):
     @model_validator(mode="before")
     @classmethod
     def paths_are_uris(cls, data: Any) -> Any:
+        """
+        Validates that paths are valid URIs, it's allowed that they
+        have variables, e.g. /pets or /pets/{petID}
 
-        for v in data.values():
-            URIWithVariables(v)
+        Special-case specification extensions, which are also allowed.
+        """
+
+        for field in data.keys():
+
+            # Specification extensions
+            if field.startswith("x-"):
+                continue
+
+            URIWithVariables(field)
 
         return data
 
@@ -905,9 +916,6 @@ class SecuritySchemeObject(GenericObject):
     Validates the OpenAPI Security Scheme object - §4.8.27
     """
 
-    # Ensure that passing `in_` to the object works.
-    model_config = ConfigDict(populate_by_name=True)
-
     type: str
     description: Optional[str | CommonMark] = None
     name: Optional[str] = None
@@ -1031,7 +1039,7 @@ class ComponentsObject(GenericObject):
             The validated components object.
         """
 
-        pattern: str = r"^[a-zA-Z0-9\.\-_]+$."
+        pattern: str = r"^[a-zA-Z0-9\.\-_]+$"
 
         # Validate each field in the components object
         for field_name, value in data.items():

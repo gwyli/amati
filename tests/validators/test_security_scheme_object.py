@@ -56,7 +56,12 @@ def test_security_scheme_none(scheme_type: str):
 def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
     with LogMixin.context():
         SecuritySchemeObject(
-            type="apiKey", description=description, name=name, in_=in_  # type: ignore
+            **{
+                "type": "apiKey",
+                "description": description,
+                "name": name,
+                "in": in_,
+            }  # type: ignore
         )
         assert not LogMixin.logs
 
@@ -69,7 +74,12 @@ def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
 def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
     with LogMixin.context():
         SecuritySchemeObject(
-            type="apiKey", description=description, name=name, in_=in_  # type: ignore
+            **{
+                "type": "apiKey",
+                "description": description,
+                "name": name,
+                "in": in_,
+            }  # type: ignore
         )
         assert LogMixin.logs
         assert LogMixin.logs[0].message is not None
