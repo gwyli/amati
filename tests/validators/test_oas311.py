@@ -68,7 +68,7 @@ def test_petstore():
     with open("tests/data/openapi.yaml", "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     with LogMixin.context():
-        oas311.OpenAPIObject(**data)
+        model = oas311.OpenAPIObject(**data)
         assert LogMixin.logs == [
             Log(
                 message="https://www.apache.org/licenses/LICENSE-2.0.html is not a valid SPDX URL",  # pylint: disable=line-too-long
@@ -89,6 +89,13 @@ def test_petstore():
                 ),
             ),
         ]
+
+    in_ = json.dumps(data, sort_keys=True)
+    dump = model.model_dump_json(exclude_unset=True, by_alias=True)
+    out_ = json.dumps(json.loads(dump), sort_keys=True)
+
+    assert in_ == out_
+
 
 def test_invalid_openapi_object():
 
