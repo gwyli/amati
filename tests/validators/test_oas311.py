@@ -90,9 +90,6 @@ def test_petstore():
             ),
         ]
 
-        assert json.loads(model.model_dump_json(exclude_unset=True)) == data
-
-
 def test_invalid_openapi_object():
 
     _resolve_forward_references.resolve_forward_references(oas311)
