@@ -141,7 +141,6 @@ def test_case_4_id_url_match_no(name: str, identifier: str):
     url = unassociated_url(identifier)
     with LogMixin.context():
         LicenceObject(name=name, identifier=identifier, url=url)  # type: ignore
-        print(LogMixin.logs)
         assert LogMixin.logs[0].message
         assert LogMixin.logs[0].type == ValueError
         assert (

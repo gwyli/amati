@@ -138,6 +138,28 @@ class LicenceObject(GenericObject):
         return self
 
 
+class ReferenceObject(GenericObject):
+    """
+    Validates the OpenAPI Specification reference object - §4.8.23
+
+    Note, "URIs" can be prefixed with a hash; this is because if the
+    representation of the referenced document is JSON or YAML, then
+    the fragment identifier SHOULD be interpreted as a JSON-Pointer
+    as per RFC6901.
+    """
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    ref: URI = Field(alias="$ref")
+    summary: Optional[str]
+    description: Optional[CommonMark]
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#reference-object",
+        section="Reference Object",
+    )
+
+
 @specification_extensions("x-")
 class InfoObject(GenericObject):
     """
@@ -156,6 +178,43 @@ class InfoObject(GenericObject):
         url="https://spec.openapis.org/oas/3.1.1.html#info-object",
         section="Info Object",
     )
+
+
+@specification_extensions("x-")
+class DiscriminatorObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.8.25
+    """
+
+    # FIXME: Need post processing to determine whether the property actually exists
+    # FIXME: The component and schema objects need to check that this is being used
+    # properly.
+    mapping: Optional[dict[str, str]] = None
+    propertyName: str
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#discriminator-object",
+        section="Security Scheme Object",
+    )
+
+
+@specification_extensions("x-")
+class ExampleObject(GenericObject):
+    """
+    Validates the OpenAPI Specification example object - §4.8.19
+    """
+
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    value: Optional[JsonSchemaValue] = None
+    externalValue: Optional[URI] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
+        section="Example Object",
+    )
+
+    _not_value_and_external_value = mv.only_one_of(["value", "externalValue"])
 
 
 @specification_extensions("x-")
@@ -197,66 +256,6 @@ class ServerVariableObject(GenericObject):
 
 
 @specification_extensions("x-")
-class ComponentsObject(GenericObject):
-    """
-    Validates the OpenAPI Specification components object - §4.8.7
-    """
-
-    schemas: Optional[dict[str, "SchemaObject | ReferenceObject"]] = None
-    responses: Optional[dict[str, "ResponseObject | ReferenceObject"]] = None
-    paremeters: Optional[dict[str, "ParameterObject | ReferenceObject"]] = None
-    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
-    requestBodies: Optional[dict[str, "RequestBodyObject | ReferenceObject"]] = None
-    headers: Optional[dict[str, "HeaderObject | ReferenceObject"]] = None
-    securitySchemes: Optional[dict[str, "SecuritySchemeObject | ReferenceObject"]] = (
-        None
-    )
-    links: Optional[dict[str, "LinkObject | ReferenceObject"]] = None
-    callbacks: Optional[dict[str, "CallbackObject | ReferenceObject"]] = None
-    pathItems: Optional[dict[str, "PathItemObject"]] = None
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#components-object",
-        section="Components Object",
-    )
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_all_fields(
-        cls, data: dict[str, dict[str, Any]]
-    ) -> dict[str, dict[str, Any]]:
-        """
-        Validates the components object.
-
-        Args:
-            data: The data to validate.
-
-        Returns:
-            The validated components object.
-        """
-
-        pattern: str = r"^[a-zA-Z0-9\.\-_]+$."
-
-        # Validate each field in the components object
-        for field_name, value in data.items():
-            if field_name.startswith("x-"):
-                continue
-
-            if not isinstance(value, dict):  # type: ignore
-                raise ValueError(
-                    f"Invalid type for '{field_name}': expected dict, got {type(value)}"
-                )
-
-            for key in value.keys():
-                if not re.match(pattern, key):
-                    raise ValueError(
-                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # pylint: disable=line-too-long
-                    )
-
-        return data
-
-
-@specification_extensions("x-")
 class ServerObject(GenericObject):
     """
     Validates the OpenAPI Specification server object - §4.8.5
@@ -273,60 +272,6 @@ class ServerObject(GenericObject):
 
 
 @specification_extensions("x-")
-class PathItemObject(GenericObject):
-    """Validates the OpenAPI Specification path item object - §4.8.9"""
-
-    ref_: Optional[URI] = Field(alias="$ref", default=None)
-    summary: Optional[str] = None
-    description: Optional[str | CommonMark] = None
-    get: "Optional[OperationObject]" = None
-    put: "Optional[OperationObject]" = None
-    post: "Optional[OperationObject]" = None
-    delete: "Optional[OperationObject]" = None
-    options: "Optional[OperationObject]" = None
-    head: "Optional[OperationObject]" = None
-    patch: "Optional[OperationObject]" = None
-    trace: "Optional[OperationObject]" = None
-    servers: "Optional[list[ServerObject]]" = None
-    parameters: "Optional[list[ParameterObject | ReferenceObject]]" = None
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#path-item-object",
-        section="Path Item Object",
-    )
-
-
-@specification_extensions("x-")
-class OperationObject(GenericObject):
-    """Validates the OpenAPI Specification operation object - §4.8.10"""
-
-    tags: Optional[list[str]] = None
-    summary: Optional[str] = None
-    description: Optional[str | CommonMark] = None
-    externalDocs: "Optional[ExternalDocumentationObject]" = None
-    operationId: Optional[str] = None
-    parameters: "Optional[list[ParameterObject | ReferenceObject]]" = None
-    requestBody: "Optional[RequestBodyObject | ReferenceObject]" = None
-    responses: "Optional[ResponsesObject]" = None
-    callbacks: "Optional[dict[str, CallbackObject | ReferenceObject]]" = None
-    deprecated: Optional[bool] = False
-    security: "Optional[list[SecurityRequirementObject]]" = None
-    servers: "Optional[list[ServerObject]]" = None
-
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#operation-object",
-        section="Operation Object",
-    )
-
-
-class ParameterObject(GenericObject):
-    """Validates the OpenAPI Specification parameter object - §4.8.11"""
-
-    pass
-
-
-@specification_extensions("x-")
 class ExternalDocumentationObject(GenericObject):
     """
     Validates the OpenAPI Specification external documentation object - §4.8.22
@@ -338,6 +283,118 @@ class ExternalDocumentationObject(GenericObject):
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
         section="External Documentation Object",
+    )
+
+
+@specification_extensions(".*")
+class PathsObject(GenericObject):
+    """Validates the OpenAPI Specification paths object - §4.8.8"""
+
+    model_config = ConfigDict(extra="allow")
+
+    @model_validator(mode="before")
+    @classmethod
+    def paths_are_uris(cls, data: Any) -> Any:
+        """
+        Validates that paths are valid URIs, it's allowed that they
+        have variables, e.g. /pets or /pets/{petID}
+
+        Special-case specification extensions, which are also allowed.
+        """
+
+        for field in data.keys():
+
+            # Specification extensions
+            if field.startswith("x-"):
+                continue
+
+            URIWithVariables(field)
+
+        return data
+
+
+@specification_extensions("x-")
+class OperationObject(GenericObject):
+    """Validates the OpenAPI Specification operation object - §4.8.10"""
+
+    tags: Optional[list[str]] = None
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    externalDocs: Optional[ExternalDocumentationObject] = None
+    operationId: Optional[str] = None
+    parameters: Optional[list["ParameterObject | ReferenceObject"]] = None
+    requestBody: Optional["RequestBodyObject | ReferenceObject"] = None
+    responses: Optional["ResponsesObject"] = None
+    callbacks: Optional[dict[str, "CallbackObject | ReferenceObject"]] = None
+    deprecated: Optional[bool] = False
+    security: Optional[list["SecurityRequirementObject"]] = None
+    servers: Optional[list[ServerObject]] = None
+
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#operation-object",
+        section="Operation Object",
+    )
+
+
+PARAMETER_STYLES: set[str] = {
+    "matrix",
+    "label",
+    "simple",
+    "form",
+    "spaceDelimited",
+    "pipeDelimited",
+    "deepObject",
+}
+
+
+class ParameterObject(GenericObject):
+    """Validates the OpenAPI Specification parameter object - §4.8.11"""
+
+    name: str
+    in_: str = Field(alias="in")
+    description: Optional[str | CommonMark] = None
+    required: Optional[bool] = None
+    deprecated: Optional[bool] = None
+    allowEmptyValue: Optional[bool] = None
+    style: Optional[str] = None
+    explode: Optional[bool] = None
+    allowReserved: Optional[bool] = None
+    schema_: Optional["SchemaObject"] = Field(alias="schema")
+    example: Optional[Any] = None
+    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
+    content: Optional[dict[str, "MediaTypeObject"]] = None
+
+    _in_valid = mv.if_then(
+        conditions={"in_": mv.UNKNOWN},
+        consequences={"in_": ["query", "header", "path", "cookie"]},
+    )
+    _path_location_is_required = mv.if_then(
+        conditions={"in_": "path"}, consequences={"required": True}
+    )
+    _empty_value_only_with_query = mv.if_then(
+        conditions={"allowEmptyValue": mv.UNKNOWN},
+        consequences={"in_": PARAMETER_STYLES ^ {"query"}},
+    )
+    _style_is_valid = mv.if_then(
+        conditions={"style": mv.UNKNOWN}, consequences={"style": list(PARAMETER_STYLES)}
+    )
+    _reserved_only_with_query = mv.if_then(
+        conditions={"allowEmptyValue": mv.UNKNOWN},
+        consequences={"in_": PARAMETER_STYLES ^ {"query"}},
+    )
+    _disallowed_if_schema = mv.if_then(
+        conditions={"schema_": mv.UNKNOWN}, consequences={"content": None}
+    )
+    _disallowed_if_content = mv.if_then(
+        conditions={"content": mv.UNKNOWN},
+        consequences={
+            "content": None,
+            "style": None,
+            "explode": None,
+            "allowReserved": None,
+            "schema_": None,
+        },
     )
 
 
@@ -363,11 +420,11 @@ class MediaTypeObject(GenericObject):
     Validates the OpenAPI Specification media type object - §4.8.14
     """
 
-    schema_: "Optional[SchemaObject]" = Field(alias="schema", default=None)
+    schema_: Optional["SchemaObject"] = Field(alias="schema", default=None)
     # FIXME: Define example
     example: Optional[Any] = None
-    examples: "Optional[dict[str, ExampleObject | ReferenceObject]]" = None
-    encoding: "Optional[EncodingObject]" = None
+    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
+    encoding: Optional["EncodingObject"] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#media-type-object",
@@ -382,7 +439,7 @@ class EncodingObject(GenericObject):
     """
 
     contentType: Optional[str] = None
-    headers: "Optional[dict[str, HeaderObject | ReferenceObject]]" = None
+    headers: Optional[dict[str, "HeaderObject | ReferenceObject"]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#encoding object-object",
@@ -405,7 +462,7 @@ class EncodingObject(GenericObject):
         return value
 
 
-type _ResponsesObjectReturnType = "dict[str, ReferenceObject | ResponseObject]"
+type _ResponsesObjectReturnType = dict[str, "ReferenceObject | ResponseObject"]
 
 
 @specification_extensions("x-")
@@ -418,7 +475,7 @@ class ResponsesObject(GenericObject):
         extra="allow",
     )
 
-    default: "Optional[ResponseObject | ReferenceObject]" = None
+    default: Optional["ResponseObject | ReferenceObject"] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#responses-object",
@@ -499,9 +556,9 @@ class ResponseObject(GenericObject):
     """
 
     description: str | CommonMark
-    headers: "Optional[dict[str, HeaderObject | ReferenceObject]]" = None
+    headers: Optional[dict[str, "HeaderObject | ReferenceObject"]] = None
     content: Optional[dict[str, MediaTypeObject]] = None
-    links: "Optional[dict[str, LinkObject | ReferenceObject]]" = None
+    links: Optional[dict[str, "LinkObject | ReferenceObject"]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/v3.1.1.html#response-object",
@@ -527,7 +584,7 @@ class CallbackObject(GenericObject):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, PathItemObject]:
+    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, "PathItemObject"]:
         """
         Validates the callback object.
         """
@@ -590,47 +647,6 @@ class TagObject(GenericObject):
     )
 
 
-class ReferenceObject(GenericObject):
-    """
-    Validates the OpenAPI Specification reference object - §4.8.23
-
-    Note, "URIs" can be prefixed with a hash; this is because if the
-    representation of the referenced document is JSON or YAML, then
-    the fragment identifier SHOULD be interpreted as a JSON-Pointer
-    as per RFC6901.
-    """
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
-
-    ref: URI = Field(alias="$ref")
-    summary: Optional[str]
-    description: Optional[CommonMark]
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#reference-object",
-        section="Reference Object",
-    )
-
-
-@specification_extensions("x-")
-class ExampleObject(GenericObject):
-    """
-    Validates the OpenAPI Specification example object - §4.8.19
-    """
-
-    summary: Optional[str] = None
-    description: Optional[str | CommonMark] = None
-    value: Optional[JsonSchemaValue] = None
-    externalValue: Optional[URI] = None
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
-        section="Example Object",
-    )
-
-    _not_value_and_external_value = mv.only_one_of(["value", "externalValue"])
-
-
 @specification_extensions("x-")
 class LinkObject(GenericObject):
     """
@@ -668,7 +684,7 @@ class HeaderObject(GenericObject):
     # Schema fields
     style: Optional[str] = Field(default="simple")
     explode: Optional[bool] = Field(default=False)
-    schema_: "Optional[SchemaObject | ReferenceObject]" = Field(
+    schema_: Optional["SchemaObject | ReferenceObject"] = Field(
         alias="schema", default=None
     )
     example: Optional[Any] = None
@@ -684,6 +700,35 @@ class HeaderObject(GenericObject):
     )
 
     _not_schema_and_content = mv.only_one_of(["schema_", "content"])
+
+
+@specification_extensions("x-")
+class XMLObject(GenericObject):
+    """
+    Validates the OpenAPI Specification object - §4.8.26
+    """
+
+    name: Optional[str] = None
+    namespace: Optional[URI] = None
+    prefix: Optional[str] = None
+    attribute: Optional[bool] = Field(default=False)
+    wrapped: Optional[bool] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
+        section="Security Scheme Object",
+    )
+
+    @field_validator("namespace", mode="after")
+    @classmethod
+    def _validate_namespace(cls, value: URI) -> URI:
+        if value.type == URIType.RELATIVE:
+            message = "XML namespace {value} cannot be a relative URI"
+            LogMixin.log(
+                Log(message=message, type=ValueError, reference=cls._reference)
+            )
+
+        return value
 
 
 class SchemaObject(GenericObject):
@@ -702,10 +747,10 @@ class SchemaObject(GenericObject):
 
     # OpenAPI-specific fields not in standard JSON Schema
     nullable: Optional[bool] = None  # OAS 3.0 style nullable flag
-    discriminator: Optional["DiscriminatorObject"] = None  # Polymorphism support
+    discriminator: Optional[DiscriminatorObject] = None  # Polymorphism support
     readOnly: Optional[bool] = None  # Declares property as read-only for requests
     writeOnly: Optional[bool] = None  # Declares property as write-only for responses
-    xml: Optional["XMLObject"] = None  # XML metadata
+    xml: Optional[XMLObject] = None  # XML metadata
     externalDocs: Optional[ExternalDocumentationObject] = None  # External documentation
     example: Optional[Any] = None  # Example of schema
     examples: Optional[list[Any]] = None  # Examples of schema (OAS 3.1)
@@ -871,9 +916,6 @@ class SecuritySchemeObject(GenericObject):
     Validates the OpenAPI Security Scheme object - §4.8.27
     """
 
-    # Ensure that passing `in_` to the object works.
-    model_config = ConfigDict(populate_by_name=True)
-
     type: str
     description: Optional[str | CommonMark] = None
     name: Optional[str] = None
@@ -917,53 +959,6 @@ class SecuritySchemeObject(GenericObject):
     )
 
 
-@specification_extensions("x-")
-class DiscriminatorObject(GenericObject):
-    """
-    Validates the OpenAPI Specification object - §4.8.25
-    """
-
-    # FIXME: Need post processing to determine whether the property actually exists
-    # FIXME: The component and schema objects need to check that this is being used
-    # properly.
-    mapping: Optional[dict[str, str]] = None
-    propertyName: str
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#discriminator-object",
-        section="Security Scheme Object",
-    )
-
-
-@specification_extensions("x-")
-class XMLObject(GenericObject):
-    """
-    Validates the OpenAPI Specification object - §4.8.26
-    """
-
-    name: Optional[str] = None
-    namespace: Optional[URI] = None
-    prefix: Optional[str] = None
-    attribute: Optional[bool] = Field(default=False)
-    wrapped: Optional[bool] = None
-    _reference: ClassVar[Reference] = Reference(
-        title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
-        section="Security Scheme Object",
-    )
-
-    @field_validator("namespace", mode="after")
-    @classmethod
-    def _validate_namespace(cls, value: URI) -> URI:
-        if value.type == URIType.RELATIVE:
-            message = "XML namespace {value} cannot be a relative URI"
-            LogMixin.log(
-                Log(message=message, type=ValueError, reference=cls._reference)
-            )
-
-        return value
-
-
 type _Requirement = dict[str, list[str]]
 
 
@@ -984,6 +979,88 @@ class SecurityRequirementObject(RootModel[list[_Requirement] | _Requirement]):
 
 
 @specification_extensions("x-")
+class PathItemObject(GenericObject):
+    """Validates the OpenAPI Specification path item object - §4.8.9"""
+
+    ref_: Optional[URI] = Field(alias="$ref", default=None)
+    summary: Optional[str] = None
+    description: Optional[str | CommonMark] = None
+    get: Optional[OperationObject] = None
+    put: Optional[OperationObject] = None
+    post: Optional[OperationObject] = None
+    delete: Optional[OperationObject] = None
+    options: Optional[OperationObject] = None
+    head: Optional[OperationObject] = None
+    patch: Optional[OperationObject] = None
+    trace: Optional[OperationObject] = None
+    servers: Optional[list[ServerObject]] = None
+    parameters: Optional[list[ParameterObject | ReferenceObject]] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#path-item-object",
+        section="Path Item Object",
+    )
+
+
+@specification_extensions("x-")
+class ComponentsObject(GenericObject):
+    """
+    Validates the OpenAPI Specification components object - §4.8.7
+    """
+
+    schemas: Optional[dict[str, SchemaObject | ReferenceObject]] = None
+    responses: Optional[dict[str, ResponseObject | ReferenceObject]] = None
+    paremeters: Optional[dict[str, ParameterObject | ReferenceObject]] = None
+    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
+    requestBodies: Optional[dict[str, RequestBodyObject | ReferenceObject]] = None
+    headers: Optional[dict[str, HeaderObject | ReferenceObject]] = None
+    securitySchemes: Optional[dict[str, SecuritySchemeObject | ReferenceObject]] = None
+    links: Optional[dict[str, LinkObject | ReferenceObject]] = None
+    callbacks: Optional[dict[str, CallbackObject | ReferenceObject]] = None
+    pathItems: Optional[dict[str, PathItemObject]] = None
+    _reference: ClassVar[Reference] = Reference(
+        title=TITLE,
+        url="https://spec.openapis.org/oas/v3.1.1.html#components-object",
+        section="Components Object",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_all_fields(
+        cls, data: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
+        """
+        Validates the components object.
+
+        Args:
+            data: The data to validate.
+
+        Returns:
+            The validated components object.
+        """
+
+        pattern: str = r"^[a-zA-Z0-9\.\-_]+$"
+
+        # Validate each field in the components object
+        for field_name, value in data.items():
+            if field_name.startswith("x-"):
+                continue
+
+            if not isinstance(value, dict):  # type: ignore
+                raise ValueError(
+                    f"Invalid type for '{field_name}': expected dict, got {type(value)}"
+                )
+
+            for key in value.keys():
+                if not re.match(pattern, key):
+                    raise ValueError(
+                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # pylint: disable=line-too-long
+                    )
+
+        return data
+
+
+@specification_extensions("x-")
 class OpenAPIObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.1
@@ -991,7 +1068,14 @@ class OpenAPIObject(GenericObject):
 
     openapi: OpenAPI
     info: InfoObject
-    servers: list[ServerObject] = []
+    jsonSchemaDialect: Optional[URI] = None
+    servers: Optional[list[ServerObject]] = Field(default=[ServerObject(url=URI("/"))])
+    paths: Optional[PathsObject] = None
+    webhooks: Optional[dict[str, PathItemObject]] = None
+    components: Optional[ComponentsObject] = None
+    security: Optional[list[SecurityRequirementObject]] = None
+    tags: Optional[list[TagObject]] = None
+    externalDocs: Optional[ExternalDocumentationObject] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
         url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
