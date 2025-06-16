@@ -11,14 +11,10 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import AnyUrl, ValidationError
 
+from amati import _resolve_forward_references
 from amati.fields.json import JSON
 from amati.logging import LogMixin
-from amati.validators.oas311 import (
-    ContactObject,
-    ExampleObject,
-    LinkObject,
-    OpenAPIObject,
-)
+from amati.validators import oas311
 from tests.helpers import text_excluding_empty_string
 
 
@@ -26,7 +22,7 @@ from tests.helpers import text_excluding_empty_string
 def test_example_object(summary: str, description: str, external_value: AnyUrl):
     with LogMixin.context():
         value: JSON = {"value": "value"}
-        ExampleObject(
+        oas311.ExampleObject(
             summary=summary,
             description=description,
             value=value,
@@ -38,7 +34,9 @@ def test_example_object(summary: str, description: str, external_value: AnyUrl):
 @given(urls(), text_excluding_empty_string())
 def test_link_object(operation_ref: AnyUrl, operation_id: str):
     with LogMixin.context():
-        LinkObject(operationRef=operation_ref, operationId=operation_id)  # type: ignore
+        oas311.LinkObject(
+            operationRef=operation_ref, operationId=operation_id  # type: ignore
+        )
         assert LogMixin.logs[0].type == ValueError
 
 
@@ -46,24 +44,38 @@ def test_link_object(operation_ref: AnyUrl, operation_id: str):
 @settings(deadline=1000)
 def test_contact_object(name: str, url: str, email: str):
     with LogMixin.context():
-        ContactObject(name=name, url=url, email=email)  # type: ignore
+        oas311.ContactObject(name=name, url=url, email=email)  # type: ignore
         assert not LogMixin.logs
 
 
 def test_valid_openapi_object():
+
+    _resolve_forward_references.resolve_forward_references(oas311)
+
     with open("tests/data/good_spec.yaml", "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     with LogMixin.context():
-        model = OpenAPIObject(**data)
+        model = oas311.OpenAPIObject(**data)
+        assert not LogMixin.logs
+
+        assert json.loads(model.model_dump_json(exclude_unset=True)) == data
+
+    with open("tests/data/openapi.yaml", "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)        
+    with LogMixin.context():
+        model = oas311.OpenAPIObject(**data)
         assert not LogMixin.logs
 
         assert json.loads(model.model_dump_json(exclude_unset=True)) == data
 
 
 def test_invalid_openapi_object():
+
+    _resolve_forward_references.resolve_forward_references(oas311)
+
     with open("tests/data/bad_spec.yaml", "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     with pytest.raises(ValidationError):
-        OpenAPIObject(**data)
+        oas311.OpenAPIObject(**data)
