@@ -1,6 +1,6 @@
 # URI: https://github.com/swagger-api/swagger-petstore/blob/0f0761b71b849c96b0425ea3796b8fb3aaa129e6/src/main/resources/openapi.yaml
 # Licence: Apache 2: https://github.com/swagger-api/swagger-petstore/blob/0f0761b71b849c96b0425ea3796b8fb3aaa129e6/LICENSE
-openapi: 3.0.4
+openapi: 3.1.1
 info:
   title: Swagger Petstore - OpenAPI 3.0
   description: |-
