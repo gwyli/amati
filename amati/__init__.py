@@ -5,51 +5,10 @@ a single datatype and validate on instantiation.
 
 __version__ = "0.1.0"
 
-from dataclasses import dataclass
-from typing import Optional, Sequence
+# Imports are here for convenience, they're not going to be used here
+# pylint: disable=unused-import
+# pyright: reportUnusedImport=false
 
-
-class AmatiReferenceException(Exception):
-    message: str = "Cannot construct empty references"
-
-
-@dataclass
-class Reference:
-    """
-    Attributes:
-        title (str): Title of the referenced content
-        section (str): Section of the referenced content
-        url (str): URL where the referenced content can be found
-    """
-
-    title: Optional[str] = None
-    section: Optional[str] = None
-    url: Optional[str] = None
-
-    def __post_init__(self):
-
-        if not self.title and not self.section and not self.url:
-            raise AmatiReferenceException
-
-
-type ReferenceArray = Sequence[Reference]
-type References = Reference | ReferenceArray
-
-
-class AmatiValueError(ValueError):
-    """
-    Custom exception to allow adding of references to exceptions.
-
-
-    Attributes:
-        message (str): The explanation of why the exception was raised
-        authority (Optional[ReferenceModel]): The reference to the standard that
-            explains why the exception was raised
-
-    Inherits:
-        ValueError
-    """
-
-    def __init__(self, message: str, reference: Optional[References] = None):
-        self.message = message
-        self.reference = reference
+from amati.amati import dispatch, file_handler, run
+from amati.exceptions import AmatiValueError
+from amati.references import AmatiReferenceException, Reference, References

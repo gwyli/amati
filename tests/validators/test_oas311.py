@@ -3,6 +3,7 @@ Tests amati/validators/oas311.py
 """
 
 import json
+from pathlib import Path
 
 import pytest
 import yaml
@@ -11,7 +12,7 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import AnyUrl, ValidationError
 
-from amati import Reference, _resolve_forward_references
+from amati import Reference, _resolve_forward_references, amati
 from amati.fields.json import JSON
 from amati.logging import Log, LogMixin
 from amati.validators import oas311
@@ -63,12 +64,11 @@ def test_valid_openapi_object():
 
 
 def test_petstore():
-    _resolve_forward_references.resolve_forward_references(oas311)
 
-    with open("tests/data/openapi.yaml", "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    data = amati.file_handler(Path("tests/data/openapi.yaml"))
+
     with LogMixin.context():
-        model = oas311.OpenAPIObject(**data)
+        model = amati.dispatch(data)
         assert LogMixin.logs == [
             Log(
                 message="https://www.apache.org/licenses/LICENSE-2.0.html is not a valid SPDX URL",  # pylint: disable=line-too-long
@@ -90,11 +90,7 @@ def test_petstore():
             ),
         ]
 
-    in_ = json.dumps(data, sort_keys=True)
-    dump = model.model_dump_json(exclude_unset=True, by_alias=True)
-    out_ = json.dumps(json.loads(dump), sort_keys=True)
-
-    assert in_ == out_
+    assert amati.validate(data, model)
 
 
 def test_invalid_openapi_object():
