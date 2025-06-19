@@ -12,14 +12,13 @@ from pydantic import ValidationError
 from amati.fields import URI
 from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES
 from amati.logging import LogMixin
-from amati.validators.oas311 import (
-    SECURITY_SCHEME_TYPES,
-    OAuthFlowsObject,
-    SecuritySchemeObject,
-)
+from amati.validators.oas304 import OAuthFlowsObject
+from amati.validators.oas311 import SecuritySchemeObject
 from tests.helpers import text_excluding_empty_string
 
-VALID_SECURITY_SCHEME_TYPES: list[str] = list(SECURITY_SCHEME_TYPES)
+VALID_SECURITY_SCHEME_TYPES: list[str] = list(
+    SecuritySchemeObject._SECURITY_SCHEME_TYPES  # pylint: disable=protected-access # type: ignore
+)
 INVALID_SECURITY_SCHEME_TYPES: st.SearchStrategy[str] = (
     st.text()
     .filter(lambda x: x not in VALID_SECURITY_SCHEME_TYPES)
