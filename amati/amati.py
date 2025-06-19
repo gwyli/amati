@@ -2,10 +2,9 @@
 High-level access to amati functionality.
 """
 
-import sys
-
 import importlib
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -13,8 +12,10 @@ import yaml
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from amati._resolve_forward_references import resolve_forward_references  #pylint: disable=wrong-import-position
-from amati.logging import Log, LogMixin  #pylint: disable=wrong-import-position
+from amati._resolve_forward_references import (  # pylint: disable=wrong-import-position
+    resolve_forward_references,
+)
+from amati.logging import Log, LogMixin  # pylint: disable=wrong-import-position
 
 
 def file_handler(file: Path) -> dict[str, Any]:
@@ -61,9 +62,17 @@ def dispatch(data: dict[str, Any]) -> BaseModel:
     if not version:
         raise ValueError("An OpenAPI Specfication must contain a version.")
 
-    v: str = version.replace(".", "")
+    version_map: dict[str, str] = {
+        "3.1.1": "311",
+        "3.1.0": "311",
+        "3.0.4": "304",
+        "3.0.3": "304",
+        "3.0.2": "304",
+        "3.0.1": "304",
+        "3.0.0": "304",
+    }
 
-    module = importlib.import_module(f"amati.validators.oas{v}")
+    module = importlib.import_module(f"amati.validators.oas{version_map[version]}")
 
     resolve_forward_references(module)
 
