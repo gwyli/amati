@@ -1,7 +1,7 @@
 """
 Validates the OpenAPI Specification version 3.1.1
 
-Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris  # pylint: disable=line-too-long
+Note that per https://spec.openapis.org/oas/v3.0.4.html#relative-references-in-api-description-uris  # pylint: disable=line-too-long
 
 > URIs used as references within an OpenAPI Description, or to external documentation
 > or other supplementary information such as a license, are resolved as identifiers,
@@ -32,27 +32,24 @@ from pydantic.json_schema import JsonSchemaValue
 from amati import AmatiValueError, Reference
 from amati import model_validators as mv
 from amati.fields import (
-    SPDXURL,
     URI,
     Email,
     HTTPAuthenticationScheme,
     HTTPStatusCode,
     MediaType,
-    SPDXIdentifier,
     URIType,
     URIWithVariables,
 )
 from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
-from amati.fields.spdx_licences import VALID_LICENCES
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
 
-TITLE = "OpenAPI Specification v3.1.1"
+TITLE = "OpenAPI Specification v3.0.4"
 
 # Convenience naming to ensure that it's clear what's happening.
-# https://spec.openapis.org/oas/v3.1.1.html#specification-extensions
+# https://spec.openapis.org/oas/v3.0.4.html#specification-extensions
 specification_extensions = allow_extra_fields
 
 
@@ -67,7 +64,7 @@ class ContactObject(GenericObject):
     email: Optional[Email] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/3.1.1.html#contact-object",
+        url="https://spec.openapis.org/oas/3.0.4.html#contact-object",
         section="Contact Object",
     )
 
@@ -76,66 +73,15 @@ class ContactObject(GenericObject):
 class LicenceObject(GenericObject):
     """
     A model representing the OpenAPI Specification licence object §4.8.4
-
-    OAS uses the SPDX licence list.
-
-    # SPECFIX: The URI is mutually exclusive of the identifier. I don't see
-    the purpose of this; if the identifier is a SPDX Identifier where's the
-    harm in also including the URI
     """
 
     name: str = Field(min_length=1)
-    # What difference does Optional make here?
-    identifier: Optional[SPDXIdentifier] = None
     url: Optional[URI] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#license-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#license-object",
         section="License Object",
     )
-
-    _not_url_and_identifier = mv.only_one_of(["url", "identifier"])
-
-    @model_validator(mode="after")
-    def check_uri_associated_with_identifier(self: Self) -> Self:
-        """
-        Validate that the URL matches the provided licence identifier.
-
-        This validator checks if the URL is listed among the known URLs for the
-        specified licence identifier.
-
-        Returns:
-            The validated licence object
-        """
-        # URI only - should warn if not SPDX
-        if self.url:
-            try:
-                SPDXURL(self.url)
-            except AmatiValueError:
-                LogMixin.log(
-                    Log(
-                        message=f"{self.url} is not a valid SPDX URL",
-                        type=Warning,
-                        reference=self._reference,
-                    )
-                )
-
-        # Both Identifier and URI, technically invalid, but should check if
-        # consistent
-        if (
-            self.url
-            and self.identifier
-            and str(self.url) not in VALID_LICENCES[self.identifier]
-        ):
-            LogMixin.log(
-                Log(
-                    message=f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
-                    type=Warning,
-                    reference=self._reference,
-                )
-            )
-
-        return self
 
 
 class ReferenceObject(GenericObject):
@@ -151,11 +97,9 @@ class ReferenceObject(GenericObject):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     ref: URI = Field(alias="$ref")
-    summary: Optional[str]
-    description: Optional[CommonMark]
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#reference-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#reference-object",
         section="Reference Object",
     )
 
@@ -167,7 +111,6 @@ class InfoObject(GenericObject):
     """
 
     title: str
-    summary: Optional[str] = None
     description: Optional[str | CommonMark] = None
     termsOfService: Optional[str] = None  # pylint: disable=invalid-name
     contact: Optional[ContactObject] = None
@@ -175,12 +118,11 @@ class InfoObject(GenericObject):
     version: str
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/3.1.1.html#info-object",
+        url="https://spec.openapis.org/oas/3.0.4.html#info-object",
         section="Info Object",
     )
 
 
-@specification_extensions("x-")
 class DiscriminatorObject(GenericObject):
     """
     Validates the OpenAPI Specification object - §4.8.25
@@ -189,11 +131,11 @@ class DiscriminatorObject(GenericObject):
     # FIXME: Need post processing to determine whether the property actually exists
     # FIXME: The component and schema objects need to check that this is being used
     # properly.
-    mapping: Optional[dict[str, str]] = None
     propertyName: str
+    mapping: Optional[dict[str, str | URI]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#discriminator-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#discriminator-object",
         section="Security Scheme Object",
     )
 
@@ -210,7 +152,7 @@ class ExampleObject(GenericObject):
     externalValue: Optional[URI] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#example-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#example-object",
         section="Example Object",
     )
 
@@ -228,7 +170,7 @@ class ServerVariableObject(GenericObject):
     description: Optional[str | CommonMark] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#server-variable-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#server-variable-object",
         section="Server Variable Object",
     )
 
@@ -247,7 +189,7 @@ class ServerVariableObject(GenericObject):
             LogMixin.log(
                 Log(
                     message=f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
-                    type=ValueError,
+                    type=Warning,
                     reference=self._reference,
                 )
             )
@@ -266,7 +208,7 @@ class ServerObject(GenericObject):
     variables: Optional[dict[str, ServerVariableObject]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#server-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#server-object",
         section="Server Object",
     )
 
@@ -281,11 +223,14 @@ class ExternalDocumentationObject(GenericObject):
     url: URI
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#external-documentation-object",
         section="External Documentation Object",
     )
 
 
+# FIXME: Specification extensions should be "^x-", but the implementation
+# doesn't play well with ConfigDict(extra="allow"). This is the only case
+# so less important to change as the eventual logic is still correct.
 @specification_extensions(".*")
 class PathsObject(GenericObject):
     """Validates the OpenAPI Specification paths object - §4.8.8"""
@@ -324,7 +269,7 @@ class OperationObject(GenericObject):
     operationId: Optional[str] = None
     parameters: Optional[list["ParameterObject | ReferenceObject"]] = None
     requestBody: Optional["RequestBodyObject | ReferenceObject"] = None
-    responses: Optional["ResponsesObject"] = None
+    responses: "ResponsesObject"
     callbacks: Optional[dict[str, "CallbackObject | ReferenceObject"]] = None
     deprecated: Optional[bool] = False
     security: Optional[list["SecurityRequirementObject"]] = None
@@ -332,7 +277,7 @@ class OperationObject(GenericObject):
 
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#operation-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#operation-object",
         section="Operation Object",
     )
 
@@ -360,7 +305,7 @@ class ParameterObject(GenericObject):
     style: Optional[str] = None
     explode: Optional[bool] = None
     allowReserved: Optional[bool] = None
-    schema_: Optional["SchemaObject"] = Field(alias="schema")
+    schema_: Optional["SchemaObject | ReferenceObject"] = Field(alias="schema")
     example: Optional[Any] = None
     examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
     content: Optional[dict[str, "MediaTypeObject"]] = None
@@ -380,7 +325,7 @@ class ParameterObject(GenericObject):
         conditions={"style": mv.UNKNOWN}, consequences={"style": list(PARAMETER_STYLES)}
     )
     _reserved_only_with_query = mv.if_then(
-        conditions={"allowEmptyValue": mv.UNKNOWN},
+        conditions={"allowReserved": mv.UNKNOWN},
         consequences={"in_": PARAMETER_STYLES ^ {"query"}},
     )
     _disallowed_if_schema = mv.if_then(
@@ -409,7 +354,7 @@ class RequestBodyObject(GenericObject):
     required: Optional[bool] = False
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#request-body-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#request-body-object",
         section="Request Body Object",
     )
 
@@ -420,14 +365,16 @@ class MediaTypeObject(GenericObject):
     Validates the OpenAPI Specification media type object - §4.8.14
     """
 
-    schema_: Optional["SchemaObject"] = Field(alias="schema", default=None)
+    schema_: Optional["SchemaObject | ReferenceObject"] = Field(
+        alias="schema", default=None
+    )
     # FIXME: Define example
     example: Optional[Any] = None
     examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
     encoding: Optional["EncodingObject"] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#media-type-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#media-type-object",
         section="Tag Object",
     )
 
@@ -442,7 +389,7 @@ class EncodingObject(GenericObject):
     headers: Optional[dict[str, "HeaderObject | ReferenceObject"]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#encoding object-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#encoding object-object",
         section="Encoding Object",
     )
 
@@ -478,7 +425,7 @@ class ResponsesObject(GenericObject):
     default: Optional["ResponseObject | ReferenceObject"] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#responses-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#responses-object",
         section="Responses Object",
     )
 
@@ -561,7 +508,7 @@ class ResponseObject(GenericObject):
     links: Optional[dict[str, "LinkObject | ReferenceObject"]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#response-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#response-object",
         section="Response Object",
     )
 
@@ -578,7 +525,7 @@ class CallbackObject(GenericObject):
     # The values are Response Objects or Reference Objects
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#callback-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#callback-object",
         section="Callback Object",
     )
 
@@ -642,7 +589,7 @@ class TagObject(GenericObject):
     externalDocs: Optional[ExternalDocumentationObject] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#tag-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#tag-object",
         section="Tag Object",
     )
 
@@ -655,13 +602,13 @@ class LinkObject(GenericObject):
 
     operationRef: Optional[URI] = None
     operationId: Optional[str] = None
-    parameters: Optional[dict[str, RuntimeExpression]] = None
-    requestBody: Optional[Any | RuntimeExpression] = None
+    parameters: Optional[dict[str, RuntimeExpression | JsonSchemaValue]] = None
+    requestBody: Optional[JsonSchemaValue | RuntimeExpression] = None
     description: Optional[str | CommonMark] = None
     server: Optional[ServerObject] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#link-object",
         section="Link Object",
     )
 
@@ -687,7 +634,7 @@ class HeaderObject(GenericObject):
     schema_: Optional["SchemaObject | ReferenceObject"] = Field(
         alias="schema", default=None
     )
-    example: Optional[Any] = None
+    example: Optional[JsonSchemaValue] = None
     examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
 
     # Content fields
@@ -695,7 +642,7 @@ class HeaderObject(GenericObject):
 
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#link-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#link-object",
         section="Link Object",
     )
 
@@ -715,7 +662,7 @@ class XMLObject(GenericObject):
     wrapped: Optional[bool] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#xml-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#xml-object",
         section="Security Scheme Object",
     )
 
@@ -763,7 +710,7 @@ class SchemaObject(GenericObject):
 
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#schema-object",
         section="Link Object",
     )
 
@@ -831,7 +778,7 @@ class OAuthFlowObject(GenericObject):
     scopes: dict[str, str] = {}
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#oauth-flow-object",
         section="OAuth Flow Object",
     )
 
@@ -879,7 +826,7 @@ class OAuthFlowsObject(GenericObject):
     authorizationCode: Optional[OAuthFlowObject] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#oauth-flow-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#oauth-flow-object",
         section="OAuth Flows Object",
     )
 
@@ -902,15 +849,6 @@ class OAuthFlowsObject(GenericObject):
         return data
 
 
-SECURITY_SCHEME_TYPES: set[str] = {
-    "apiKey",
-    "http",
-    "mutualTLS",
-    "oauth2",
-    "openIdConnect",
-}
-
-
 class SecuritySchemeObject(GenericObject):
     """
     Validates the OpenAPI Security Scheme object - §4.8.27
@@ -925,14 +863,21 @@ class SecuritySchemeObject(GenericObject):
     flows: Optional[OAuthFlowsObject] = None
     openIdConnectUrl: Optional[URI] = None
 
+    _SECURITY_SCHEME_TYPES: ClassVar[set[str]] = {
+        "apiKey",
+        "http",
+        "oauth2",
+        "openIdConnect",
+    }
+
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0",
+        url="https://spec.openapis.org/oas/v3.0.4.html#security-scheme-object-0",
         section="Security Scheme Object",
     )
 
     _type_in_enum = mv.if_then(
-        conditions={"type": mv.UNKNOWN}, consequences={"type": SECURITY_SCHEME_TYPES}
+        conditions={"type": mv.UNKNOWN}, consequences={"type": _SECURITY_SCHEME_TYPES}
     )
 
     _apikey_has_name_and_in = mv.if_then(
@@ -955,7 +900,7 @@ class SecuritySchemeObject(GenericObject):
 
     _flows_not_oauth2 = mv.if_then(
         conditions={"flows": None},
-        consequences={"type": SECURITY_SCHEME_TYPES ^ {"oauth2"}},
+        consequences={"type": _SECURITY_SCHEME_TYPES ^ {"oauth2"}},
     )
 
 
@@ -970,10 +915,11 @@ class SecurityRequirementObject(RootModel[list[_Requirement] | _Requirement]):
 
     # FIXME: The name must be a valid Security Scheme - need to use post-processing
     # FIXME If the security scheme is of type "oauth2" or "openIdConnect", then the
-    # value must be a list
+    # value must be a list For other security scheme types, the array MAY contain a
+    # list of role names which are required for the execution
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/3.1.1.html#security-requirement-object",
+        url="https://spec.openapis.org/oas/3.0.4.html#security-requirement-object",
         section="Security Requirement Object",
     )
 
@@ -997,7 +943,7 @@ class PathItemObject(GenericObject):
     parameters: Optional[list[ParameterObject | ReferenceObject]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#path-item-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#path-item-object",
         section="Path Item Object",
     )
 
@@ -1008,7 +954,7 @@ class ComponentsObject(GenericObject):
     Validates the OpenAPI Specification components object - §4.8.7
     """
 
-    schemas: Optional[dict[str, SchemaObject | ReferenceObject]] = None
+    schemas: Optional[dict[str, SchemaObject]] = None
     responses: Optional[dict[str, ResponseObject | ReferenceObject]] = None
     paremeters: Optional[dict[str, ParameterObject | ReferenceObject]] = None
     examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
@@ -1017,10 +963,9 @@ class ComponentsObject(GenericObject):
     securitySchemes: Optional[dict[str, SecuritySchemeObject | ReferenceObject]] = None
     links: Optional[dict[str, LinkObject | ReferenceObject]] = None
     callbacks: Optional[dict[str, CallbackObject | ReferenceObject]] = None
-    pathItems: Optional[dict[str, PathItemObject]] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/v3.1.1.html#components-object",
+        url="https://spec.openapis.org/oas/v3.0.4.html#components-object",
         section="Components Object",
     )
 
@@ -1068,16 +1013,14 @@ class OpenAPIObject(GenericObject):
 
     openapi: OpenAPI
     info: InfoObject
-    jsonSchemaDialect: Optional[URI] = None
     servers: Optional[list[ServerObject]] = Field(default=[ServerObject(url=URI("/"))])
-    paths: Optional[PathsObject] = None
-    webhooks: Optional[dict[str, PathItemObject]] = None
+    paths: PathsObject
     components: Optional[ComponentsObject] = None
     security: Optional[list[SecurityRequirementObject]] = None
     tags: Optional[list[TagObject]] = None
     externalDocs: Optional[ExternalDocumentationObject] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
-        url="https://spec.openapis.org/oas/3.1.1.html#openapi-object",
+        url="https://spec.openapis.org/oas/3.0.4.html#openapi-object",
         section="OpenAPI Object",
     )

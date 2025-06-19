@@ -2,6 +2,8 @@
 High-level access to amati functionality.
 """
 
+import sys
+
 import importlib
 import json
 from pathlib import Path
@@ -10,8 +12,9 @@ from typing import Any
 import yaml
 from pydantic import BaseModel
 
-from amati._resolve_forward_references import resolve_forward_references
-from amati.logging import Log, LogMixin
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from amati._resolve_forward_references import resolve_forward_references  #pylint: disable=wrong-import-position
+from amati.logging import Log, LogMixin  #pylint: disable=wrong-import-position
 
 
 def file_handler(file: Path) -> dict[str, Any]:
@@ -102,3 +105,22 @@ def run(file_path: str):
     model = dispatch(data)
 
     print(validate(data, model))
+    print(LogMixin.logs)
+
+
+if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog="amati",
+        description="Test whether a OpenAPI specification is valid.",
+    )
+
+    parser.add_argument(
+        "-s", "--spec", required=True, help="The specification to be parsed"
+    )
+
+    args = parser.parse_args()
+
+    run(args.spec)
