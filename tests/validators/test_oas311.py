@@ -3,7 +3,6 @@ Tests amati/validators/oas311.py
 """
 
 import json
-from pathlib import Path
 
 import pytest
 import yaml
@@ -65,7 +64,7 @@ def test_valid_openapi_object():
 
 def test_petstore():
 
-    data = amati.file_handler(Path("tests/data/openapi.yaml"))
+    data = amati.load_file("tests/data/openapi.yaml")
 
     with LogMixin.context():
         model = amati.dispatch(data)

@@ -6,47 +6,23 @@ import importlib
 import json
 import sys
 from pathlib import Path
-from typing import Any
 
-import yaml
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from amati._resolve_forward_references import (  # pylint: disable=wrong-import-position
     resolve_forward_references,
 )
+from amati.file_handler import load_file  # pylint: disable=wrong-import-position
 from amati.logging import Log, LogMixin  # pylint: disable=wrong-import-position
 
-
-def file_handler(file: Path) -> dict[str, Any]:
-    """
-    Creates a format suitable for Amati from a provided file.
-
-    Args:
-        file: An existing file in a Path
-
-    Returns:
-        A dict suitable to be used by Amati
-
-    Raises:
-        ValueError: If the file does not exist or is not a valid type
-    """
-
-    if not file.exists():
-        raise ValueError(f"{file} does not exist")
-
-    if file.suffix in (".yaml", ".yml"):
-        with open(file, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
-
-    if file.suffix == ".json":
-        with open(file, "r", encoding="utf-8") as f:
-            return json.loads(f.read())
-
-    raise ValueError(f"{file} is not a JSON or YAML file")
+type JSONPrimitive = str | int | float | bool | None
+type JSONArray = list["JSONValue"]
+type JSONObject = dict[str, "JSONValue"]
+type JSONValue = JSONPrimitive | JSONArray | JSONObject
 
 
-def dispatch(data: dict[str, Any]) -> BaseModel:
+def dispatch(data: JSONObject) -> BaseModel:
     """
     Returns the correct model for the passed spec
 
@@ -57,7 +33,10 @@ def dispatch(data: dict[str, Any]) -> BaseModel:
         A pydantic model representing the API specification
     """
 
-    version: str | None = data.get("openapi")
+    version: JSONValue | None = data.get("openapi")
+
+    if not isinstance(version, str):
+        raise ValueError("A OpenAPI specification version must be a string.")
 
     if not version:
         raise ValueError("An OpenAPI Specfication must contain a version.")
@@ -85,7 +64,7 @@ def dispatch(data: dict[str, Any]) -> BaseModel:
     return model
 
 
-def validate(original: dict[str, Any], validated: BaseModel) -> bool:
+def validate(original: JSONObject, validated: BaseModel) -> bool:
     """
     Confirms whether a Pydantic model is the same a a dictionary.
 
@@ -107,9 +86,7 @@ def validate(original: dict[str, Any], validated: BaseModel) -> bool:
 
 def run(file_path: str):
 
-    file = Path(file_path)
-
-    data = file_handler(file)
+    data = load_file(file_path)
 
     model = dispatch(data)
 
