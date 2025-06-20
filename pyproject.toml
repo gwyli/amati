@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "abnf>=2.3.1",
     "idna>=3.10",
+    "jsonpickle>=4.1.1",
     "jsonschema>=4.24.0",
     "pydantic>=2.11.5",
     "pyyaml>=6.0.2",

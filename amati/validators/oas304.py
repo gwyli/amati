@@ -27,7 +27,6 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from pydantic.json_schema import JsonSchemaValue
 
 from amati import AmatiValueError, Reference
 from amati import model_validators as mv
@@ -45,6 +44,12 @@ from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
 from amati.logging import Log, LogMixin
 from amati.validators.generic import GenericObject, allow_extra_fields
+
+type JSONPrimitive = str | int | float | bool | None
+type JSONArray = list["JSONValue"]
+type JSONObject = dict[str, "JSONValue"]
+type JSONValue = JSONPrimitive | JSONArray | JSONObject
+
 
 TITLE = "OpenAPI Specification v3.0.4"
 
@@ -148,7 +153,7 @@ class ExampleObject(GenericObject):
 
     summary: Optional[str] = None
     description: Optional[str | CommonMark] = None
-    value: Optional[JsonSchemaValue] = None
+    value: Optional[JSONValue] = None
     externalValue: Optional[URI] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
@@ -370,7 +375,7 @@ class MediaTypeObject(GenericObject):
     )
     # FIXME: Define example
     example: Optional[Any] = None
-    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
+    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
     encoding: Optional["EncodingObject"] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,
@@ -602,8 +607,8 @@ class LinkObject(GenericObject):
 
     operationRef: Optional[URI] = None
     operationId: Optional[str] = None
-    parameters: Optional[dict[str, RuntimeExpression | JsonSchemaValue]] = None
-    requestBody: Optional[JsonSchemaValue | RuntimeExpression] = None
+    parameters: Optional[dict[str, RuntimeExpression | JSONValue]] = None
+    requestBody: Optional[JSONValue | RuntimeExpression] = None
     description: Optional[str | CommonMark] = None
     server: Optional[ServerObject] = None
     _reference: ClassVar[Reference] = Reference(
@@ -634,7 +639,7 @@ class HeaderObject(GenericObject):
     schema_: Optional["SchemaObject | ReferenceObject"] = Field(
         alias="schema", default=None
     )
-    example: Optional[JsonSchemaValue] = None
+    example: Optional[JSONValue] = None
     examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
 
     # Content fields

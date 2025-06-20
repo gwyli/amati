@@ -1,0 +1,6 @@
+openapi: "3.1.1"
+info:
+  licence:
+    name: MIT
+    identifier: Apache
+    url: https://opensource.org/license/mit/

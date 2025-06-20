@@ -7,14 +7,15 @@ import json
 import sys
 from pathlib import Path
 
-from pydantic import BaseModel
+import jsonpickle
+from pydantic import BaseModel, ValidationError
+from pydantic_core import ErrorDetails
+
+# pylint: disable=wrong-import-position
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from amati._resolve_forward_references import (  # pylint: disable=wrong-import-position
-    resolve_forward_references,
-)
-from amati.file_handler import load_file  # pylint: disable=wrong-import-position
-from amati.logging import Log, LogMixin  # pylint: disable=wrong-import-position
+from amati._resolve_forward_references import resolve_forward_references
+from amati.file_handler import load_file
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]
@@ -22,7 +23,7 @@ type JSONObject = dict[str, "JSONValue"]
 type JSONValue = JSONPrimitive | JSONArray | JSONObject
 
 
-def dispatch(data: JSONObject) -> BaseModel:
+def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[ErrorDetails] | None]:
     """
     Returns the correct model for the passed spec
 
@@ -33,7 +34,7 @@ def dispatch(data: JSONObject) -> BaseModel:
         A pydantic model representing the API specification
     """
 
-    version: JSONValue | None = data.get("openapi")
+    version: JSONValue = data.get("openapi")
 
     if not isinstance(version, str):
         raise ValueError("A OpenAPI specification version must be a string.")
@@ -57,16 +58,17 @@ def dispatch(data: JSONObject) -> BaseModel:
 
     try:
         model = module.OpenAPIObject(**data)
-    except Exception as e:
-        LogMixin.log(Log(message=e.args[1], type=e.args[0]))
-        raise
+    except ValidationError as e:
+        return None, e.errors()
 
-    return model
+    return model, None
 
 
-def validate(original: JSONObject, validated: BaseModel) -> bool:
+def check(original: JSONObject, validated: BaseModel) -> bool:
     """
-    Confirms whether a Pydantic model is the same a a dictionary.
+    Runs a consistency check on the output of amati.
+    Determines whether the validated model is the same as the
+    originally provided API Specification
 
     Args:
         original: The dictionary representation of the original file
@@ -84,14 +86,27 @@ def validate(original: JSONObject, validated: BaseModel) -> bool:
     return original_ == new_
 
 
-def run(file_path: str):
+def run(file_path: str, consistency_check: bool = False):
+    """
+    Runs the full amati process
+    """
 
     data = load_file(file_path)
 
-    model = dispatch(data)
+    result, errors = dispatch(data)
 
-    print(validate(data, model))
-    print(LogMixin.logs)
+    if result and consistency_check:
+        if check(data, result):
+            print("Consistency check successful")
+        else:
+            print("Consistency check failed")
+
+    if errors:
+        if not Path(".amati").exists():
+            Path(".amati").mkdir()
+
+        with open(".amati/pydantic.json", "w", encoding="utf-8") as f:
+            f.write(jsonpickle.encode(errors))  # type: ignore
 
 
 if __name__ == "__main__":
@@ -105,6 +120,10 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-s", "--spec", required=True, help="The specification to be parsed"
+    )
+
+    parser.add_argument(
+        "-c", "--consistency-check", required=False, default=False, help="Runs "
     )
 
     args = parser.parse_args()

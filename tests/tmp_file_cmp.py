@@ -11,8 +11,8 @@ from amati.validators import oas311
 
 if __name__ == "__main__":
 
-    new = pathlib.Path("tests/data/out.json")
-    old_sorted = pathlib.Path("tests/data/in.json")
+    new = pathlib.Path(".amati/out.json")
+    old_sorted = pathlib.Path(".amati/in.json")
     old = pathlib.Path(sys.argv[1])
 
     with open(old, "r", encoding="utf-8") as f:

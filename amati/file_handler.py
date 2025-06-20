@@ -3,7 +3,7 @@ File Loader Module with Gzip Support
 
 A file loading system that provides automatic format detection and gzip decompression
 for JSON and YAML files. The module uses the Strategy pattern to allow easy extension
-for additional file formats while maintaining type safety and comprehensive error 
+for additional file formats while maintaining type safety and comprehensive error
 handling.
 
 Features:
@@ -150,10 +150,6 @@ def load_file(file_path: str | Path) -> JSONObject:
 
     Returns:
         Parsed content as dict, list, or other appropriate type
-
-    Example:
-        >>> data = load_file('config.json.gz')
-        >>> data = load_file('settings.yaml')
     """
     processor = FileProcessor()
     return processor.load_file(file_path)
