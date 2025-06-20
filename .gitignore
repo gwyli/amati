@@ -132,7 +132,5 @@ cython_debug/
 # Mac
 .DS_Store
 
-
-# Temporary testing files
-tests/data/out.json
-tests/data/in.json
+# Logging output
+.amati/*

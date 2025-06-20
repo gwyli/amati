@@ -3,16 +3,16 @@ Logging utilities for Amati.
 """
 
 from contextlib import contextmanager
-from typing import ClassVar, Generator, List, Optional, Type
-
-from pydantic import BaseModel
+from dataclasses import dataclass
+from typing import ClassVar, Generator, Optional, Type
 
 from amati.references import References
 
 type LogType = Exception | Warning
 
 
-class Log(BaseModel):
+@dataclass
+class Log:
     message: str
     type: Type[LogType]
     reference: Optional[References] = None
@@ -26,7 +26,7 @@ class LogMixin(object):
     It is NOT thread-safe. State is maintained at a global level.
     """
 
-    logs: ClassVar[List[Log]] = []
+    logs: ClassVar[list[Log]] = []
 
     @classmethod
     def log(cls, message: Log) -> None:
@@ -42,7 +42,7 @@ class LogMixin(object):
 
     @classmethod
     @contextmanager
-    def context(cls) -> Generator[List[Log], None, None]:
+    def context(cls) -> Generator[list[Log], None, None]:
         """Create a context manager for handling logs.
 
         Yields:

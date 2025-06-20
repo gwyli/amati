@@ -2,84 +2,62 @@
 Tests amati/validators/oas311.py
 """
 
-import json
 from pathlib import Path
+from typing import Literal, cast
 
-import pytest
-import yaml
-from hypothesis import given, settings
-from hypothesis import strategies as st
-from hypothesis.provisional import urls
-from pydantic import AnyUrl, ValidationError
-
-from amati import _resolve_forward_references, amati
-from amati.fields.json import JSON
+from amati.amati import check, dispatch, load_file
 from amati.logging import LogMixin
-from amati.validators import oas311
-from tests.helpers import text_excluding_empty_string
+
+TEST_DATA_PATH = Path("tests/data")
+
+type TestOptions = Literal["good"] | Literal["bad"]
+type TestData = dict[TestOptions, list[Path]]
 
 
-@given(st.text(), st.text(), urls())
-def test_example_object(summary: str, description: str, external_value: AnyUrl):
-    with LogMixin.context():
-        value: JSON = {"value": "value"}
-        oas311.ExampleObject(
-            summary=summary,
-            description=description,
-            value=value,
-            externalValue=external_value,  # type: ignore
-        )
-        assert LogMixin.logs[0].type == ValueError
+def get_test_data() -> TestData:
+    """
+    Gathers the set of test data.
+    """
+
+    files: TestData = {"good": [], "bad": []}
+
+    for file in TEST_DATA_PATH.glob("**/*.*"):
+
+        if file.suffix in (".yaml", ".yml", ".json"):
+            test_style: TestOptions = cast(TestOptions, file.parts[-2])
+            files[test_style].append(file)
+
+    return files
 
 
-@given(urls(), text_excluding_empty_string())
-def test_link_object(operation_ref: AnyUrl, operation_id: str):
-    with LogMixin.context():
-        oas311.LinkObject(
-            operationRef=operation_ref, operationId=operation_id  # type: ignore
-        )
-        assert LogMixin.logs[0].type == ValueError
+def test_good_files():
+
+    files = get_test_data()
+
+    for file in files["good"]:
+
+        data = load_file(file)
+
+        with LogMixin.context():
+            result, errors = dispatch(data)
+
+        assert not errors
+        assert result
+
+        if file.stat().st_size < 1024 * 1024:
+            check(data, result)
 
 
-@given(st.text(), urls(), st.emails())
-@settings(deadline=1000)
-def test_contact_object(name: str, url: str, email: str):
-    with LogMixin.context():
-        oas311.ContactObject(name=name, url=url, email=email)  # type: ignore
-        assert not LogMixin.logs
+def test_bad_files():
 
+    files = get_test_data()
 
-def test_valid_openapi_object():
+    for file in files["bad"]:
 
-    _resolve_forward_references.resolve_forward_references(oas311)
+        data = load_file(file)
 
-    with open("tests/data/good_spec.yaml", "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+        with LogMixin.context():
+            result, errors = dispatch(data)
 
-    with LogMixin.context():
-        model = oas311.OpenAPIObject(**data)
-        assert not LogMixin.logs
-
-        assert json.loads(model.model_dump_json(exclude_unset=True)) == data
-
-
-def test_petstore():
-
-    data = amati.file_handler(Path("tests/data/openapi.yaml"))
-
-    with LogMixin.context():
-        model = amati.dispatch(data)
-        assert not LogMixin.logs
-
-    assert amati.validate(data, model)
-
-
-def test_invalid_openapi_object():
-
-    _resolve_forward_references.resolve_forward_references(oas311)
-
-    with open("tests/data/bad_spec.yaml", "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-
-    with pytest.raises(ValidationError):
-        oas311.OpenAPIObject(**data)
+        assert errors
+        assert not result

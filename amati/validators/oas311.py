@@ -326,7 +326,7 @@ class MediaTypeObject(GenericObject):
     schema_: Optional["SchemaObject"] = Field(alias="schema", default=None)
     # FIXME: Define example
     example: Optional[Any] = None
-    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
+    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
     encoding: Optional["EncodingObject"] = None
     _reference: ClassVar[Reference] = Reference(
         title=TITLE,

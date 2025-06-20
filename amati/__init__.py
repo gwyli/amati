@@ -9,6 +9,6 @@ __version__ = "0.1.0"
 # pylint: disable=unused-import
 # pyright: reportUnusedImport=false
 
-from amati.amati import dispatch, file_handler, run
+from amati.amati import dispatch, run
 from amati.exceptions import AmatiValueError
 from amati.references import AmatiReferenceException, Reference, References
