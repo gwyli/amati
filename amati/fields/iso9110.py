@@ -25,7 +25,7 @@ with open(DATA_DIRECTORY / "iso9110.json", "r", encoding="utf-8") as f:
 
 
 HTTP_AUTHENTICATION_SCHEMES: set[str] = set(
-    [x["Authentication Scheme Name"] for x in data]
+    [x["Authentication Scheme Name"].lower() for x in data]
 )
 
 
@@ -54,7 +54,7 @@ class HTTPAuthenticationScheme(_Str):
 
     def __init__(self, value: str):
 
-        if value not in HTTP_AUTHENTICATION_SCHEMES:
+        if value.lower() not in HTTP_AUTHENTICATION_SCHEMES:
             raise AmatiValueError(
                 f"{value} is not a valid HTTP authentication schema.",
                 reference=reference,
