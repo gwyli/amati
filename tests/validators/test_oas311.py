@@ -2,9 +2,10 @@
 Tests amati/validators/oas311.py
 """
 
+import json
 import warnings
 from pathlib import Path
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 from amati.amati import check, dispatch, load_file
 from amati.logging import LogMixin
@@ -58,16 +59,39 @@ def test_good_files():
             assert check(data, result)
 
 
+def get_errors(file: Path) -> list[dict[str, Any]]:
+    """
+    Returns the stored, expected, set of errors associated
+    with a given test specification.
+    """
+
+    expected_error_file = Path(str(file).replace("yaml", "errors"))
+    print(expected_error_file)
+
+    with open(expected_error_file, "r", encoding="utf-8") as f:
+        expected_errors = json.loads(f.read())
+
+    return expected_errors
+
+
 def test_bad_files():
 
     files = get_test_data()
 
     for file in files["bad"]:
 
+        expected_errors = get_errors(file)
+        print(file)
+
         data = load_file(file)
 
         with LogMixin.context():
             result, errors = dispatch(data)
 
-        assert errors
+        print(json.dumps(errors, sort_keys=True))
+        print(json.dumps(expected_errors, sort_keys=True))
+
+        assert json.dumps(errors, sort_keys=True) == json.dumps(
+            expected_errors, sort_keys=True
+        )
         assert not result
