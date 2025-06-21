@@ -106,7 +106,7 @@ def run(file_path: str, consistency_check: bool = False, store_errors: bool = Fa
             Path(".amati").mkdir()
 
         with open(".amati/pydantic.json", "w", encoding="utf-8") as f:
-            f.write(jsonpickle.encode(errors))  # type: ignore
+            f.write(jsonpickle.encode(errors, unpicklable=False))  # type: ignore
 
 
 if __name__ == "__main__":
@@ -123,11 +123,19 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-cc", "--consistency-check", required=False, action="store_true", help="Runs a consistency check between the input specification and amati"
+        "-cc",
+        "--consistency-check",
+        required=False,
+        action="store_true",
+        help="Runs a consistency check between the input specification and amati",
     )
-    
+
     parser.add_argument(
-        "-se", "--store-errors", required=False, action="store_true", help="Stores and errors in a file for visibility."
+        "-se",
+        "--store-errors",
+        required=False,
+        action="store_true",
+        help="Stores and errors in a file for visibility.",
     )
 
     args = parser.parse_args()
