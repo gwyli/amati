@@ -68,3 +68,12 @@ addopts = "--strict-markers"
 markers = [
     "external: requires external dependencies"
     ]
+
+[tool.uv.index]
+name = "pypi"
+url = "https://pypi.org/simple/"
+default = true
+
+name = "testpypi"
+url = "https://test.pypi.org/legacy/"
+publish-url = "https://test.pypi.org/legacy/"
