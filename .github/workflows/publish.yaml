@@ -1,8 +1,9 @@
-name: Publish to PyPI test
+name: Publish to PyPI
 
 on:
-  push:
-    branches: [ "main" ]
+  release:
+    types: [published]
+
 
 jobs:
   run:
@@ -22,5 +23,7 @@ jobs:
           python-version-file: ".python-version"
       - name: Build
         run: uv build
+      - name: Publish to PyPI test
+        run: uv publish --index testpypi
       - name: Publish
         run: uv publish
