@@ -59,7 +59,7 @@ uv sync
 
 ### Data
 
-There are some scripts to create the data needed by the project, for example, all the possible licences. If the data needs to be refreshed this can be done by running the contents of `/scripts`.
+There are some scripts to create the data needed by the project, for example, all the possible licences. If the data needs to be refreshed this can be done by running the contents of `/scripts/data`.
 
 
 
