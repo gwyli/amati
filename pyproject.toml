@@ -1,7 +1,7 @@
 [project]
 name = "amati"
 version = "0.1.0"
-description = "Validates that a .yaml or .json file conforms to the OpenAPI Specifications 3.x. This is an ALPHA build."
+description = "Validates that a .yaml or .json file conforms to the OpenAPI Specifications 3.x."
 readme = "README.md"
 authors = [
     { name = "Ben", email = "2551337+ben-alexander@users.noreply.github.com" }
