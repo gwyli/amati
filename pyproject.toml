@@ -1,12 +1,22 @@
 [project]
 name = "amati"
 version = "0.1.0"
-description = "Add your description here"
+description = "Validates that a .yaml or .json file conforms to the OpenAPI Specifications 3.x. This is an ALPHA build."
 readme = "README.md"
 authors = [
     { name = "Ben", email = "2551337+ben-alexander@users.noreply.github.com" }
 ]
 requires-python = ">=3.13"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Testing :: Acceptance"
+]
+licence = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "abnf>=2.3.1",
     "idna>=3.10",
@@ -15,6 +25,10 @@ dependencies = [
     "pydantic>=2.11.5",
     "pyyaml>=6.0.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ben-alexander/amati"
+Issues = "https://github.com/ben-alexander/amati/issues"
 
 [project.scripts]
 amati = "amati:main"
