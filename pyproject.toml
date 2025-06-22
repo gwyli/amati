@@ -52,5 +52,5 @@ typeCheckingMode="strict"
 doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
 addopts = "--strict-markers"
 markers = [
-    "slow: long running tests"
+    "external: requires external dependencies"
     ]

@@ -43,7 +43,7 @@ jobs:
         run: uv run pylint tests
 
       - name: Testing
-        run: uv run pytest --cov
+        run: uv run pytest -m"not external" --cov
 
       - name: Doctests
         run: uv run pytest --doctest-modules amati/

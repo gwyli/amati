@@ -37,7 +37,7 @@ def get_errors(error_file: Path) -> list[dict[str, Any]]:
     return expected_errors
 
 
-@pytest.mark.slow
+@pytest.mark.external
 def test_specs():
 
     content = get_test_data()
