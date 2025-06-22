@@ -1,4 +1,8 @@
-name: "Publish"
+name: Publish to PyPI test
+
+on:
+  push:
+    branches: [ "main" ]
 
 jobs:
   run:
