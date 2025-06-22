@@ -1,0 +1,28 @@
+[
+    {
+        "type": "string_type",
+        "loc": [
+            "info",
+            "description",
+            "str"
+        ],
+        "msg": "Input should be a valid string",
+        "input": {
+            "$ref": "description.yml#/introduction"
+        },
+        "url": "https://errors.pydantic.dev/2.11/v/string_type"
+    },
+    {
+        "type": "string_type",
+        "loc": [
+            "info",
+            "description",
+            "str"
+        ],
+        "msg": "Input should be a valid string",
+        "input": {
+            "$ref": "description.yml#/introduction"
+        },
+        "url": "https://errors.pydantic.dev/2.11/v/string_type"
+    }
+]

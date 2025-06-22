@@ -51,3 +51,6 @@ typeCheckingMode="strict"
 [tool.pytest.ini_options]
 doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
 addopts = "--strict-markers"
+markers = [
+    "external: requires external dependencies"
+    ]

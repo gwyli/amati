@@ -86,7 +86,7 @@ def check(original: JSONObject, validated: BaseModel) -> bool:
     return original_ == new_
 
 
-def run(file_path: str, consistency_check: bool = False):
+def run(file_path: str, consistency_check: bool = False, store_errors: bool = False):
     """
     Runs the full amati process
     """
@@ -101,12 +101,12 @@ def run(file_path: str, consistency_check: bool = False):
         else:
             print("Consistency check failed")
 
-    if errors:
+    if errors and store_errors:
         if not Path(".amati").exists():
             Path(".amati").mkdir()
 
         with open(".amati/pydantic.json", "w", encoding="utf-8") as f:
-            f.write(jsonpickle.encode(errors))  # type: ignore
+            f.write(jsonpickle.encode(errors, unpicklable=False))  # type: ignore
 
 
 if __name__ == "__main__":
@@ -123,9 +123,21 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-c", "--consistency-check", required=False, default=False, help="Runs "
+        "-cc",
+        "--consistency-check",
+        required=False,
+        action="store_true",
+        help="Runs a consistency check between the input specification and amati",
+    )
+
+    parser.add_argument(
+        "-se",
+        "--store-errors",
+        required=False,
+        action="store_true",
+        help="Stores and errors in a file for visibility.",
     )
 
     args = parser.parse_args()
 
-    run(args.spec)
+    run(args.spec, args.consistency_check, args.store_errors)
