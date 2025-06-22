@@ -14,6 +14,11 @@ This uses Pydantic, especially the validation, and Typing to construct the entir
 
 Where the specification conforms, but relies on implementation-defined behavior (e.g. [data type formats](https://spec.openapis.org/oas/v3.1.1.html#data-type-format)), a warning will be raised.
 
+## Requirements
+
+* The latest version of [uv](https://docs.astral.sh/uv/)
+* [git 2.49+](https://git-scm.com/downloads/linux)
+
 ## Testing and formatting
 
 This project uses:
@@ -28,7 +33,17 @@ This project uses:
 
 It's expected that there are no errors, no surviving mutants and 100% of the code is reached and executed.
 
-**NOTE** Some test data may have a different licence than amati. This is noted in the first line of the test data, where appropriate.
+amati runs tests on external specifications, detailed in `tests/data/.amati.tests.yaml`. To be able to run these tests the appropriate GitHub repos need to be local. Specific revisions of the repos can be downloaded by running
+
+```sh
+python scripts/tests/setup_test_specs.py
+```
+
+To run everything, from linting, type checking to downloading test specs run:
+
+```sh
+sh bin/checks.sh
+```
 
 ## Building
 
@@ -45,9 +60,6 @@ uv sync
 ### Data
 
 There are some scripts to create the data needed by the project, for example, all the possible licences. If the data needs to be refreshed this can be done by running the contents of `/scripts`.
-```sh
-pip install -e ".[build]"
-```
 
 
 

@@ -1,0 +1,33 @@
+directory: ../amati-test-specs
+repos:
+  digitalocean:
+    uri: https://github.com/digitalocean/openapi.git
+    revision: 765bf60b6d35ce39368c8f2e5186ea6e2810d6e1
+    error_file: tests/data/DigitalOcean-public.v2.errors
+    licence: Apache 2.0
+    licence_permalink: https://github.com/digitalocean/openapi/blob/765bf60b6d35ce39368c8f2e5186ea6e2810d6e1/LICENSE
+    specs:
+      - specification/DigitalOcean-public.v2.yaml
+  github:
+    uri: https://github.com/github/rest-api-description.git
+    revision: 23d16a0c0808c8241b1076d63e8d3f2e75cb6632
+    licence: MIT
+    licence_permalink: https://github.com/github/rest-api-description/blob/23d16a0c0808c8241b1076d63e8d3f2e75cb6632/LICENSE.md
+    specs:
+      - descriptions/api.github.com/api.github.com.json
+      - descriptions/api.github.com/api.github.com.yaml
+      - descriptions-next/api.github.com/api.github.com.yaml
+  redocly:
+    uri: https://github.com/Redocly/museum-openapi-example.git
+    revision: 2770b2b2e59832d245c7b0eb0badf6568d7efb53
+    licence: MIT
+    licence_permalink: https://github.com/Redocly/museum-openapi-example/blob/2770b2b2e59832d245c7b0eb0badf6568d7efb53/LICENSE
+    specs:
+      - openapi.yaml
+  swagger:
+    uri: https://github.com/swagger-api/swagger-petstore.git
+    revision: 0f0761b71b849c96b0425ea3796b8fb3aaa129e6
+    licence: Apache 2
+    licence_permalink: https://github.com/swagger-api/swagger-petstore/blob/0f0761b71b849c96b0425ea3796b8fb3aaa129e6/LICENSE
+    specs:
+      - src/main/resources/openapi.yaml
