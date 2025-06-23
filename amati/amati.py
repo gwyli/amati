@@ -37,10 +37,10 @@ def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[ErrorDetails] | N
     version: JSONValue = data.get("openapi")
 
     if not isinstance(version, str):
-        raise ValueError("A OpenAPI specification version must be a string.")
+        raise TypeError("A OpenAPI specification version must be a string.")
 
     if not version:
-        raise ValueError("An OpenAPI Specfication must contain a version.")
+        raise TypeError("An OpenAPI Specfication must contain a version.")
 
     version_map: dict[str, str] = {
         "3.1.1": "311",
@@ -86,9 +86,19 @@ def check(original: JSONObject, validated: BaseModel) -> bool:
     return original_ == new_
 
 
-def run(file_path: str, consistency_check: bool = False, store_errors: bool = False):
+def run(file_path: str | Path, consistency_check: bool = False):
     """
-    Runs the full amati process
+    Runs the full amati process on a specific specification file.
+
+     * Parses the YAML or JSON specification, gunzipping if necessary.
+     * Validates the specification.
+     * Runs a consistency check on the ouput of the validation to verify
+       that the output is identical to the input.
+     * Stores any errors found during validation.
+
+    Args:
+        file_path: The specification to be validated
+        consistency_check: Whether or not to verify the output against the input
     """
 
     data = load_file(file_path)
@@ -101,12 +111,51 @@ def run(file_path: str, consistency_check: bool = False, store_errors: bool = Fa
         else:
             print("Consistency check failed")
 
-    if errors and store_errors:
+    if errors:
         if not Path(".amati").exists():
             Path(".amati").mkdir()
 
-        with open(".amati/pydantic.json", "w", encoding="utf-8") as f:
+        error_file = Path(file_path).parts[-1]
+
+        with open(f".amati/{error_file}.json", "w", encoding="utf-8") as f:
             f.write(jsonpickle.encode(errors, unpicklable=False))  # type: ignore
+
+
+def discover(discover_dir: str = ".") -> list[Path]:
+    """
+    Finds OpenAPI Specification files to validate
+
+    Args:
+        discover_dir: The directory to search through.
+    Returns:
+        A list of paths to validate.
+    """
+
+    specs: list[Path] = []
+
+    if Path("openapi.json").exists():
+        specs.append(Path("openapi.json"))
+
+    if Path("openapi.yaml").exists():
+        specs.append(Path("openapi.yaml"))
+
+    if specs:
+        return specs
+
+    if discover_dir == ".":
+        raise FileNotFoundError(
+            "openapi.json or openapi.yaml can't be found, use --discover or --spec."
+        )
+
+    specs = specs + list(Path(discover_dir).glob("**/openapi.json"))
+    specs = specs + list(Path(discover_dir).glob("**/openapi.yaml"))
+
+    if not specs:
+        raise FileNotFoundError(
+            "openapi.json or openapi.yaml can't be found, use --spec."
+        )
+
+    return specs
 
 
 if __name__ == "__main__":
@@ -115,11 +164,20 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         prog="amati",
-        description="Test whether a OpenAPI specification is valid.",
+        description="""
+        Tests whether a OpenAPI specification is valid. Will look an openapi.json
+        or openapi.yaml file in the directory that amati is called from. If 
+        --discover is set will search the directory tree. If the specification
+        does not follow the naming recommendation the --spec switch should be
+        used.
+        """,
     )
 
     parser.add_argument(
-        "-s", "--spec", required=True, help="The specification to be parsed"
+        "-s",
+        "--spec",
+        required=False,
+        help="The specification to be parsed",
     )
 
     parser.add_argument(
@@ -131,13 +189,19 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-se",
-        "--store-errors",
+        "-d",
+        "--discover",
         required=False,
-        action="store_true",
-        help="Stores and errors in a file for visibility.",
+        default=".",
+        help="Searches the specified directory tree for openapi.yaml or openapi.json.",
     )
 
     args = parser.parse_args()
 
-    run(args.spec, args.consistency_check, args.store_errors)
+    if args.spec:
+        specifications: list[Path] = [Path(args.spec)]
+    else:
+        specifications = discover(args.discover)
+
+    for specification in specifications:
+        run(specification, args.consistency_check)
