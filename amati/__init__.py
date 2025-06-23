@@ -3,7 +3,9 @@ Amati is a specification validator, built to put a specification into
 a single datatype and validate on instantiation.
 """
 
-__version__ = "0.1.0"
+import importlib.metadata
+
+__version__ = importlib.metadata.version("amati")
 
 # Imports are here for convenience, they're not going to be used here
 # pylint: disable=unused-import
