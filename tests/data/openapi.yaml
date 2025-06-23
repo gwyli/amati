@@ -1,0 +1,26 @@
+# Minimal example of an OpenAPI spec for use in tests/test_amati.py
+openapi: 3.1.1
+info:
+  title: Example API
+  termsOfService: https://example.com/terms
+  contact: 
+    email: support@example.com
+  license:
+    name: MIT
+    identifier: MIT
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://api.{environment}.example.com/v1/users/{userId}
+    description: Test servers
+    variables:
+      environment:
+        default: staging
+        enum:
+          - staging
+          - development
+        description: The environment to use
+      userId:
+        default: "1"
+        description: The user ID
