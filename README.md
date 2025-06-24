@@ -39,7 +39,7 @@ amati runs tests on external specifications, detailed in `tests/data/.amati.test
 python scripts/tests/setup_test_specs.py
 ```
 
-To run everything, from linting, type checking to downloading test specs run:
+To run everything, from linting, type checking to downloading test specs and building and testing the Docker image run:
 
 ```sh
 sh bin/checks.sh
@@ -56,6 +56,27 @@ uv python install
 uv venv
 uv sync
 ```
+
+### Docker
+
+A development Docker image is provided, `Dockerfile.dev`, to build:
+
+```sh
+docker build -t amati -f Dockerfile.dev .
+```
+
+and to run against a specific specification the location of the specification needs to be mounted in the container.
+
+```sh
+docker run -v "<path-to-mount>:/<mount-name> amati <options>
+```
+
+This can be tested against a provided specification, from the root directory
+
+```sh
+docker run --detach -v "$(pwd):/data" amati -d /data
+```
+
 
 ### Data
 
