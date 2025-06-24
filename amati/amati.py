@@ -86,7 +86,7 @@ def check(original: JSONObject, validated: BaseModel) -> bool:
     return original_ == new_
 
 
-def run(file_path: str | Path, consistency_check: bool = False):
+def run(file_path: str | Path, consistency_check: bool = False, local: bool = False):
     """
     Runs the full amati process on a specific specification file.
 
@@ -101,7 +101,9 @@ def run(file_path: str | Path, consistency_check: bool = False):
         consistency_check: Whether or not to verify the output against the input
     """
 
-    data = load_file(file_path)
+    spec = Path(file_path)
+
+    data = load_file(spec)
 
     result, errors = dispatch(data)
 
@@ -112,12 +114,19 @@ def run(file_path: str | Path, consistency_check: bool = False):
             print("Consistency check failed")
 
     if errors:
-        if not Path(".amati").exists():
-            Path(".amati").mkdir()
 
-        error_file = Path(file_path).parts[-1]
+        error_file = Path(file_path).parts[-1] + ".errors.json"
+        error_path = spec.parent
 
-        with open(f".amati/{error_file}.json", "w", encoding="utf-8") as f:
+        if local:
+            error_path = Path(".amati")
+
+            if not error_path.exists():
+                error_path.mkdir()
+
+        error_path = error_path / error_file
+
+        with open(error_path, "w", encoding="utf-8") as f:
             f.write(jsonpickle.encode(errors, unpicklable=False))  # type: ignore
 
 
@@ -170,6 +179,9 @@ if __name__ == "__main__":
         --discover is set will search the directory tree. If the specification
         does not follow the naming recommendation the --spec switch should be
         used.
+        
+        Creates a file <filename>.errors.json alongside the original specification
+        containing a JSON representation of all the errors.
         """,
     )
 
@@ -196,6 +208,14 @@ if __name__ == "__main__":
         help="Searches the specified directory tree for openapi.yaml or openapi.json.",
     )
 
+    parser.add_argument(
+        "-l",
+        "--local",
+        required=False,
+        action="store_true",
+        help="Store errors local to the caller; a .amati/ directory will be created.",
+    )
+
     args = parser.parse_args()
 
     if args.spec:
@@ -204,4 +224,4 @@ if __name__ == "__main__":
         specifications = discover(args.discover)
 
     for specification in specifications:
-        run(specification, args.consistency_check)
+        run(specification, args.consistency_check, args.local)
