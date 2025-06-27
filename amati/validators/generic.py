@@ -47,7 +47,14 @@ class GenericObject(BaseModel):
                 and field not in self.get_field_aliases()
             ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
-                LogMixin.log({"msg": message, "type": "value_error"})
+                LogMixin.log(
+                    {
+                        "msg": message,
+                        "type": "value_error",
+                        "loc": (self.__repr_name__(),),
+                        "input": field,
+                    }
+                )
 
     def model_post_init(self, __context: Any) -> None:
         if not self.model_extra:
@@ -71,7 +78,14 @@ class GenericObject(BaseModel):
 
         for field in excess_fields:
             message = f"{field} is not a valid field for {self.__repr_name__()}."
-            LogMixin.log({"msg": message, "type": "value_error"})
+            LogMixin.log(
+                {
+                    "msg": message,
+                    "type": "value_error",
+                    "loc": (self.__repr_name__(),),
+                    "input": field,
+                }
+            )
 
     def get_field_aliases(self) -> list[str]:
         """
