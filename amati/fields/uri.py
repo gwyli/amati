@@ -11,7 +11,7 @@ import idna
 from abnf import Node, ParseError, Rule
 from abnf.grammars import rfc3986, rfc3987
 
-from amati import AmatiValueError, Reference
+from amati import AmatiValueError
 from amati.fields import Str as _Str
 from amati.grammars import rfc6901
 
@@ -61,11 +61,7 @@ class Scheme(_Str):
         except ParseError as e:
             raise AmatiValueError(
                 f"{value} is not a valid URI scheme",
-                reference=Reference(
-                    title="Uniform Resource Identifier (URI): Generic Syntax",
-                    section="3.1 - Scheme",
-                    url="https://www.rfc-editor.org/rfc/rfc3986#section-3.1",
-                ),
+                "https://www.rfc-editor.org/rfc/rfc3986#section-3.1",
             ) from e
 
         # Look up the scheme in the IANA registry to get status info
@@ -211,11 +207,7 @@ class URI(_Str):
             except ParseError as e:
                 raise AmatiValueError(
                     f"{value} is not a valid JSON pointer",
-                    reference=Reference(
-                        title="JavaScript Object Notation (JSON) Pointer",
-                        section="6 - URI Fragment Identifier Representation",
-                        url="https://www.rfc-editor.org/rfc/rfc6901#section-6",
-                    ),
+                    "https://www.rfc-editor.org/rfc/rfc6901#section-6",
                 ) from e
 
         # Attempt parsing with multiple RFC specifications in order of preference.

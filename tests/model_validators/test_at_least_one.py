@@ -9,7 +9,6 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import BaseModel
 
-from amati import Reference
 from amati import model_validators as mv
 from amati.logging import LogMixin
 from tests.helpers import text_excluding_empty_string
@@ -26,7 +25,7 @@ class AtLeastOneNoRestrictions(BaseModel):
     age: Optional[int] = None
     music: Optional[list[int]] = None
     _at_least_one_of = mv.at_least_one_of()
-    _reference: ClassVar[Reference] = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class AtLeastOneWithRestrictions(BaseModel):
@@ -34,7 +33,7 @@ class AtLeastOneWithRestrictions(BaseModel):
     age: Optional[int] = None
     music: Optional[list[int]] = None
     _at_least_one_of = mv.at_least_one_of(fields=["name", "age"])
-    _reference: ClassVar[Reference] = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class AtLeastOneWithTwoRestrictions(BaseModel):
@@ -43,7 +42,7 @@ class AtLeastOneWithTwoRestrictions(BaseModel):
     music: Optional[list[int]] = None
     _at_least_one_of_name = mv.at_least_one_of(fields=["name"])
     _at_least_one_of_age = mv.at_least_one_of(fields=["age"])
-    _reference: ClassVar[Reference] = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 def test_empty_object():

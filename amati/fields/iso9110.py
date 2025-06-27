@@ -9,12 +9,11 @@ and a class for scheme validation.
 import json
 import pathlib
 
-from amati import AmatiValueError, Reference
+from amati import AmatiValueError
 from amati.fields import Str as _Str
 
-reference = Reference(
-    title="Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry (ISO9110)",
-    url="https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml",
+reference_uri = (
+    "https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml"
 )
 
 
@@ -57,5 +56,5 @@ class HTTPAuthenticationScheme(_Str):
         if value.lower() not in HTTP_AUTHENTICATION_SCHEMES:
             raise AmatiValueError(
                 f"{value} is not a valid HTTP authentication schema.",
-                reference=reference,
+                reference_uri,
             )

@@ -37,9 +37,8 @@ def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObje
     with LogMixin.context():
         Model(**data)
         assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
-        assert LogMixin.logs[0].reference is None
+        assert LogMixin.logs[0]["msg"] is not None
+        assert LogMixin.logs[0]["type"] == "value_error"
 
 
 @given(

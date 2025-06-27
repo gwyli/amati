@@ -20,8 +20,7 @@ from typing import (
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 from pydantic_core._pydantic_core import PydanticUndefined
 
-from amati import Reference
-from amati.logging import Log, LogMixin
+from amati.logging import LogMixin
 
 
 class GenericObject(BaseModel):
@@ -30,7 +29,7 @@ class GenericObject(BaseModel):
     to pydantic.BaseModel.
     """
 
-    _reference: ClassVar[Reference] = PrivateAttr()
+    _reference_uri: ClassVar[str] = PrivateAttr()
     _extra_field_pattern: Optional[Pattern[str]] = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
@@ -48,12 +47,7 @@ class GenericObject(BaseModel):
                 and field not in self.get_field_aliases()
             ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
-                LogMixin.log(
-                    Log(
-                        message=message,
-                        type=ValueError,
-                    )
-                )
+                LogMixin.log({"msg": message, "type": "value_error"})
 
     def model_post_init(self, __context: Any) -> None:
         if not self.model_extra:
@@ -77,12 +71,7 @@ class GenericObject(BaseModel):
 
         for field in excess_fields:
             message = f"{field} is not a valid field for {self.__repr_name__()}."
-            LogMixin.log(
-                Log(
-                    message=message,
-                    type=ValueError,
-                )
-            )
+            LogMixin.log({"msg": message, "type": "value_error"})
 
     def get_field_aliases(self) -> list[str]:
         """

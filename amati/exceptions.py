@@ -4,8 +4,6 @@ Exceptions, declared here to not put in __init__
 
 from typing import Optional
 
-from amati.references import References
-
 
 class AmatiValueError(ValueError):
     """
@@ -21,6 +19,6 @@ class AmatiValueError(ValueError):
         ValueError
     """
 
-    def __init__(self, message: str, reference: Optional[References] = None):
+    def __init__(self, message: str, reference_uri: Optional[str] = None):
         self.message = message
-        self.reference = reference
+        self.reference_uri = reference_uri

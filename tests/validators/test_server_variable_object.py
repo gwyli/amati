@@ -47,5 +47,5 @@ def test_invalid_default(xserver_variable: tuple[list[str], str]):
     with LogMixin.context():
         ServerVariableObject(enum=enum, default=default)
         assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0]["msg"] is not None
+        assert LogMixin.logs[0]["type"] == "value_error"

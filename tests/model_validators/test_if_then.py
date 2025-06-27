@@ -1,11 +1,12 @@
 """Tests for amati.model_validators.if_then"""
 
+from typing import ClassVar
+
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import BaseModel
 
-from amati import Reference
 from amati.logging import LogMixin
 from amati.model_validators import UNKNOWN, if_then
 
@@ -13,14 +14,14 @@ from amati.model_validators import UNKNOWN, if_then
 class ModelNoConditions(BaseModel):
     field: str = ""
     x = if_then()
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class ModelWithConditions(BaseModel):
     role: str = ""
     permission: bool = False
     _if_then = if_then(conditions={"role": "admin"}, consequences={"permission": True})
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class ModelWithMultipleConditions(BaseModel):
@@ -31,7 +32,7 @@ class ModelWithMultipleConditions(BaseModel):
         conditions={"role": "manager", "department": "finance"},
         consequences={"can_approve": True},
     )
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 # Add new test class after existing classes
@@ -43,7 +44,7 @@ class ModelWithUnknownConditions(BaseModel):
         conditions={"role": "admin"},
         consequences={"permission": True, "notify": UNKNOWN},
     )
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class ModelWithMultipleUnknownConditions(BaseModel):
@@ -55,7 +56,7 @@ class ModelWithMultipleUnknownConditions(BaseModel):
         conditions={"role": "manager", "department": "finance"},
         consequences={"can_approve": True, "can_edit": UNKNOWN},
     )
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class ModelWithIterableConditions(BaseModel):
@@ -64,7 +65,7 @@ class ModelWithIterableConditions(BaseModel):
     _if_then = if_then(
         conditions={"role": "admin"}, consequences={"status": ["active", "pending"]}
     )
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class ModelWithMultipleIterableConditions(BaseModel):
@@ -76,7 +77,7 @@ class ModelWithMultipleIterableConditions(BaseModel):
         conditions={"role": "manager", "department": "finance"},
         consequences={"status": ["active", "pending"], "level": [1, 2, 3]},
     )
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 def test_missing_conditions_consequences():
@@ -109,7 +110,7 @@ def test_conditions_met_invalid():
     with LogMixin.context():
         ModelWithConditions(role="admin", permission=False)
         assert len(LogMixin.logs) == 1
-        assert "Expected permission to be True found False" in LogMixin.logs[0].message
+        assert "Expected permission to be True found False" in LogMixin.logs[0]["msg"]
 
 
 @given(role=st.sampled_from(["admin", "user", ""]), permission=st.booleans())
@@ -120,7 +121,7 @@ def test_property_based(role: str, permission: bool):
 
         if role == "admin" and not permission:
             assert len(LogMixin.logs) == 1
-            assert "Expected permission to be True" in LogMixin.logs[0].message
+            assert "Expected permission to be True" in LogMixin.logs[0]["msg"]
         else:
             assert len(LogMixin.logs) == 0
 
@@ -144,7 +145,7 @@ def test_multiple_conditions_all_met_invalid():
             role="manager", department="finance", can_approve=False
         )
         assert len(LogMixin.logs) == 1
-        assert "Expected can_approve to be True found False" in LogMixin.logs[0].message
+        assert "Expected can_approve to be True found False" in LogMixin.logs[0]["msg"]
 
 
 def test_multiple_conditions_partial_met():
@@ -180,7 +181,7 @@ def test_multiple_conditions_property_based(
 
         if role == "manager" and department == "finance" and not can_approve:
             assert len(LogMixin.logs) == 1
-            assert "Expected can_approve to be True" in LogMixin.logs[0].message
+            assert "Expected can_approve to be True" in LogMixin.logs[0]["msg"]
         else:
             assert len(LogMixin.logs) == 0
 
@@ -241,7 +242,7 @@ def test_unknown_property_based(role: str, permission: bool, notify: bool):
 
         if role == "admin" and not permission:
             assert len(LogMixin.logs) == 1
-            assert "Expected permission to be True" in LogMixin.logs[0].message
+            assert "Expected permission to be True" in LogMixin.logs[0]["msg"]
         else:
             assert len(LogMixin.logs) == 0
             if role == "admin":
@@ -270,7 +271,7 @@ def test_iterable_consequence_invalid():
         assert len(LogMixin.logs) == 1
         assert (
             "Expected status to be in ['active', 'pending'] found inactive"
-            in LogMixin.logs[0].message
+            in LogMixin.logs[0]["msg"]
         )
 
 
@@ -323,7 +324,7 @@ def test_iterable_property_based(role: str, status: str):
             assert len(LogMixin.logs) == 1
             assert (
                 f"Expected status to be in ['active', 'pending'] found {status}"
-                in LogMixin.logs[0].message
+                in LogMixin.logs[0]["msg"]
             )
         else:
             assert len(LogMixin.logs) == 0
@@ -340,7 +341,7 @@ def test_if_then_none_unknown_condition():
         _if_then = if_then(
             conditions={"status": UNKNOWN}, consequences={"result": True}
         )
-        _reference: Reference = Reference(title="test")
+        _reference_uri: ClassVar[str] = "https://example.com"
 
     with LogMixin.context():
         ConditionalModel()
@@ -356,7 +357,7 @@ def test_if_then_unfulfilled_condition():
         _if_then = if_then(
             conditions={"status": "Not Present"}, consequences={"result": True}
         )
-        _reference: Reference = Reference(title="test")
+        _reference_uri: ClassVar[str] = "https://example.com"
 
     with LogMixin.context():
         ConditionalModel()

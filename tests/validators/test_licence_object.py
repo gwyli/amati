@@ -56,8 +56,8 @@ def test_case_1(name: str):
     with LogMixin.context():
         LicenceObject(name=name, identifier=None, url=None)
         assert LogMixin.logs
-        assert LogMixin.logs[0].message
-        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0]["msg"]
+        assert LogMixin.logs[0]["type"] == "value_error"
 
     # URI('') will error as the empty string is an invalid URI
     with pytest.raises(ValidationError):
@@ -97,8 +97,8 @@ def test_case_3_invalid(name: str, url: str):
     with LogMixin.context():
         LicenceObject(name=name, url=url)  # type: ignore
         assert LogMixin.logs
-        assert LogMixin.logs[0].message
-        assert LogMixin.logs[0].type == Warning
+        assert LogMixin.logs[0]["msg"]
+        assert LogMixin.logs[0]["type"] == "warning"
 
 
 def unassociated_url(identifier: str) -> str:  # type: ignore
@@ -132,8 +132,8 @@ def test_case_4_id_url_match(name: str, identifier: str):
     with LogMixin.context():
         LicenceObject(name=name, identifier=identifier, url=url)  # type: ignore
         assert LogMixin.logs
-        assert LogMixin.logs[0].message
-        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0]["msg"]
+        assert LogMixin.logs[0]["type"] == "value_error"
 
 
 @given(text_excluding_empty_string(), st.sampled_from(VALID_IDENTIFIERS_WITH_URLS))
@@ -141,10 +141,10 @@ def test_case_4_id_url_match_no(name: str, identifier: str):
     url = unassociated_url(identifier)
     with LogMixin.context():
         LicenceObject(name=name, identifier=identifier, url=url)  # type: ignore
-        assert LogMixin.logs[0].message
-        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0]["msg"]
+        assert LogMixin.logs[0]["type"] == "value_error"
         assert (
-            LogMixin.logs[1].message
+            LogMixin.logs[1]["msg"]
             == f"{url} is not associated with the identifier {identifier}"
         )
-        assert LogMixin.logs[1].type == Warning
+        assert LogMixin.logs[1]["type"] == "warning"

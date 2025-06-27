@@ -10,7 +10,7 @@ from pydantic._internal._decorators import (
     PydanticDescriptorProxy,
 )
 
-from amati.logging import Log, LogMixin
+from amati.logging import LogMixin
 from amati.validators.generic import GenericObject
 
 
@@ -107,14 +107,13 @@ def at_least_one_of(
         The validator that ensures at least one public field is non-empty.
 
     Example:
-        >>> from amati import Reference
         >>> LogMixin.logs = []
         >>>
         >>> class User(GenericObject):
         ...     name: str = ""
         ...     email: str = None
         ...     _at_least_one_of = at_least_one_of()
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>> user = User()
         >>> assert len(LogMixin.logs) == 1
@@ -125,7 +124,7 @@ def at_least_one_of(
         ...     email: str = None
         ...     age: int = None
         ...     _at_least_one_of = at_least_one_of(fields=["name", "email"])
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>>
         >>> user = User(name="John")  # Works fine
@@ -159,11 +158,11 @@ def at_least_one_of(
 
         msg = f"{public_fields} do not have values, expected at least one."
         LogMixin.log(
-            Log(
-                message=msg,
-                type=ValueError,
-                reference=self._reference,  # pylint: disable=protected-access # type: ignore
-            )
+            {
+                "msg": msg,
+                "type": "value_error",
+                "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+            }
         )
 
         return self
@@ -189,14 +188,13 @@ def only_one_of(
         The validator that ensures at one public field is non-empty.
 
     Example:
-        >>> from amati import Reference
         >>> LogMixin.logs = []
         >>>
         >>> class User(GenericObject):
         ...     email: str = ""
         ...     name: str = ""
         ...     _only_one_of = only_one_of()
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>> user = User(email="test@example.com")  # Works fine
         >>> user = User(name="123-456-7890")  # Works fine
@@ -210,7 +208,7 @@ def only_one_of(
         ...     email: str = ""
         ...     age: int = None
         ...     _only_one_of = only_one_of(["name", "email"])
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>> user = User(name="Bob")  # Works fine
         >>> user = User(email="test@example.com")  # Works fine
@@ -245,11 +243,11 @@ def only_one_of(
             msg = f"Expected at most one field to have a value, {", ".join(truthy)} did"
 
             LogMixin.log(
-                Log(
-                    message=msg,
-                    type=ValueError,
-                    reference=self._reference,  # pylint: disable=protected-access # type: ignore
-                )
+                {
+                    "msg": msg,
+                    "type": "value_error",
+                    "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                }
             )
 
         return self
@@ -275,14 +273,13 @@ def all_of(
         The validator that ensures at most one public field is non-empty.
 
     Example:
-        >>> from amati import Reference
         >>> LogMixin.logs = []
         >>>
         >>> class User(GenericObject):
         ...     email: str = ""
         ...     name: str = ""
         ...     _all_of = all_of()
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>> user = User(email="a@b.com", name="123") # Works fine
         >>> assert not LogMixin.logs
@@ -296,7 +293,7 @@ def all_of(
         ...     email: str = ""
         ...     age: int = None
         ...     _all_of = all_of(["name", "email"])
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>> LogMixin.logs = []
         >>> user = User(name="Bob", email="a@b.com") # Works fine
@@ -334,11 +331,11 @@ def all_of(
             msg = f"Expected at all fields to have a value, {", ".join(falsy)} did not"
 
             LogMixin.log(
-                Log(
-                    message=msg,
-                    type=ValueError,
-                    reference=self._reference,  # pylint: disable=protected-access # type: ignore
-                )
+                {
+                    "msg": msg,
+                    "type": "value_error",
+                    "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                }
             )
 
         return self
@@ -370,7 +367,6 @@ def if_then(
         ValueError: If a condition and consequence are not present
 
     Example:
-        >>> from amati import Reference
         >>> LogMixin.logs = []
         >>>
         >>> class User(GenericObject):
@@ -380,7 +376,7 @@ def if_then(
         ...         conditions={"role": "admin"},
         ...         consequences={"can_edit": True}
         ...     )
-        ...     _reference: Reference = Reference(title="test")
+        ...     _reference_uri = "https://example.com"
         ...
         >>> user = User(role="admin", can_edit=True)  # Works fine
         >>> assert not LogMixin.logs
@@ -425,12 +421,12 @@ def if_then(
                 continue
 
             LogMixin.log(
-                Log(
-                    message=f"Expected {field} to be {"in " if iterable else ""}"
+                {
+                    "msg": f"Expected {field} to be {"in " if iterable else ""}"
                     f"{value} found {actual}",
-                    type=ValueError,
-                    reference=self._reference,  # pylint: disable=protected-access # type: ignore
-                )
+                    "type": "value_error",
+                    "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                }
             )
 
         return self

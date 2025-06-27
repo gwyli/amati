@@ -6,14 +6,11 @@ Exchange (SPDX) licence list.
 import json
 import pathlib
 
-from amati import AmatiValueError, Reference
+from amati import AmatiValueError
 from amati.fields import Str as _Str
 from amati.fields.uri import URI
 
-reference = Reference(
-    title="SPDX License List",
-    url="https://spdx.org/licenses/",
-)
+reference_uri = "https://spdx.org/licenses/"
 
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
@@ -55,7 +52,7 @@ class SPDXIdentifier(_Str):
 
         if value not in VALID_LICENCES:
             raise AmatiValueError(
-                f"{value} is not a valid SPDX licence identifier", reference=reference
+                f"{value} is not a valid SPDX licence identifier", reference_uri
             )
 
 
@@ -88,5 +85,5 @@ class SPDXURL(URI):  # pylint: disable=invalid-name
 
         if value not in VALID_URLS:
             raise AmatiValueError(
-                f"{value} is not associated with any identifier.", reference=reference
+                f"{value} is not associated with any identifier.", reference_uri
             )

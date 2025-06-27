@@ -13,4 +13,3 @@ __version__ = importlib.metadata.version("amati")
 
 from amati.amati import dispatch, run
 from amati.exceptions import AmatiValueError
-from amati.references import AmatiReferenceException, Reference, References

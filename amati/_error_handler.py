@@ -3,7 +3,6 @@ Handles Pydantic errors and amati logs to provide a consistent view to the user.
 """
 
 import json
-from typing import Generator
 
 from amati.logging import Log
 
@@ -30,24 +29,6 @@ def remove_duplicates(data: list[JSONObject]) -> list[JSONObject]:
     return unique_data
 
 
-def reformat_logs(logs: list[Log]) -> Generator[JSONObject]:
-    """
-    Reformat logs into a Pydantic error for reporting
-    """
-
-    for log in logs:
-
-        url = getattr(getattr(log, "reference", None), "url", None)
-
-        yield {
-            "type": str(log.type),
-            "loc": [None],
-            "msg": log.message,
-            "input": {},
-            "url": url,
-        }
-
-
 def handle_errors(errors: list[JSONObject] | None, logs: list[Log]) -> list[JSONObject]:
     """
     Makes errors and logs consistent for user consumption.
@@ -59,7 +40,7 @@ def handle_errors(errors: list[JSONObject] | None, logs: list[Log]) -> list[JSON
         result.extend(errors)
 
     if logs:
-        result.extend(reformat_logs(logs))
+        result.extend(logs)
 
     result = remove_duplicates(result)
 
