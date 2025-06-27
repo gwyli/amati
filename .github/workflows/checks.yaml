@@ -3,6 +3,14 @@ name: Checks
 on:
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '.github/'
+      - 'tests/data/'
+      - 'bin/'
+      - '.dockerignore'
+      - 'LICENSE'
+      - 'README.md'
+
 
 permissions:
   contents: read
