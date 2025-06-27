@@ -15,6 +15,7 @@ type LogType = Exception | Warning
 class Log:
     message: str
     type: Type[LogType]
+    data: object = None
     reference: Optional[References] = None
 
 
