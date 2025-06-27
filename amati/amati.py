@@ -226,7 +226,8 @@ if __name__ == "__main__":
         "--consistency-check",
         required=False,
         action="store_true",
-        help="Runs a consistency check between the input specification and amati",
+        help="Runs a consistency check between the input specification and the"
+        " parsed specification",
     )
 
     parser.add_argument(
@@ -242,7 +243,8 @@ if __name__ == "__main__":
         "--local",
         required=False,
         action="store_true",
-        help="Store errors local to the caller; a .amati/ directory will be created.",
+        help="Store errors local to the caller in a file called <file-name>.errors.json"
+        "; a .amati/ directory will be created.",
     )
 
     parser.add_argument(
@@ -250,8 +252,9 @@ if __name__ == "__main__":
         "--html-report",
         required=False,
         action="store_true",
-        help="Creates an HTML report of the errors, alongside the original file or in"
-        "a .amati/ directory if the --local switch is used",
+        help="Creates an HTML report of the errors, called <file-name>.errors.html,"
+        " alongside the original file or in a .amati/ directory if the --local switch"
+        " is used",
     )
 
     args = parser.parse_args()

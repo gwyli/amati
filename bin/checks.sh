@@ -7,4 +7,4 @@ pytest --doctest-modules amati/
 docker build -t amati -f Dockerfile . 
 cd test
 docker run --detach -v "$(pwd):/data" amati -d /data
-cd ..
+cd ../
