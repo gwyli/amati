@@ -21,13 +21,16 @@ jobs:
         with:
           filters: |
             relevant:
-              - '**'
-              - '!.github/**'
-              - '!tests/data/**'
-              - '!bin/**'
-              - '!.dockerignore'
-              - '!LICENSE'
-              - '!README.md'
+              - '**/*.py'
+              - '**/*.sh'
+              - '**/*.json'
+              - '**/*.html'
+              - '**/*.toml'
+              - '**/*.lock'
+              - 'tests/**/*.yaml'
+              - '.pylintrc'
+              - '.python-version'
+              - '.Dockerfile'
       
       - name: Skip message
         if: ${{ !(steps.check_changes.outputs.relevant == 'true') }}
