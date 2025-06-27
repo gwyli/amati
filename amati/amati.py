@@ -14,9 +14,9 @@ from pydantic import BaseModel, ValidationError
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from amati._error_handler import handle_errors
-from amati.logging import Log, LogMixin
 from amati._resolve_forward_references import resolve_forward_references
 from amati.file_handler import load_file
+from amati.logging import Log, LogMixin
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]

@@ -24,7 +24,7 @@ from amati import Reference
 from amati.logging import Log, LogMixin
 
 
-class GenericObject(LogMixin, BaseModel):
+class GenericObject(BaseModel):
     """
     A generic model to overwrite provide extra functionality
     to pydantic.BaseModel.
@@ -48,7 +48,7 @@ class GenericObject(LogMixin, BaseModel):
                 and field not in self.get_field_aliases()
             ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
-                self.log(
+                LogMixin.log(
                     Log(
                         message=message,
                         type=ValueError,
