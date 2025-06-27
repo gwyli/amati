@@ -53,7 +53,7 @@ class GenericObject(BaseModel):
                         "type": "value_error",
                         "loc": (self.__repr_name__(),),
                         "input": field,
-                        "url": self._reference_uri
+                        "url": self._reference_uri,
                     }
                 )
 
@@ -85,7 +85,7 @@ class GenericObject(BaseModel):
                     "type": "value_error",
                     "loc": (self.__repr_name__(),),
                     "input": field,
-                    "url": self._reference_uri
+                    "url": self._reference_uri,
                 }
             )
 

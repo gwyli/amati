@@ -261,6 +261,7 @@ PARAMETER_STYLES: set[str] = {
 }
 
 
+@specification_extensions("x-")
 class ParameterObject(GenericObject):
     """Validates the OpenAPI Specification parameter object - §4.8.11"""
 
@@ -277,6 +278,9 @@ class ParameterObject(GenericObject):
     example: Optional[Any] = None
     examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
     content: Optional[dict[str, "MediaTypeObject"]] = None
+    _reference_uri: ClassVar[str] = (
+        "https://spec.openapis.org/oas/v3.1.1.html#parameter-object"
+    )
 
     _in_valid = mv.if_then(
         conditions={"in_": mv.UNKNOWN},
