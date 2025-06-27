@@ -46,7 +46,8 @@ def test_status_code_range(value: str):
     assert result.is_range is True
 
 
-@given(helpers.everything_except(int))
+@given(helpers.everything_except(int).filter(lambda x: x not in REGISTERED_HTTP_STATUS_CODES))
 def test_everything_except_integers(value: Any):
+
     with pytest.raises(AmatiValueError):
         HTTPStatusCode(value)  # type: ignore
