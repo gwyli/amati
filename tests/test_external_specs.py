@@ -36,6 +36,9 @@ def get_errors(error_file: Path) -> list[dict[str, Any]]:
 
 
 def determine_file_names(file: Path) -> dict[str, Path]:
+    """
+    Make sorting out all the file names easier.
+    """
 
     file_names: dict[str, Path] = {}
 
