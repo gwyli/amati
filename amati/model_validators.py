@@ -242,7 +242,11 @@ def only_one_of(
                 truthy.append(name)
 
         if len(truthy) != 1:
-            msg = f"Expected at most one field to have a value, {", ".join(truthy)} did"
+            if truthy:
+                field_string = ", ".join(truthy)
+            else:
+                field_string = "none"
+            msg = f"Expected at most one field to have a value, {field_string} did"
 
             LogMixin.log(
                 {

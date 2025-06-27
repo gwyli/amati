@@ -922,7 +922,7 @@ class ComponentsObject(GenericObject):
 
     schemas: Optional[dict[str, SchemaObject]] = None
     responses: Optional[dict[str, ResponseObject | ReferenceObject]] = None
-    paremeters: Optional[dict[str, ParameterObject | ReferenceObject]] = None
+    parameters: Optional[dict[str, ParameterObject | ReferenceObject]] = None
     examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
     requestBodies: Optional[dict[str, RequestBodyObject | ReferenceObject]] = None
     headers: Optional[dict[str, HeaderObject | ReferenceObject]] = None
