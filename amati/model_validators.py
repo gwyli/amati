@@ -174,6 +174,7 @@ def at_least_one_of(
 
 def only_one_of(
     fields: Optional[Sequence[str]] = None,
+    type_: Optional[str] = "value_error",
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure one public field is non-empty.
 
@@ -251,7 +252,7 @@ def only_one_of(
             LogMixin.log(
                 {
                     "msg": msg,
-                    "type": "value_error",
+                    "type": type_ or "value_error",
                     "loc": (self.__class__.__name__,),
                     "input": candidates,
                     "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore

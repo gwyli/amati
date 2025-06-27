@@ -117,12 +117,6 @@ def run(
         result, errors = dispatch(data)
         logs.extend(LogMixin.logs)
 
-    if result and consistency_check:
-        if check(data, result):
-            print("Consistency check successful")
-        else:
-            print("Consistency check failed")
-
     if errors or logs:
 
         handled_errors: list[JSONObject] = handle_errors(errors, logs)
@@ -160,6 +154,9 @@ def run(
                 encoding="utf-8",
             ) as f:
                 f.write(html_output)
+
+    if result and consistency_check:
+        return check(data, result)
 
 
 def discover(discover_dir: str = ".") -> list[Path]:
@@ -265,4 +262,9 @@ if __name__ == "__main__":
         specifications = discover(args.discover)
 
     for specification in specifications:
-        run(specification, args.consistency_check, args.local, args.html_report)
+        if successful_check := run(
+            specification, args.consistency_check, args.local, args.html_report
+        ):
+            print("Consistency check successful for {specification}")
+        else:
+            print("Consistency check failed for {specification}")

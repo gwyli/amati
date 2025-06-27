@@ -50,8 +50,8 @@ from amati.validators.oas304 import (
     PathItemObject,
     PathsObject,
     RequestBodyObject,
-    ResponsesObject,
     ResponseObject,
+    ResponsesObject,
 )
 from amati.validators.oas304 import SecuritySchemeObject as OAS30SecuritySchemeObject
 from amati.validators.oas304 import (

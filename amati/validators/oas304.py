@@ -149,7 +149,9 @@ class ExampleObject(GenericObject):
         "https://spec.openapis.org/oas/v3.0.4.html#example-object"
     )
 
-    _not_value_and_external_value = mv.only_one_of(["value", "externalValue"])
+    _not_value_and_external_value = mv.only_one_of(
+        ["value", "externalValue"], "warning"
+    )
 
 
 @specification_extensions("x-")
@@ -397,7 +399,7 @@ class EncodingObject(GenericObject):
 type _ResponsesObjectReturnType = dict[str, "ReferenceObject | ResponseObject"]
 
 
-@specification_extensions("x-")
+@specification_extensions(".*")
 class ResponsesObject(GenericObject):
     """
     Validates the OpenAPI Specification responses object - §4.8.16
