@@ -28,7 +28,6 @@ jobs:
               - '!.dockerignore'
               - '!LICENSE'
               - '!README.md'
-
       
       - name: Debug path filter output
         run: |
