@@ -20,64 +20,65 @@ jobs:
         id: check_changes
         with:
           filters: |
-            run_python_checks:
+            only_skip_files:
+              - '.github/**'
+              - 'tests/data/**'
+              - 'bin/**'
+              - '.dockerignore'
+              - 'LICENSE'
+              - 'README.md'
+            any_files:
               - '**'
-              - '!.github/**'
-              - '!tests/data/**'
-              - '!bin/**'
-              - '!.dockerignore'
-              - '!LICENSE'
-              - '!README.md'
       
       - name: Debug path filter output
         run: |
           echo "run_python_checks: ${{ steps.check_changes.outputs.run_python_checks }}"      
       
       - name: Skip message
-        if: ${{ !steps.check_changes.outputs.run_python_checks }}
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: echo "Skipping Python checks - no relevant changes detected"
 
 
       - name: Install uv
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         uses: astral-sh/setup-uv@v6
 
       - name: Set up Python
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
 
       - name: Install the project
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv sync --locked --all-extras --dev
 
       - name: Formatting
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv run black .
 
       - name: Import sorting
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv run isort .
 
       - name: Linting
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv run pylint amati
       
       - name: Test Linting
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv run pylint tests
 
       - name: Testing
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv run pytest -m"not external" --cov
 
       - name: Doctests
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         run: uv run pytest --doctest-modules amati/
 
       - name: Coverage comment
-        if: steps.check_changes.outputs.run_python_checks == 'true'
+        if: ${{ !(steps.check_changes.outputs.only_skip_files == 'true' && steps.check_changes.outputs.any_files == 'true') }}
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
