@@ -2,7 +2,7 @@
 Tests amati/validators/generic.py
 """
 
-from typing import Any
+from typing import Any, ClassVar
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -13,16 +13,19 @@ from amati.validators.generic import GenericObject, allow_extra_fields
 
 class Model(GenericObject):
     value: Any
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 @allow_extra_fields()
 class ModelExtra(GenericObject):
     value: Any
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 @allow_extra_fields(pattern=r"^x-")
 class ModelExtraPattern(GenericObject):
     value: Any
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 @given(
