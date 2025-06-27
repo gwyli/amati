@@ -636,6 +636,9 @@ class XMLObject(GenericObject):
     @field_validator("namespace", mode="after")
     @classmethod
     def _validate_namespace(cls, value: URI) -> URI:
+        """
+        Validates that the namespace is not a relative URI.
+        """
         if value.type == URIType.RELATIVE:
             message = "XML namespace {value} cannot be a relative URI"
             LogMixin.log(

@@ -3,6 +3,7 @@ Handles Pydantic errors and amati logs to provide a consistent view to the user.
 """
 
 import json
+from typing import cast
 
 from amati.logging import Log
 
@@ -40,7 +41,7 @@ def handle_errors(errors: list[JSONObject] | None, logs: list[Log]) -> list[JSON
         result.extend(errors)
 
     if logs:
-        result.extend(logs)
+        result.extend(cast(list[JSONObject], logs))
 
     result = remove_duplicates(result)
 
