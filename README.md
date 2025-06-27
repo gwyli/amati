@@ -35,13 +35,13 @@ A Dockerfile is available on [DockerHub](https://hub.docker.com/r/benale/amati/t
 To run against a specific specification the location of the specification needs to be mounted in the container.
 
 ```sh
-docker run -v "<path-to-mount>:/<mount-name> amati <options>
+docker run -v "<path-to-mount>:/<mount-name> amati:alpha <options>
 ```
 
 e.g. 
 
 ```sh
-docker run -v /Users/myuser/myrepo:/data amati --spec data/myspec.yaml --hr
+docker run -v /Users/myuser/myrepo:/data amati:alpha --spec data/myspec.yaml --hr
 ```
 
 ## Architecture
