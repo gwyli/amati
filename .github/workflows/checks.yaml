@@ -21,13 +21,21 @@ jobs:
         with:
           filters: |
             run_python_checks:
-              - '**' # Match everything initially
+              - '**'
               - '!.github/**'
               - '!tests/data/**'
               - '!bin/**'
               - '!.dockerignore'
               - '!LICENSE'
               - '!README.md'
+
+      
+      - name: Debug path filter output
+        run: |
+          echo "run_python_checks: ${{ steps.check_changes.outputs.run_python_checks }}"
+          echo "Changed files:"
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
+      
       
       - name: Skip message
         if: ${{ !steps.check_changes.outputs.run_python_checks }}
