@@ -23,7 +23,6 @@ from pydantic import (
     ConfigDict,
     Field,
     RootModel,
-    ValidationError,
     model_validator,
 )
 
@@ -32,7 +31,6 @@ from amati import model_validators as mv
 from amati.fields import (
     SPDXURL,
     URI,
-    HTTPStatusCode,
     SPDXIdentifier,
 )
 from amati.fields.commonmark import CommonMark
@@ -52,6 +50,7 @@ from amati.validators.oas304 import (
     PathItemObject,
     PathsObject,
     RequestBodyObject,
+    ResponsesObject,
     ResponseObject,
 )
 from amati.validators.oas304 import SecuritySchemeObject as OAS30SecuritySchemeObject
@@ -329,91 +328,6 @@ class MediaTypeObject(GenericObject):
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#media-type-object"
     )
-
-
-type _ResponsesObjectReturnType = dict[str, "ReferenceObject | ResponseObject"]
-
-
-@specification_extensions("x-")
-class ResponsesObject(GenericObject):
-    """
-    Validates the OpenAPI Specification responses object - §4.8.16
-    """
-
-    model_config = ConfigDict(
-        extra="allow",
-    )
-
-    default: Optional["ResponseObject | ReferenceObject"] = None
-    _reference_uri: ClassVar[str] = (
-        "https://spec.openapis.org/oas/v3.1.1.html#responses-object"
-    )
-
-    @classmethod
-    def _choose_model(
-        cls, value: Any, field_name: str
-    ) -> "ReferenceObject | ResponseObject":
-        """
-        Choose the model to use for validation based on the type of value.
-
-        Args:
-            value: The value to validate.
-
-        Returns:
-            The model class to use for validation.
-        """
-
-        message = f"{field_name} must be a ResponseObject or ReferenceObject, got {type(value)}"  # pylint: disable=line-too-long
-
-        try:
-            return ResponseObject.model_validate(value)
-        except ValidationError:
-            try:
-                return ReferenceObject.model_validate(value)
-            except ValidationError as e:
-                raise ValueError(message, ResponsesObject._reference_uri) from e
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_all_fields(cls, data: dict[str, Any]) -> _ResponsesObjectReturnType:
-        """
-        Validates the responses object.
-        """
-
-        validated_data: _ResponsesObjectReturnType = {}
-
-        for field_name, value in data.items():
-
-            # If the value is a specification extension, allow it
-            if field_name.startswith("x-"):
-                validated_data[field_name] = value
-                continue
-
-            # If the value is the fixed field, "default", allow it
-            if field_name == "default":
-                if isinstance(value, dict):
-                    validated_data[field_name] = ResponsesObject._choose_model(
-                        value, field_name
-                    )
-                continue
-
-            # Otherwise, if the field appears like a valid HTTP status code or a range
-            if re.match(r"^[1-5]([0-9]{2}|XX)+$", str(field_name)):
-
-                # Double check and raise a value error if not
-                HTTPStatusCode(field_name)
-
-                # and validate as a ResponseObject or ReferenceObject
-                validated_data[field_name] = ResponsesObject._choose_model(
-                    value, field_name
-                )
-
-                continue
-
-            # If the field is not a valid HTTP status code or "default"
-            raise ValueError(f"Invalid type for numeric field '{field_name}'")
-
-        return validated_data
 
 
 class SchemaObject(GenericObject):
