@@ -32,9 +32,7 @@ jobs:
       
       - name: Debug path filter output
         run: |
-          echo "run_python_checks: ${{ steps.check_changes.outputs.run_python_checks }}"
-          echo "Changed files:"
-      
+          echo "run_python_checks: ${{ steps.check_changes.outputs.run_python_checks }}"      
       
       - name: Skip message
         if: ${{ !steps.check_changes.outputs.run_python_checks }}
