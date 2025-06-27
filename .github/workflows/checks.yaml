@@ -11,54 +11,77 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      # Gives the action the necessary permissions for publishing new
-      # comments in pull requests.
       pull-requests: write
-      # Gives the action the necessary permissions for pushing data to the
-      # python-coverage-comment-action branch, and for editing existing
-      # comments (to avoid publishing multiple comments in the same PR)
       contents: write
     steps:
       - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: check_changes
+        with:
+          filters: |
+            run_python_checks:
+              - '**' # Match everything initially
+              - '!.github/**'
+              - '!tests/data/**'
+              - '!bin/**'
+              - '!.dockerignore'
+              - '!LICENSE'
+              - '!README.md'
+      
+      - name: Skip message
+        if: ${{ !steps.check_changes.outputs.run_python_checks }}
+        run: echo "Skipping Python checks - no relevant changes detected"
+
+
       - name: Install uv
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         uses: astral-sh/setup-uv@v6
+
       - name: Set up Python
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
 
       - name: Install the project
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv sync --locked --all-extras --dev
 
       - name: Formatting
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv run black .
 
       - name: Import sorting
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv run isort .
 
       - name: Linting
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv run pylint amati
       
       - name: Test Linting
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv run pylint tests
 
       - name: Testing
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv run pytest -m"not external" --cov
 
       - name: Doctests
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         run: uv run pytest --doctest-modules amati/
 
       - name: Coverage comment
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Store Pull Request comment to be posted
+        if: steps.check_changes.outputs.run_python_checks == 'true'
         uses: actions/upload-artifact@v4
-        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
         with:
-          # If you use a different name, update COMMENT_ARTIFACT_NAME accordingly
           name: python-coverage-comment-action
-          # If you use a different name, update COMMENT_FILENAME accordingly
           path: python-coverage-comment-action.txt
