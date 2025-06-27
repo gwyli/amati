@@ -4,21 +4,21 @@ Logging utilities for Amati.
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import ClassVar, Generator, Optional, Type
-
-from amati.references import References
+from typing import Any, ClassVar, Generator, NotRequired, TypedDict
 
 type LogType = Exception | Warning
 
 
 @dataclass
-class Log:
-    message: str
-    type: Type[LogType]
-    reference: Optional[References] = None
+class Log(TypedDict):
+    type: str
+    loc: NotRequired[tuple[int | str, ...]]
+    msg: str
+    input: NotRequired[Any]
+    url: NotRequired[str]
 
 
-class LogMixin(object):
+class LogMixin:
     """
     A mixin class that provides logging functionality.
 

@@ -7,15 +7,16 @@ import json
 import sys
 from pathlib import Path
 
-import jsonpickle
+from jinja2 import Environment, FileSystemLoader
 from pydantic import BaseModel, ValidationError
-from pydantic_core import ErrorDetails
 
 # pylint: disable=wrong-import-position
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from amati._error_handler import handle_errors
 from amati._resolve_forward_references import resolve_forward_references
 from amati.file_handler import load_file
+from amati.logging import Log, LogMixin
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]
@@ -23,7 +24,7 @@ type JSONObject = dict[str, "JSONValue"]
 type JSONValue = JSONPrimitive | JSONArray | JSONObject
 
 
-def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[ErrorDetails] | None]:
+def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[JSONObject] | None]:
     """
     Returns the correct model for the passed spec
 
@@ -59,7 +60,7 @@ def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[ErrorDetails] | N
     try:
         model = module.OpenAPIObject(**data)
     except ValidationError as e:
-        return None, e.errors()
+        return None, json.loads(e.json())
 
     return model, None
 
@@ -86,7 +87,12 @@ def check(original: JSONObject, validated: BaseModel) -> bool:
     return original_ == new_
 
 
-def run(file_path: str | Path, consistency_check: bool = False):
+def run(
+    file_path: str | Path,
+    consistency_check: bool = False,
+    local: bool = False,
+    html_report: bool = False,
+):
     """
     Runs the full amati process on a specific specification file.
 
@@ -101,24 +107,56 @@ def run(file_path: str | Path, consistency_check: bool = False):
         consistency_check: Whether or not to verify the output against the input
     """
 
-    data = load_file(file_path)
+    spec = Path(file_path)
 
-    result, errors = dispatch(data)
+    data = load_file(spec)
+
+    logs: list[Log] = []
+
+    with LogMixin.context():
+        result, errors = dispatch(data)
+        logs.extend(LogMixin.logs)
+
+    if errors or logs:
+
+        handled_errors: list[JSONObject] = handle_errors(errors, logs)
+
+        file_name = Path(Path(file_path).parts[-1])
+        error_file = file_name.with_suffix(file_name.suffix + ".errors")
+        error_path = spec.parent
+
+        if local:
+            error_path = Path(".amati")
+
+            if not error_path.exists():
+                error_path.mkdir()
+
+        with open(
+            error_path / error_file.with_suffix(error_file.suffix + ".json"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            f.write(json.dumps(handled_errors))
+
+        if html_report:
+            env = Environment(
+                loader=FileSystemLoader(".")
+            )  # Assumes template is in the same directory
+            template = env.get_template("TEMPLATE.html")
+
+            # Render the template with your data
+            html_output = template.render(errors=handled_errors)
+
+            # Save the output to a file
+            with open(
+                error_path / error_file.with_suffix(error_file.suffix + ".html"),
+                "w",
+                encoding="utf-8",
+            ) as f:
+                f.write(html_output)
 
     if result and consistency_check:
-        if check(data, result):
-            print("Consistency check successful")
-        else:
-            print("Consistency check failed")
-
-    if errors:
-        if not Path(".amati").exists():
-            Path(".amati").mkdir()
-
-        error_file = Path(file_path).parts[-1]
-
-        with open(f".amati/{error_file}.json", "w", encoding="utf-8") as f:
-            f.write(jsonpickle.encode(errors, unpicklable=False))  # type: ignore
+        return check(data, result)
 
 
 def discover(discover_dir: str = ".") -> list[Path]:
@@ -170,6 +208,9 @@ if __name__ == "__main__":
         --discover is set will search the directory tree. If the specification
         does not follow the naming recommendation the --spec switch should be
         used.
+        
+        Creates a file <filename>.errors.json alongside the original specification
+        containing a JSON representation of all the errors.
         """,
     )
 
@@ -196,6 +237,23 @@ if __name__ == "__main__":
         help="Searches the specified directory tree for openapi.yaml or openapi.json.",
     )
 
+    parser.add_argument(
+        "-l",
+        "--local",
+        required=False,
+        action="store_true",
+        help="Store errors local to the caller; a .amati/ directory will be created.",
+    )
+
+    parser.add_argument(
+        "-hr",
+        "--html-report",
+        required=False,
+        action="store_true",
+        help="Creates an HTML report of the errors, alongside the original file or in"
+        "a .amati/ directory if the --local switch is used",
+    )
+
     args = parser.parse_args()
 
     if args.spec:
@@ -204,4 +262,9 @@ if __name__ == "__main__":
         specifications = discover(args.discover)
 
     for specification in specifications:
-        run(specification, args.consistency_check)
+        if successful_check := run(
+            specification, args.consistency_check, args.local, args.html_report
+        ):
+            print("Consistency check successful for {specification}")
+        else:
+            print("Consistency check failed for {specification}")

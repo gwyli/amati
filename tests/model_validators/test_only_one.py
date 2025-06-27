@@ -9,7 +9,6 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import BaseModel
 
-from amati import Reference
 from amati import model_validators as mv
 from amati.logging import LogMixin
 from tests.helpers import text_excluding_empty_string
@@ -19,7 +18,7 @@ MIN = int(float_info.min)
 
 class EmptyObject(BaseModel):
     _only_one = mv.only_one_of(fields=[])
-    _reference: Reference = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class OnlyOneNoRestrictions(BaseModel):
@@ -27,7 +26,7 @@ class OnlyOneNoRestrictions(BaseModel):
     age: Optional[int] = None
     music: Optional[list[int]] = None
     _only_one_of = mv.only_one_of()
-    _reference: ClassVar[Reference] = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class OnlyOneWithRestrictions(BaseModel):
@@ -35,7 +34,7 @@ class OnlyOneWithRestrictions(BaseModel):
     age: Optional[int] = None
     music: Optional[list[int]] = None
     _only_one_of = mv.only_one_of(fields=["name", "age"])
-    _reference: ClassVar[Reference] = Reference(title="test")
+    _reference_uri: ClassVar[str] = "https://example.com"
 
 
 def test_empty_object():

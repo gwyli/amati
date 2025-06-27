@@ -6,7 +6,7 @@ from typing import ClassVar
 
 from abnf import ParseError
 
-from amati import AmatiValueError, Reference
+from amati import AmatiValueError
 from amati.fields import Str as _Str
 from amati.grammars import oas
 
@@ -31,10 +31,8 @@ class RuntimeExpression(_Str):
     It is validated against the ABNF grammar in the OpenAPI spec.
     """
 
-    _reference: ClassVar[Reference] = Reference(
-        title="OpenAPI Specification v3.1.1",
-        section="Runtime Expressions",
-        url="https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions",
+    _reference_uri: ClassVar[str] = (
+        "https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions"
     )
 
     def __init__(self, value: str):
@@ -50,7 +48,7 @@ class RuntimeExpression(_Str):
         except ParseError as e:
             raise AmatiValueError(
                 f"{value} is not a valid runtime expression",
-                reference=self._reference,
+                self._reference_uri,
             ) from e
 
 
@@ -59,11 +57,7 @@ class OpenAPI(_Str):
     Represents an OpenAPI version string.s
     """
 
-    _reference: ClassVar[Reference] = Reference(
-        title="OpenAPI Initiative Publications",
-        url="https://spec.openapis.org/#openapi-specification",
-        section="OpenAPI Specification ",
-    )
+    _reference_uri: ClassVar[str] = "https://spec.openapis.org/#openapi-specification"
 
     def __init__(self, value: str):
         """
@@ -75,5 +69,5 @@ class OpenAPI(_Str):
         if value not in OPENAPI_VERSIONS:
             raise AmatiValueError(
                 f"{value} is not a valid OpenAPI version",
-                reference=self._reference,
+                self._reference_uri,
             )

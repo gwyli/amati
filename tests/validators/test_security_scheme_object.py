@@ -37,8 +37,8 @@ def test_security_scheme_invalid(scheme_type: str):
     with LogMixin.context():
         SecuritySchemeObject(type=scheme_type)
         assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0]["msg"] is not None
+        assert LogMixin.logs[0]["type"] == "value_error"
 
 
 @given(st.none())
@@ -81,8 +81,8 @@ def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
             }  # type: ignore
         )
         assert LogMixin.logs
-        assert LogMixin.logs[0].message is not None
-        assert LogMixin.logs[0].type == ValueError
+        assert LogMixin.logs[0]["msg"] is not None
+        assert LogMixin.logs[0]["type"] == "value_error"
 
 
 @given(st.text(), st.sampled_from(VALID_HTTP_AUTHENTICATION_SCHEMES), st.text())

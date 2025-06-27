@@ -5,7 +5,7 @@ Tests amati/fields/email.py
 import re
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 from amati import AmatiValueError
@@ -18,7 +18,6 @@ from amati.fields.email import Email
 
 
 @given(st.emails())
-@settings(deadline=300)
 def test_email_valid(email: str):
     Email(email)
 

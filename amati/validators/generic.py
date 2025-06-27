@@ -20,17 +20,16 @@ from typing import (
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 from pydantic_core._pydantic_core import PydanticUndefined
 
-from amati import Reference
-from amati.logging import Log, LogMixin
+from amati.logging import LogMixin
 
 
-class GenericObject(LogMixin, BaseModel):
+class GenericObject(BaseModel):
     """
     A generic model to overwrite provide extra functionality
     to pydantic.BaseModel.
     """
 
-    _reference: ClassVar[Reference] = PrivateAttr()
+    _reference_uri: ClassVar[str] = PrivateAttr()
     _extra_field_pattern: Optional[Pattern[str]] = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
@@ -48,11 +47,14 @@ class GenericObject(LogMixin, BaseModel):
                 and field not in self.get_field_aliases()
             ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
-                self.log(
-                    Log(
-                        message=message,
-                        type=ValueError,
-                    )
+                LogMixin.log(
+                    {
+                        "msg": message,
+                        "type": "value_error",
+                        "loc": (self.__repr_name__(),),
+                        "input": field,
+                        "url": self._reference_uri,
+                    }
                 )
 
     def model_post_init(self, __context: Any) -> None:
@@ -78,10 +80,13 @@ class GenericObject(LogMixin, BaseModel):
         for field in excess_fields:
             message = f"{field} is not a valid field for {self.__repr_name__()}."
             LogMixin.log(
-                Log(
-                    message=message,
-                    type=ValueError,
-                )
+                {
+                    "msg": message,
+                    "type": "value_error",
+                    "loc": (self.__repr_name__(),),
+                    "input": field,
+                    "url": self._reference_uri,
+                }
             )
 
     def get_field_aliases(self) -> list[str]:

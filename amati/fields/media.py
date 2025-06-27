@@ -9,14 +9,10 @@ from typing import Optional
 from abnf import ParseError
 from abnf.grammars import rfc7231
 
-from amati import AmatiValueError, Reference
+from amati import AmatiValueError
 from amati.fields import Str as _Str
 
-reference = Reference(
-    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
-    url="https://datatracker.ietf.org/doc/html/rfc7231#appendix-D",
-    section="Appendix D",
-)
+reference_uri = "https://datatracker.ietf.org/doc/html/rfc7231#appendix-D"
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
@@ -69,7 +65,7 @@ class MediaType(_Str):
 
         except ParseError as e:
             raise AmatiValueError(
-                "Invalid media type or media type range", reference=reference
+                "Invalid media type or media type range", reference_uri
             ) from e
 
         if self.type in MEDIA_TYPES:

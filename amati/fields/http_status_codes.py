@@ -11,12 +11,11 @@ import pathlib
 import re
 from typing import Optional, Self
 
-from amati import AmatiValueError, Reference
+from amati import AmatiValueError
 from amati.fields import Str as _Str
 
-reference = Reference(
-    title="Hypertext Transfer Protocol (HTTP) Status Code Registry",
-    url="https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml",
+reference_uri = (
+    "https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml"
 )
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
@@ -88,7 +87,7 @@ class HTTPStatusCode(_Str):
             self.is_range = True
         else:
             raise AmatiValueError(
-                f"{value} is not a valid HTTP Status Code", reference=reference
+                f"{value} is not a valid HTTP Status Code", reference_uri
             )
 
         if self.description != "Unassigned":
