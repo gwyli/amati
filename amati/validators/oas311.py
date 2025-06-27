@@ -110,6 +110,8 @@ class LicenceObject(GenericObject):
                     {
                         "msg": f"{str(self.url)} is not a valid SPDX URL",
                         "type": "warning",
+                        "loc": (self.__class__.__name__,),
+                        "input": self.url,
                         "url": self._reference_uri,
                     }
                 )
@@ -125,6 +127,8 @@ class LicenceObject(GenericObject):
                 {
                     "msg": f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
                     "type": "warning",
+                    "loc": (self.__class__.__name__,),
+                    "input": self.model_dump_json(),
                     "url": self._reference_uri,
                 }
             )
@@ -215,6 +219,8 @@ class ServerVariableObject(GenericObject):
                 {
                     "msg": f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
                     "type": "value_error",
+                    "loc": (self.__class__.__name__,),
+                    "input": {"default": self.default, "enum": self.enum},
                     "url": self._reference_uri,
                 }
             )
@@ -476,6 +482,8 @@ class SchemaObject(GenericObject):
                 {
                     "msg": f"Invalid JSON Schema: {e.message}",
                     "type": "value_error",
+                    "loc": (self.__class__.__name__,),
+                    "input": schema_dict,
                     "url": self._reference_uri,
                 }
             )

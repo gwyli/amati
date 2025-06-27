@@ -161,6 +161,8 @@ def at_least_one_of(
             {
                 "msg": msg,
                 "type": "value_error",
+                "loc": (self.__class__.__name__,),
+                "input": candidates,
                 "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
             }
         )
@@ -246,6 +248,8 @@ def only_one_of(
                 {
                     "msg": msg,
                     "type": "value_error",
+                    "loc": (self.__class__.__name__,),
+                    "input": candidates,
                     "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
                 }
             )
@@ -334,6 +338,8 @@ def all_of(
                 {
                     "msg": msg,
                     "type": "value_error",
+                    "loc": (self.__class__.__name__,),
+                    "input": candidates,
                     "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
                 }
             )
@@ -425,6 +431,8 @@ def if_then(
                     "msg": f"Expected {field} to be {"in " if iterable else ""}"
                     f"{value} found {actual}",
                     "type": "value_error",
+                    "loc": (self.__class__.__name__,),
+                    "input": candidates,
                     "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
                 }
             )

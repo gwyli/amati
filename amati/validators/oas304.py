@@ -181,6 +181,8 @@ class ServerVariableObject(GenericObject):
                 {
                     "msg": f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
                     "type": "warning",
+                    "loc": (self.__class__.__name__,),
+                    "input": {"default": self.default, "enum": self.enum},
                     "url": self._reference_uri,
                 }
             )
@@ -637,7 +639,13 @@ class XMLObject(GenericObject):
         if value.type == URIType.RELATIVE:
             message = "XML namespace {value} cannot be a relative URI"
             LogMixin.log(
-                {"msg": message, "type": "value_error", "url": cls._reference_uri}
+                {
+                    "msg": message,
+                    "type": "value_error",
+                    "loc": (cls.__name__,),
+                    "input": value,
+                    "url": cls._reference_uri,
+                }
             )
 
         return value
@@ -713,6 +721,8 @@ class SchemaObject(GenericObject):
                 {
                     "msg": f"Invalid JSON Schema: {e.message}",
                     "type": "value_error",
+                    "loc": (self.__class__.__name__,),
+                    "input": schema_dict,
                     "url": self._reference_uri,
                 }
             )
