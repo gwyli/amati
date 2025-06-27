@@ -28,6 +28,11 @@ jobs:
               - '!.dockerignore'
               - '!LICENSE'
               - '!README.md'
+      
+      - name: Skip message
+        if: ${{ !steps.check_changes.outputs.run_python_checks }}
+        run: echo "Skipping Python checks - no relevant changes detected"
+
 
       - name: Install uv
         if: steps.check_changes.outputs.run_python_checks == 'true'
