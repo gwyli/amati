@@ -18,7 +18,6 @@ from amati.fields.email import Email
 
 
 @given(st.emails())
-@settings(deadline=300)
 def test_email_valid(email: str):
     Email(email)
 
