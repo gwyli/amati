@@ -7,7 +7,7 @@ from typing import Any, ClassVar
 from hypothesis import given
 from hypothesis import strategies as st
 
-from amati.logging import LogMixin
+from amati.logging import Logger
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 
@@ -37,11 +37,11 @@ def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObje
     if "value" not in data.keys():
         data["value"] = data_strategy.draw(st.text())
 
-    with LogMixin.context():
+    with Logger.context():
         Model(**data)
-        assert LogMixin.logs
-        assert LogMixin.logs[0]["msg"] is not None
-        assert LogMixin.logs[0]["type"] == "value_error"
+        assert Logger.logs
+        assert Logger.logs[0]["msg"] is not None
+        assert Logger.logs[0]["type"] == "value_error"
 
 
 @given(
@@ -60,9 +60,9 @@ def test_allow_extra_fields(data: dict[str, str], data_strategy: st.DataObject):
     if "value" not in data.keys():
         data["value"] = data_strategy.draw(st.text())
 
-    with LogMixin.context():
+    with Logger.context():
         ModelExtra(**data)
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @st.composite
@@ -84,9 +84,9 @@ def test_allow_extra_fields_with_pattern(
     if "value" not in data.keys():
         data["value"] = data_strategy.draw(st.text())
 
-    with LogMixin.context():
+    with Logger.context():
         ModelExtraPattern(**data)
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(text_matching_pattern(), st.data())
@@ -99,6 +99,6 @@ def test_allow_extra_fields_with_pattern_and_extra(
     # Add another field not begining with 'x-'
     data["extra"] = data_strategy.draw(st.text())
 
-    with LogMixin.context():
+    with Logger.context():
         ModelExtraPattern(**data)
-        assert LogMixin.logs
+        assert Logger.logs

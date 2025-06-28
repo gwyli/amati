@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from amati.logging import LogMixin
+from amati.logging import Logger
 from amati.validators.oas311 import ServerVariableObject
 from tests import helpers
 
@@ -22,9 +22,9 @@ def valid_server_variable(draw: st.DrawFn) -> dict[str, list[str] | str]:
 
 @given(valid_server_variable())
 def test_server_variable_object(xserver_variable: dict[str, list[str] | str]):
-    with LogMixin.context():
+    with Logger.context():
         ServerVariableObject(**xserver_variable)  # type: ignore
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(st.text())
@@ -44,8 +44,8 @@ def invalid_server_variable(draw: st.DrawFn) -> tuple[list[str], str]:
 @given(invalid_server_variable())
 def test_invalid_default(xserver_variable: tuple[list[str], str]):
     enum, default = xserver_variable
-    with LogMixin.context():
+    with Logger.context():
         ServerVariableObject(enum=enum, default=default)
-        assert LogMixin.logs
-        assert LogMixin.logs[0]["msg"] is not None
-        assert LogMixin.logs[0]["type"] == "value_error"
+        assert Logger.logs
+        assert Logger.logs[0]["msg"] is not None
+        assert Logger.logs[0]["type"] == "value_error"

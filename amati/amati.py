@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from amati._error_handler import handle_errors
 from amati._resolve_forward_references import resolve_forward_references
 from amati.file_handler import load_file
-from amati.logging import Log, LogMixin
+from amati.logging import Log, Logger
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]
@@ -113,9 +113,9 @@ def run(
 
     logs: list[Log] = []
 
-    with LogMixin.context():
+    with Logger.context():
         result, errors = dispatch(data)
-        logs.extend(LogMixin.logs)
+        logs.extend(Logger.logs)
 
     if errors or logs:
 
@@ -268,6 +268,6 @@ if __name__ == "__main__":
         if successful_check := run(
             specification, args.consistency_check, args.local, args.html_report
         ):
-            print("Consistency check successful for {specification}")
+            print(f"Consistency check successful for {specification}")
         else:
-            print("Consistency check failed for {specification}")
+            print(f"Consistency check failed for {specification}")

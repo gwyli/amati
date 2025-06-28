@@ -20,7 +20,7 @@ from typing import (
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 from pydantic_core._pydantic_core import PydanticUndefined
 
-from amati.logging import LogMixin
+from amati.logging import Logger
 
 
 class GenericObject(BaseModel):
@@ -47,7 +47,7 @@ class GenericObject(BaseModel):
                 and field not in self.get_field_aliases()
             ):
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
-                LogMixin.log(
+                Logger.log(
                     {
                         "msg": message,
                         "type": "value_error",
@@ -79,7 +79,7 @@ class GenericObject(BaseModel):
 
         for field in excess_fields:
             message = f"{field} is not a valid field for {self.__repr_name__()}."
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": message,
                     "type": "value_error",

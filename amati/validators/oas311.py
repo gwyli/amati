@@ -37,7 +37,7 @@ from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI
 from amati.fields.spdx_licences import VALID_LICENCES
-from amati.logging import LogMixin
+from amati.logging import Logger
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.oas304 import (
     CallbackObject,
@@ -105,7 +105,7 @@ class LicenceObject(GenericObject):
             try:
                 SPDXURL(self.url)
             except AmatiValueError:
-                LogMixin.log(
+                Logger.log(
                     {
                         "msg": f"{str(self.url)} is not a valid SPDX URL",
                         "type": "warning",
@@ -122,7 +122,7 @@ class LicenceObject(GenericObject):
             and self.identifier
             and str(self.url) not in VALID_LICENCES[self.identifier]
         ):
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
                     "type": "warning",
@@ -214,7 +214,7 @@ class ServerVariableObject(GenericObject):
             return self
 
         if self.default not in self.enum:
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
                     "type": "value_error",
@@ -396,7 +396,7 @@ class SchemaObject(GenericObject):
             # This will validate the structure conforms to JSON Schema
             validator_cls(meta_schema).validate(schema_dict)  # type: ignore
         except JSONVSchemeValidationError as e:
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": f"Invalid JSON Schema: {e.message}",
                     "type": "value_error",

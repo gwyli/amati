@@ -18,7 +18,7 @@ class Log(TypedDict):
     url: NotRequired[str]
 
 
-class LogMixin:
+class Logger:
     """
     A mixin class that provides logging functionality.
 
