@@ -158,18 +158,37 @@ def run(
     if result and consistency_check:
         return check(data, result)
 
+    return True
 
-def discover(discover_dir: str = ".") -> list[Path]:
+
+def discover(spec: str, discover_dir: str = ".") -> list[Path]:
     """
     Finds OpenAPI Specification files to validate
 
     Args:
+        spec: The path to a specific OpenAPI specification file.
         discover_dir: The directory to search through.
     Returns:
-        A list of paths to validate.
+        A list of specifications to validate.
     """
 
     specs: list[Path] = []
+
+    # If a spec is provided, check if it exists and erorr if not
+    if spec:
+        spec_path = Path(spec)
+
+        if not spec_path.exists():
+            raise FileNotFoundError(f"File {spec} does not exist.")
+
+        if not spec_path.is_file():
+            raise IsADirectoryError(f"{spec} is a directory, not a file.")
+
+        specs.append(spec_path)
+
+        # End early if we're not also trying to find files
+        if not discover_dir:
+            return specs
 
     if Path("openapi.json").exists():
         specs.append(Path("openapi.json"))
@@ -258,16 +277,20 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    
+    print('Starting amati...')
 
-    if args.spec:
-        specifications: list[Path] = [Path(args.spec)]
-    else:
-        specifications = discover(args.discover)
+    specifications = discover(args.spec, args.discover)
+    print(specifications)
 
     for specification in specifications:
-        if successful_check := run(
+        successful_check = run(
             specification, args.consistency_check, args.local, args.html_report
-        ):
+        )
+
+        if args.consistency_check and successful_check:
             print(f"Consistency check successful for {specification}")
-        else:
+        elif args.consistency_check:
             print(f"Consistency check failed for {specification}")
+            
+    print('completed.')
