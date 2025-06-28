@@ -43,5 +43,5 @@ jobs:
           context: .
           push: true
           tags:  |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:${{ github.event.release.tag_name }}.1
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:alpha
+            ${{ secrets.DOCKERHUB_USER }}/${{ secrets.DOCKERHUB_REPO }}:${{ github.event.release.tag_name }}.1
+            ${{ secrets.DOCKERHUB_USER }}/${{ secrets.DOCKERHUB_REPO }}:alpha
