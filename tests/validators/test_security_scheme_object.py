@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from amati.fields import URI
 from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES
-from amati.logging import LogMixin
+from amati.logging import Logger
 from amati.validators.oas304 import OAuthFlowsObject
 from amati.validators.oas311 import SecuritySchemeObject
 from tests.helpers import text_excluding_empty_string
@@ -34,11 +34,11 @@ INVALID_HTTP_AUTHENTICATION_SCHEMES: st.SearchStrategy[str] = st.text().filter(
 @given(INVALID_SECURITY_SCHEME_TYPES)
 def test_security_scheme_invalid(scheme_type: str):
 
-    with LogMixin.context():
+    with Logger.context():
         SecuritySchemeObject(type=scheme_type)
-        assert LogMixin.logs
-        assert LogMixin.logs[0]["msg"] is not None
-        assert LogMixin.logs[0]["type"] == "value_error"
+        assert Logger.logs
+        assert Logger.logs[0]["msg"] is not None
+        assert Logger.logs[0]["type"] == "value_error"
 
 
 @given(st.none())
@@ -53,7 +53,7 @@ def test_security_scheme_none(scheme_type: str):
     st.sampled_from(("query", "header", "cookie")),
 )
 def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
-    with LogMixin.context():
+    with Logger.context():
         SecuritySchemeObject(
             **{
                 "type": "apiKey",
@@ -62,7 +62,7 @@ def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
                 "in": in_,
             }  # type: ignore
         )
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(
@@ -71,7 +71,7 @@ def test_security_scheme_apikey_valid(description: str, name: str, in_: str):
     st.text().filter(lambda x: x not in ("query", "header", "cookie")),
 )
 def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
-    with LogMixin.context():
+    with Logger.context():
         SecuritySchemeObject(
             **{
                 "type": "apiKey",
@@ -80,21 +80,21 @@ def test_security_scheme_apikey_invalid(description: str, name: str, in_: str):
                 "in": in_,
             }  # type: ignore
         )
-        assert LogMixin.logs
-        assert LogMixin.logs[0]["msg"] is not None
-        assert LogMixin.logs[0]["type"] == "value_error"
+        assert Logger.logs
+        assert Logger.logs[0]["msg"] is not None
+        assert Logger.logs[0]["type"] == "value_error"
 
 
 @given(st.text(), st.sampled_from(VALID_HTTP_AUTHENTICATION_SCHEMES), st.text())
 def test_security_scheme_http_valid(description: str, scheme: str, bearer_format: str):
-    with LogMixin.context():
+    with Logger.context():
         SecuritySchemeObject(
             type="http",
             description=description,
             scheme=scheme,  # type: ignore
             bearerFormat=bearer_format,
         )
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(st.text(), st.text(), INVALID_HTTP_AUTHENTICATION_SCHEMES, st.text())
@@ -114,7 +114,7 @@ def test_security_scheme_http_invalid(
 def test_security_scheme_oauth2_valid(
     description: str, scheme: str, bearer_format: str
 ):
-    with LogMixin.context():
+    with Logger.context():
         SecuritySchemeObject(
             type="oauth2",
             description=description,
@@ -122,7 +122,7 @@ def test_security_scheme_oauth2_valid(
             bearerFormat=bearer_format,
             flows=OAuthFlowsObject(),
         )
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(st.text(), st.text(), INVALID_HTTP_AUTHENTICATION_SCHEMES, st.text())
@@ -146,7 +146,7 @@ def test_security_scheme_oauth2_invalid(
 def test_oauth_flows_implicit_valid(
     authorization_url: URI, refresh_url: URI, scopes: dict[str, str]
 ):
-    with LogMixin.context():
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "implicit": {
@@ -157,7 +157,7 @@ def test_oauth_flows_implicit_valid(
             }  # type: ignore
         )
 
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(
@@ -169,7 +169,7 @@ def test_oauth_flows_implicit_valid(
 def test_oauth_flows_implicit_invalid(
     authorization_url: URI, token_url: URI, refresh_url: URI, scopes: dict[str, str]
 ):
-    with LogMixin.context():
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "implicit": {
@@ -181,7 +181,7 @@ def test_oauth_flows_implicit_invalid(
             }  # type: ignore
         )
 
-        assert LogMixin.logs
+        assert Logger.logs
 
 
 @given(
@@ -193,7 +193,7 @@ def test_oauth_flows_implicit_invalid(
 def test_oauth_flows_authorization_code_valid(
     authorization_url: URI, token_url: URI, refresh_url: URI, scopes: dict[str, str]
 ):
-    with LogMixin.context():
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "authorizationCode": {
@@ -204,7 +204,7 @@ def test_oauth_flows_authorization_code_valid(
                 }
             }  # type: ignore
         )
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(
@@ -215,7 +215,7 @@ def test_oauth_flows_authorization_code_valid(
 def test_oauth_flows_authorization_code_invalid(
     uri: URI, refresh_url: URI, scopes: dict[str, str]
 ):
-    with LogMixin.context():
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "authorizationCode": {
@@ -225,8 +225,8 @@ def test_oauth_flows_authorization_code_invalid(
                 }
             }  # type: ignore
         )
-        assert LogMixin.logs
-    with LogMixin.context():
+        assert Logger.logs
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "authorizationCode": {
@@ -236,7 +236,7 @@ def test_oauth_flows_authorization_code_invalid(
                 }
             }  # type: ignore
         )
-        assert LogMixin.logs
+        assert Logger.logs
 
 
 @given(
@@ -247,7 +247,7 @@ def test_oauth_flows_authorization_code_invalid(
 def test_oauth_flows_client_and_password_valid(
     token_url: URI, refresh_url: URI, scopes: dict[str, str]
 ):
-    with LogMixin.context():
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "clientCredentials": {
@@ -258,8 +258,8 @@ def test_oauth_flows_client_and_password_valid(
             }  # type: ignore
         )
 
-        assert not LogMixin.logs
-    with LogMixin.context():
+        assert not Logger.logs
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "password": {
@@ -269,7 +269,7 @@ def test_oauth_flows_client_and_password_valid(
                 }
             }  # type: ignore
         )
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 @given(
@@ -281,7 +281,7 @@ def test_oauth_flows_client_and_password_valid(
 def test_oauth_flows_client_and_password_invalid(
     authorization_url: URI, token_url: URI, refresh_url: URI, scopes: dict[str, str]
 ):
-    with LogMixin.context():
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "clientCredentials": {
@@ -292,8 +292,8 @@ def test_oauth_flows_client_and_password_invalid(
                 }
             }  # type: ignore
         )
-        assert LogMixin.logs
-    with LogMixin.context():
+        assert Logger.logs
+    with Logger.context():
         OAuthFlowsObject(
             **{
                 "password": {
@@ -304,4 +304,4 @@ def test_oauth_flows_client_and_password_invalid(
                 }
             }  # type: ignore
         )
-        assert LogMixin.logs
+        assert Logger.logs

@@ -42,7 +42,7 @@ from amati.fields import (
 from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
-from amati.logging import LogMixin
+from amati.logging import Logger
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 type JSONPrimitive = str | int | float | bool | None
@@ -179,7 +179,7 @@ class ServerVariableObject(GenericObject):
             return self
 
         if self.default not in self.enum:
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
                     "type": "warning",
@@ -647,7 +647,7 @@ class XMLObject(GenericObject):
         """
         if value.type == URIType.RELATIVE:
             message = "XML namespace {value} cannot be a relative URI"
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": message,
                     "type": "value_error",
@@ -726,7 +726,7 @@ class SchemaObject(GenericObject):
             # This will validate the structure conforms to JSON Schema
             validator_cls(meta_schema).validate(schema_dict)  # type: ignore
         except JSONVSchemeValidationError as e:
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": f"Invalid JSON Schema: {e.message}",
                     "type": "value_error",

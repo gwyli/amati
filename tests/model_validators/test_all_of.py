@@ -10,7 +10,7 @@ from hypothesis import strategies as st
 from pydantic import BaseModel
 
 from amati import model_validators as mv
-from amati.logging import LogMixin
+from amati.logging import Logger
 from tests.helpers import text_excluding_empty_string
 
 MIN = int(float_info.min)
@@ -38,9 +38,9 @@ class AllWithRestrictions(BaseModel):
 
 
 def test_empty_object():
-    with LogMixin.context():
+    with Logger.context():
         EmptyObject()
-        assert not LogMixin.logs
+        assert not Logger.logs
 
 
 # Using a min_value forces integers to be not-None
@@ -56,71 +56,71 @@ def test_all_of_no_restrictions(name: str, age: int, music: list[int]):
     model = AllNoRestrictions(name=name, age=age, music=music)
     assert model.name and model.age == age and model.music
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=age, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=name, age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=name, age=age, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=name, age=None, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=age, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
     # Tests with falsy values
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=age, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=name, age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=name, age=age, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=name, age=None, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=age, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
     # Test when no fields are provided
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=None, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=None, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=None, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=None, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
 
 # Using a min_value forces integers to be not-None
@@ -137,66 +137,66 @@ def test_all_of_with_restrictions(name: str, age: int, music: list[int]):
     model = AllWithRestrictions(name=name, age=age, music=music)
     assert model.name and model.age == age and model.music
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name=None, age=age, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name=name, age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
     model = AllWithRestrictions(name=name, age=age, music=None)
     assert model.name and model.age == age
 
-    with LogMixin.context():
+    with Logger.context():
         model = AllWithRestrictions(name=None, age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name=name, age=None, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name=None, age=age, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
     # Tests with falsy values
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name="", age=age, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name=name, age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
     model = AllWithRestrictions(name=name, age=age, music=[])
     assert model.name and model.age == age
 
-    with LogMixin.context():
+    with Logger.context():
         model = AllWithRestrictions(name="", age=None, music=music)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name=name, age=None, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllWithRestrictions(name="", age=age, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
     # Test when no fields are provided
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=None, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=None, music=None)
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name=None, age=None, music=[])
-        assert LogMixin.logs
+        assert Logger.logs
 
-    with LogMixin.context():
+    with Logger.context():
         AllNoRestrictions(name="", age=None, music=[])
-        assert LogMixin.logs
+        assert Logger.logs

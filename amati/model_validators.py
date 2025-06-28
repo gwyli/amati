@@ -10,7 +10,7 @@ from pydantic._internal._decorators import (
     PydanticDescriptorProxy,
 )
 
-from amati.logging import LogMixin
+from amati.logging import Logger
 from amati.validators.generic import GenericObject
 
 
@@ -107,7 +107,7 @@ def at_least_one_of(
         The validator that ensures at least one public field is non-empty.
 
     Example:
-        >>> LogMixin.logs = []
+        >>> Logger.logs = []
         >>>
         >>> class User(GenericObject):
         ...     name: str = ""
@@ -116,8 +116,8 @@ def at_least_one_of(
         ...     _reference_uri = "https://example.com"
         ...
         >>> user = User()
-        >>> assert len(LogMixin.logs) == 1
-        >>> LogMixin.logs = []
+        >>> assert len(Logger.logs) == 1
+        >>> Logger.logs = []
 
         >>> class User(GenericObject):
         ...     name: str = ""
@@ -128,11 +128,11 @@ def at_least_one_of(
         ...
         >>>
         >>> user = User(name="John")  # Works fine
-        >>> assert not LogMixin.logs
+        >>> assert not Logger.logs
         >>> user = User()
-        >>> assert len(LogMixin.logs) == 1
+        >>> assert len(Logger.logs) == 1
         >>> user = User(age=30)
-        >>> assert len(LogMixin.logs) == 2
+        >>> assert len(Logger.logs) == 2
 
 
     Note:
@@ -157,7 +157,7 @@ def at_least_one_of(
         public_fields = ", ".join(f"{name}" for name in candidates.keys())
 
         msg = f"{public_fields} do not have values, expected at least one."
-        LogMixin.log(
+        Logger.log(
             {
                 "msg": msg,
                 "type": "value_error",
@@ -191,7 +191,7 @@ def only_one_of(
         The validator that ensures at one public field is non-empty.
 
     Example:
-        >>> LogMixin.logs = []
+        >>> Logger.logs = []
         >>>
         >>> class User(GenericObject):
         ...     email: str = ""
@@ -201,10 +201,10 @@ def only_one_of(
         ...
         >>> user = User(email="test@example.com")  # Works fine
         >>> user = User(name="123-456-7890")  # Works fine
-        >>> assert not LogMixin.logs
+        >>> assert not Logger.logs
         >>> user = User(email="a@b.com", name="123")
-        >>> assert LogMixin.logs
-        >>> LogMixin.logs = []
+        >>> assert Logger.logs
+        >>> Logger.logs = []
 
         >>> class User(GenericObject):
         ...     name: str = ""
@@ -216,11 +216,11 @@ def only_one_of(
         >>> user = User(name="Bob")  # Works fine
         >>> user = User(email="test@example.com")  # Works fine
         >>> user = User(name="Bob", age=30)  # Works fine
-        >>> assert not LogMixin.logs
+        >>> assert not Logger.logs
         >>> user = User(name="Bob", email="a@b.com")
-        >>> assert len(LogMixin.logs) == 1
+        >>> assert len(Logger.logs) == 1
         >>> user = User(age=30)
-        >>> assert len(LogMixin.logs) == 2
+        >>> assert len(Logger.logs) == 2
 
     Note:
         Only public fields (not starting with '_') are checked. Private fields
@@ -249,7 +249,7 @@ def only_one_of(
                 field_string = "none"
             msg = f"Expected at most one field to have a value, {field_string} did"
 
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": msg,
                     "type": type_ or "value_error",
@@ -282,7 +282,7 @@ def all_of(
         The validator that ensures at most one public field is non-empty.
 
     Example:
-        >>> LogMixin.logs = []
+        >>> Logger.logs = []
         >>>
         >>> class User(GenericObject):
         ...     email: str = ""
@@ -291,11 +291,11 @@ def all_of(
         ...     _reference_uri = "https://example.com"
         ...
         >>> user = User(email="a@b.com", name="123") # Works fine
-        >>> assert not LogMixin.logs
+        >>> assert not Logger.logs
         >>> user = User(email="test@example.com")
-        >>> assert len(LogMixin.logs) == 1
+        >>> assert len(Logger.logs) == 1
         >>> user = User(name="123-456-7890")
-        >>> assert len(LogMixin.logs) == 2
+        >>> assert len(Logger.logs) == 2
 
         >>> class User(GenericObject):
         ...     name: str = ""
@@ -304,17 +304,17 @@ def all_of(
         ...     _all_of = all_of(["name", "email"])
         ...     _reference_uri = "https://example.com"
         ...
-        >>> LogMixin.logs = []
+        >>> Logger.logs = []
         >>> user = User(name="Bob", email="a@b.com") # Works fine
-        >>> assert not LogMixin.logs
+        >>> assert not Logger.logs
         >>> user = User(name="Bob")
-        >>> assert len(LogMixin.logs) == 1
+        >>> assert len(Logger.logs) == 1
         >>> user = User(email="test@example.com")
-        >>> assert len(LogMixin.logs) == 2
+        >>> assert len(Logger.logs) == 2
         >>> user = User(age=30)
-        >>> assert len(LogMixin.logs) == 3
+        >>> assert len(Logger.logs) == 3
         >>> user = User(name="Bob", age=30)
-        >>> assert len(LogMixin.logs) == 4
+        >>> assert len(Logger.logs) == 4
 
     Note:
         Only public fields (not starting with '_') are checked. Private fields
@@ -339,7 +339,7 @@ def all_of(
         if falsy:
             msg = f"Expected at all fields to have a value, {", ".join(falsy)} did not"
 
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": msg,
                     "type": "value_error",
@@ -378,7 +378,7 @@ def if_then(
         ValueError: If a condition and consequence are not present
 
     Example:
-        >>> LogMixin.logs = []
+        >>> Logger.logs = []
         >>>
         >>> class User(GenericObject):
         ...     role: str = ""
@@ -390,11 +390,11 @@ def if_then(
         ...     _reference_uri = "https://example.com"
         ...
         >>> user = User(role="admin", can_edit=True)  # Works fine
-        >>> assert not LogMixin.logs
+        >>> assert not Logger.logs
         >>> user = User(role="admin", can_edit=False)  # Fails validation
-        >>> assert len(LogMixin.logs) == 1
+        >>> assert len(Logger.logs) == 1
         >>> user = User(role="user", can_edit=False)  # Works fine
-        >>> assert len(LogMixin.logs) == 1
+        >>> assert len(Logger.logs) == 1
     """
 
     @model_validator(mode="after")
@@ -431,7 +431,7 @@ def if_then(
             if value == actual:
                 continue
 
-            LogMixin.log(
+            Logger.log(
                 {
                     "msg": f"Expected {field} to be {"in " if iterable else ""}"
                     f"{value} found {actual}",
