@@ -1,6 +1,6 @@
 [project]
 name = "amati"
-version = "0.2.3"
+version = "0.2.4"
 description = "Validates that a .yaml or .json file conforms to the OpenAPI Specifications 3.x."
 readme = "README.md"
 authors = [
