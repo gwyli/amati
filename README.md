@@ -29,7 +29,11 @@ options:
                         file or in a .amati/ directory if the --local switch is used
 ```
 
-A Dockerfile is available on [DockerHub](https://hub.docker.com/r/benale/amati/tags)
+### Docker
+
+A Dockerfile is available on [DockerHub](https://hub.docker.com/r/benale/amati/tags) or `docker pull benale/amati:alpha`.
+
+Whilst an alpha build only the image tagged `alpha` will be maintained. If there are breaking API changes these will be detailed in releases going forward. Releases can be separately watched using the custom option when watching this repository.
 
 To run against a specific specification the location of the specification needs to be mounted in the container.
 
@@ -37,10 +41,21 @@ To run against a specific specification the location of the specification needs 
 docker run -v "<path-to-specification>:/<mount-name> benale/amati:alpha <options>
 ```
 
-e.g. where you have a specification located in `/Users/myuser/myrepo/myspec.yaml`
+e.g. where you have a specification located in `/Users/myuser/myrepo/myspec.yaml` and create a mount `/data`:
 
 ```sh
 docker run -v /Users/myuser/myrepo:/data benale/amati:alpha --spec /data/myspec.yaml --html-report
+```
+
+### PyPI
+
+amati is [available on PyPI](https://pypi.org/project/amati/), to run everything:
+
+```py
+>>> from amati import amati
+>>> check = amati.run('tests/data/openapi.yaml', consistency_check=True, local=True, html_report=True)
+>>> check
+True
 ```
 
 ## Architecture
@@ -98,7 +113,7 @@ sh bin/checks.sh
 
 ### Docker
 
-A development Docker image is provided, `Dockerfile`, to build:
+A `Dockerfile` is provided, to build:
 
 ```sh
 docker build -t amati -f Dockerfile .
