@@ -8,15 +8,16 @@ import sys
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
+from loguru import logger
 from pydantic import BaseModel, ValidationError
 
 # pylint: disable=wrong-import-position
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from amati._error_handler import handle_errors
+from amati._logging import Log, Logger
 from amati._resolve_forward_references import resolve_forward_references
 from amati.file_handler import load_file
-from amati.logging import Log, Logger
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]
@@ -241,7 +242,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-cc",
         "--consistency-check",
         required=False,
         action="store_true",
@@ -258,7 +258,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-l",
         "--local",
         required=False,
         action="store_true",
@@ -267,7 +266,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-hr",
         "--html-report",
         required=False,
         action="store_true",
@@ -277,20 +275,36 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    
-    print('Starting amati...')
 
-    specifications = discover(args.spec, args.discover)
-    print(specifications)
+    logger.remove()  # Remove the default logger
+    # Add a new logger that outputs to stderr with a specific format
+    logger.add(sys.stderr, format="{time} | {level} | {message}")
+
+    logger.info("Starting amati")
+
+    try:
+        specifications = discover(args.spec, args.discover)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error(str(e))
+        sys.exit(1)
 
     for specification in specifications:
-        successful_check = run(
-            specification, args.consistency_check, args.local, args.html_report
-        )
+
+        successful_check = False
+        logger.info(f"Processing specification {specification}")
+
+        try:
+            successful_check = run(
+                specification, args.consistency_check, args.local, args.html_report
+            )
+            logger.info(f"Specification {specification} processed successfully.")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error(f"Error processing {specification}, {str(e)}")
+            sys.exit(1)
 
         if args.consistency_check and successful_check:
-            print(f"Consistency check successful for {specification}")
+            logger.info(f"Consistency check successful for {specification}")
         elif args.consistency_check:
-            print(f"Consistency check failed for {specification}")
-            
-    print('completed.')
+            logger.info(f"Consistency check failed for {specification}")
+
+    logger.info("Stopping amati.")

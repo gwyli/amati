@@ -10,8 +10,8 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
+from amati._logging import Logger
 from amati.fields.spdx_licences import VALID_LICENCES, VALID_URLS
-from amati.logging import Logger
 from amati.validators.oas311 import LicenceObject
 from tests.helpers import none_and_empty_string, text_excluding_empty_string
 
