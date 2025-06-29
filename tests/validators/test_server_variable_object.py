@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from amati.logging import Logger
+from amati._logging import Logger
 from amati.validators.oas311 import ServerVariableObject
 from tests import helpers
 

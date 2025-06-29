@@ -10,7 +10,7 @@ from pydantic._internal._decorators import (
     PydanticDescriptorProxy,
 )
 
-from amati.logging import Logger
+from amati._logging import Logger
 from amati.validators.generic import GenericObject
 
 

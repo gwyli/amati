@@ -7,7 +7,7 @@ from typing import Any, ClassVar
 from hypothesis import given
 from hypothesis import strategies as st
 
-from amati.logging import Logger
+from amati._logging import Logger
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 

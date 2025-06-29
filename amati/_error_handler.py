@@ -5,7 +5,7 @@ Handles Pydantic errors and amati logs to provide a consistent view to the user.
 import json
 from typing import cast
 
-from amati.logging import Log
+from amati._logging import Log
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]

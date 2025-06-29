@@ -30,6 +30,7 @@ from pydantic import (
 
 from amati import AmatiValueError
 from amati import model_validators as mv
+from amati._logging import Logger
 from amati.fields import (
     URI,
     Email,
@@ -42,7 +43,6 @@ from amati.fields import (
 from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
-from amati.logging import Logger
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 type JSONPrimitive = str | int | float | bool | None

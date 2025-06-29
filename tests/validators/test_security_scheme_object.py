@@ -9,9 +9,9 @@ from hypothesis import strategies as st
 from hypothesis.provisional import urls
 from pydantic import ValidationError
 
+from amati._logging import Logger
 from amati.fields import URI
 from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES
-from amati.logging import Logger
 from amati.validators.oas304 import OAuthFlowsObject
 from amati.validators.oas311 import SecuritySchemeObject
 from tests.helpers import text_excluding_empty_string
