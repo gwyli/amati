@@ -20,7 +20,7 @@ from typing import (
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 from pydantic_core._pydantic_core import PydanticUndefined
 
-from amati.logging import Logger
+from amati._logging import Logger
 
 
 class GenericObject(BaseModel):

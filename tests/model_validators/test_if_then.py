@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import BaseModel
 
-from amati.logging import Logger
+from amati._logging import Logger
 from amati.model_validators import UNKNOWN, if_then
 
 

@@ -10,7 +10,7 @@ from hypothesis import strategies as st
 from pydantic import BaseModel
 
 from amati import model_validators as mv
-from amati.logging import Logger
+from amati._logging import Logger
 from tests.helpers import text_excluding_empty_string
 
 MIN = int(float_info.min)

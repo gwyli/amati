@@ -2,7 +2,7 @@
 Tests amati/logging.py
 """
 
-from amati.logging import Logger
+from amati._logging import Logger
 from amati.validators.generic import GenericObject
 
 

@@ -10,7 +10,7 @@ amati is designed to validate that a file conforms to the [OpenAPI Specification
 
 ```sh
 python amati/amati.py --help
-usage: amati [-h] [-s SPEC] [-cc] [-d DISCOVER] [-l] [-hr]
+usage: amati [-h] [-s SPEC] [--consistency-check] [-d DISCOVER] [--local] [--html-report]
 
 Tests whether a OpenAPI specification is valid. Will look an openapi.json or openapi.yaml file in the directory that
 amati is called from. If --discover is set will search the directory tree. If the specification does not follow the
@@ -20,13 +20,12 @@ specification containing a JSON representation of all the errors.
 options:
   -h, --help            show this help message and exit
   -s, --spec SPEC       The specification to be parsed
-  -cc, --consistency-check
-                        Runs a consistency check between the input specification and the parsed specification
+  --consistency-check   Runs a consistency check between the input specification and the parsed specification
   -d, --discover DISCOVER
                         Searches the specified directory tree for openapi.yaml or openapi.json.
-  -l, --local           Store errors local to the caller in a file called <file-name>.errors.json; a .amati/ directory
+  --local               Store errors local to the caller in a file called <file-name>.errors.json; a .amati/ directory
                         will be created.
-  -hr, --html-report    Creates an HTML report of the errors, called <file-name>.errors.html, alongside the original
+  --html-report         Creates an HTML report of the errors, called <file-name>.errors.html, alongside the original
                         file or in a .amati/ directory if the --local switch is used
 ```
 
@@ -35,13 +34,13 @@ A Dockerfile is available on [DockerHub](https://hub.docker.com/r/benale/amati/t
 To run against a specific specification the location of the specification needs to be mounted in the container.
 
 ```sh
-docker run -v "<path-to-mount>:/<mount-name> amati:alpha <options>
+docker run -v "<path-to-specification>:/<mount-name> benale/amati:alpha <options>
 ```
 
-e.g. 
+e.g. where you have a specification located in `/Users/myuser/myrepo/myspec.yaml`
 
 ```sh
-docker run -v /Users/myuser/myrepo:/data amati:alpha --spec data/myspec.yaml --hr
+docker run -v /Users/myuser/myrepo:/data benale/amati:alpha --spec /data/myspec.yaml --html-report
 ```
 
 ## Architecture
@@ -99,7 +98,7 @@ sh bin/checks.sh
 
 ### Docker
 
-A development Docker image is provided, `Dockerfile.dev`, to build:
+A development Docker image is provided, `Dockerfile`, to build:
 
 ```sh
 docker build -t amati -f Dockerfile .
@@ -108,7 +107,7 @@ docker build -t amati -f Dockerfile .
 to run against a specific specification the location of the specification needs to be mounted in the container.
 
 ```sh
-docker run -v "<path-to-mount>:/<mount-name> amati <options>
+docker run -v "<path-to-specification>:/<mount-name> amati <options>
 ```
 
 This can be tested against a provided specification, from the root directory

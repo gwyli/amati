@@ -28,6 +28,7 @@ from pydantic import (
 
 from amati import AmatiValueError
 from amati import model_validators as mv
+from amati._logging import Logger
 from amati.fields import (
     SPDXURL,
     URI,
@@ -37,7 +38,6 @@ from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI
 from amati.fields.spdx_licences import VALID_LICENCES
-from amati.logging import Logger
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.oas304 import (
     CallbackObject,
