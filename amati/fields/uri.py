@@ -5,7 +5,7 @@ Validates a URI according to the RFC3986 ABNF grammar
 import json
 import pathlib
 from enum import Enum
-from typing import Optional, Self
+from typing import Self
 
 import idna
 from abnf import Node, ParseError, Rule
@@ -17,7 +17,7 @@ from amati.grammars import rfc6901
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
-with open(DATA_DIRECTORY / "schemes.json", "r", encoding="utf-8") as f:
+with open(DATA_DIRECTORY / "schemes.json", encoding="utf-8") as f:
     SCHEMES = json.loads(f.read())
 
 
@@ -39,7 +39,7 @@ class Scheme(_Str):
         'Permanent'
     """
 
-    status: Optional[str] = None
+    status: str | None = None
 
     def __init__(self, value: str) -> None:
         """Initialize a new Scheme instance with validation.
@@ -70,7 +70,6 @@ class Scheme(_Str):
 
 
 class URIType(str, Enum):
-
     ABSOLUTE = "absolute"
     RELATIVE = "relative"
     NON_RELATIVE = "non-relative"
@@ -107,12 +106,12 @@ class URI(_Str):
         <URIType.ABSOLUTE: 'absolute'>
     """
 
-    scheme: Optional[Scheme] = None
-    authority: Optional[str] = None
-    host: Optional[str] = None
-    path: Optional[str] = None
-    query: Optional[str] = None
-    fragment: Optional[str] = None
+    scheme: Scheme | None = None
+    authority: str | None = None
+    host: str | None = None
+    path: str | None = None
+    query: str | None = None
+    fragment: str | None = None
     # RFC 3987 Internationalized Resource Identifier (IRI) flag
     is_iri: bool = False
 
@@ -262,7 +261,6 @@ class URI(_Str):
         """
 
         for child in node.children:
-
             # If the node name is in the URI annotations, set the attribute
             if child.name == "scheme":
                 self.__dict__["scheme"] = Scheme(child.value)

@@ -10,7 +10,6 @@ import pathlib
 import requests
 
 if __name__ == "__main__":
-
     raw_data: dict[str, str] = {
         "application": "https://www.iana.org/assignments/media-types/application.csv",
         "audio": "https://www.iana.org/assignments/media-types/audio.csv",

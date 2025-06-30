@@ -1,8 +1,8 @@
 """Generic factories to add repetitive validators to Pydantic models."""
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from numbers import Number
-from typing import Any, Optional, Sequence
+from typing import Any
 
 from pydantic import model_validator
 from pydantic._internal._decorators import (
@@ -72,7 +72,7 @@ def is_truthy_with_numeric_zero(value: Any) -> bool:
 
 
 def _get_candidates(
-    self: GenericObject, fields: Optional[Sequence[str]]
+    self: GenericObject, fields: Sequence[str] | None
 ) -> dict[str, Any]:
     """
     Helper function to filter down the list of fields of a model to examine.
@@ -90,7 +90,7 @@ def _get_candidates(
 
 
 def at_least_one_of(
-    fields: Optional[Sequence[str]] = None,
+    fields: Sequence[str] | None = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure at least one public field is non-empty.
 
@@ -163,7 +163,7 @@ def at_least_one_of(
                 "type": "value_error",
                 "loc": (self.__class__.__name__,),
                 "input": candidates,
-                "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                "url": self._reference_uri,  # type: ignore
             }
         )
 
@@ -173,8 +173,8 @@ def at_least_one_of(
 
 
 def only_one_of(
-    fields: Optional[Sequence[str]] = None,
-    type_: Optional[str] = "value_error",
+    fields: Sequence[str] | None = None,
+    type_: str | None = "value_error",
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure one public field is non-empty.
 
@@ -255,7 +255,7 @@ def only_one_of(
                     "type": type_ or "value_error",
                     "loc": (self.__class__.__name__,),
                     "input": candidates,
-                    "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                    "url": self._reference_uri,  # type: ignore
                 }
             )
 
@@ -265,7 +265,7 @@ def only_one_of(
 
 
 def all_of(
-    fields: Optional[Sequence[str]] = None,
+    fields: Sequence[str] | None = None,
 ) -> PydanticDescriptorProxy[ModelValidatorDecoratorInfo]:
     """Factory that adds validation to ensure at most one public field is non-empty.
 
@@ -337,7 +337,7 @@ def all_of(
                 falsy.append(name)
 
         if falsy:
-            msg = f"Expected at all fields to have a value, {", ".join(falsy)} did not"
+            msg = f"Expected at all fields to have a value, {', '.join(falsy)} did not"
 
             Logger.log(
                 {
@@ -345,7 +345,7 @@ def all_of(
                     "type": "value_error",
                     "loc": (self.__class__.__name__,),
                     "input": candidates,
-                    "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                    "url": self._reference_uri,  # type: ignore
                 }
             )
 
@@ -399,7 +399,6 @@ def if_then(
 
     @model_validator(mode="after")
     def validate_if_then(self: GenericObject) -> GenericObject:
-
         if not conditions or not consequences:
             raise ValueError(
                 "A condition and a consequence must be "
@@ -433,12 +432,12 @@ def if_then(
 
             Logger.log(
                 {
-                    "msg": f"Expected {field} to be {"in " if iterable else ""}"
+                    "msg": f"Expected {field} to be {'in ' if iterable else ''}"
                     f"{value} found {actual}",
                     "type": "value_error",
                     "loc": (self.__class__.__name__,),
                     "input": candidates,
-                    "url": self._reference_uri,  # pylint: disable=protected-access # type: ignore
+                    "url": self._reference_uri,  # type: ignore
                 }
             )
 

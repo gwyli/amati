@@ -26,7 +26,7 @@ def get_repos() -> dict[str, Any]:
 
     guard()
 
-    with open("tests/data/.amati.tests.yaml", "r", encoding="utf-8") as f:
+    with open("tests/data/.amati.tests.yaml", encoding="utf-8") as f:
         content = yaml.safe_load(f)
 
     return content
@@ -46,7 +46,6 @@ def clone(content: dict[str, Any]):
         directory.mkdir()
 
     for local, remote in content["repos"].items():
-
         clone_directory: Path = directory / local
 
         if clone_directory.exists():
@@ -62,13 +61,12 @@ def clone(content: dict[str, Any]):
                 remote["uri"],
                 str(clone_directory),
                 "--depth=1",
-                f"--revision={remote["revision"]}",
+                f"--revision={remote['revision']}",
             ],
             check=True,
         )
 
 
 if __name__ == "__main__":
-
     data = get_repos()
     clone(data)

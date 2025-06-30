@@ -4,7 +4,6 @@ Validates a media type or media type range according to RFC7321
 
 import json
 import pathlib
-from typing import Optional
 
 from abnf import ParseError
 from abnf.grammars import rfc7231
@@ -16,7 +15,7 @@ reference_uri = "https://datatracker.ietf.org/doc/html/rfc7231#appendix-D"
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
-with open(DATA_DIRECTORY / "media-types.json", "r", encoding="utf-8") as f:
+with open(DATA_DIRECTORY / "media-types.json", encoding="utf-8") as f:
     MEDIA_TYPES = json.loads(f.read())
 
 
@@ -38,7 +37,7 @@ class MediaType(_Str):
 
     type: str = ""
     subtype: str = ""
-    parameter: Optional[str] = None
+    parameter: str | None = None
     is_registered: bool = False
     is_range: bool = False
 
@@ -69,7 +68,6 @@ class MediaType(_Str):
             ) from e
 
         if self.type in MEDIA_TYPES:
-
             if self.subtype == "*":
                 self.is_range = True
                 self.is_registered = True

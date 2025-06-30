@@ -4,11 +4,12 @@ types but one.
 """
 
 import random
-from typing import Any, Optional, Sequence, Tuple, Type, Union
+from collections.abc import Sequence
+from typing import Any
 
 from hypothesis import strategies as st
 
-ExcludedTypes = Union[Type[Any], Tuple[Type[Any], ...]]
+ExcludedTypes = type[Any] | tuple[type[Any], ...]
 
 
 def everything_except(excluded_types: ExcludedTypes) -> st.SearchStrategy[Any]:
@@ -38,7 +39,7 @@ def none_and_empty_string(type_: Any) -> st.SearchStrategy[Any]:
     return st.sampled_from([None, type_()])
 
 
-def random_choice_empty(sequence: Sequence[Any]) -> Optional[Any]:
+def random_choice_empty(sequence: Sequence[Any]) -> Any | None:
     """Return a random element from a sequence, or None if the sequence is empty.
 
     Args:

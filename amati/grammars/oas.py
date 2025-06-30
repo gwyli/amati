@@ -26,8 +26,8 @@ class Rule(_Rule):
     """Parser rules for grammar from OpenAPI Specification"""
 
     grammar: ClassVar[list[str] | str] = [
-        'expression = "$url" / "$method" / "$statusCode" / "$request." source / "$response." source',  # pylint: disable=line-too-long
-        "source     = header-reference / query-reference / path-reference / body-reference",  # pylint: disable=line-too-long
+        'expression = "$url" / "$method" / "$statusCode" / "$request." source / "$response." source',  # noqa: E501
+        "source     = header-reference / query-reference / path-reference / body-reference",  # noqa: E501
         'header-reference = "header." token',
         'query-reference  = "query." name',
         'path-reference   = "path." name',

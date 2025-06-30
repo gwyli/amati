@@ -1,7 +1,7 @@
 """
 Validates the OpenAPI Specification version 3.1.1
 
-Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris  # pylint: disable=line-too-long
+Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris
 
 > URIs used as references within an OpenAPI Description, or to external documentation
 > or other supplementary information such as a license, are resolved as identifiers,
@@ -13,8 +13,7 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 """
 
 import re
-from typing import Any, ClassVar, Optional
-from typing_extensions import Self
+from typing import Any, ClassVar, Optional, Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
 from jsonschema.protocols import Validator as JSONSchemaValidator
@@ -52,13 +51,11 @@ from amati.validators.oas304 import (
     RequestBodyObject,
     ResponseObject,
     ResponsesObject,
-)
-from amati.validators.oas304 import SecuritySchemeObject as OAS30SecuritySchemeObject
-from amati.validators.oas304 import (
     ServerObject,
     TagObject,
     XMLObject,
 )
+from amati.validators.oas304 import SecuritySchemeObject as OAS30SecuritySchemeObject
 
 TITLE = "OpenAPI Specification v3.1.1"
 
@@ -81,8 +78,8 @@ class LicenceObject(GenericObject):
 
     name: str = Field(min_length=1)
     # What difference does Optional make here?
-    identifier: Optional[SPDXIdentifier] = None
-    url: Optional[URI] = None
+    identifier: SPDXIdentifier | None = None
+    url: URI | None = None
     _reference_uri: ClassVar[str] = URI(
         "https://spec.openapis.org/oas/v3.1.1.html#license-object"
     )
@@ -124,7 +121,7 @@ class LicenceObject(GenericObject):
         ):
             Logger.log(
                 {
-                    "msg": f"{self.url} is not associated with the identifier {self.identifier}",  # pylint: disable=line-too-long
+                    "msg": f"{self.url} is not associated with the identifier {self.identifier}",  # noqa: E501
                     "type": "warning",
                     "loc": (self.__class__.__name__,),
                     "input": self.model_dump_json(),
@@ -148,8 +145,8 @@ class ReferenceObject(GenericObject):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     ref: URI = Field(alias="$ref")
-    summary: Optional[str]
-    description: Optional[CommonMark]
+    summary: str | None
+    description: CommonMark | None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#reference-object"
     )
@@ -162,11 +159,11 @@ class InfoObject(GenericObject):
     """
 
     title: str
-    summary: Optional[str] = None
-    description: Optional[str | CommonMark] = None
-    termsOfService: Optional[str] = None  # pylint: disable=invalid-name
-    contact: Optional[ContactObject] = None
-    license: Optional[LicenceObject] = None
+    summary: str | None = None
+    description: str | CommonMark | None = None
+    termsOfService: str | None = None
+    contact: ContactObject | None = None
+    license: LicenceObject | None = None
     version: str
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/3.1.1.html#info-object"
@@ -183,7 +180,7 @@ class DiscriminatorObject(GenericObject):
     # FIXME: The component and schema objects need to check that this is being used
     # properly.
     propertyName: str
-    mapping: Optional[dict[str, str | URI]] = None
+    mapping: dict[str, str | URI] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#discriminator-object"
     )
@@ -195,9 +192,9 @@ class ServerVariableObject(GenericObject):
     Validates the OpenAPI Specification server variable object - §4.8.6
     """
 
-    enum: Optional[list[str]] = Field(None, min_length=1)
+    enum: list[str] | None = Field(None, min_length=1)
     default: str = Field(min_length=1)
-    description: Optional[str | CommonMark] = None
+    description: str | CommonMark | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#server-variable-object"
     )
@@ -216,7 +213,7 @@ class ServerVariableObject(GenericObject):
         if self.default not in self.enum:
             Logger.log(
                 {
-                    "msg": f"The default value {self.default} is not in the enum list {self.enum}",  # pylint: disable=line-too-long
+                    "msg": f"The default value {self.default} is not in the enum list {self.enum}",  # noqa: E501
                     "type": "value_error",
                     "loc": (self.__class__.__name__,),
                     "input": {"default": self.default, "enum": self.enum},
@@ -231,18 +228,18 @@ class ServerVariableObject(GenericObject):
 class OperationObject(GenericObject):
     """Validates the OpenAPI Specification operation object - §4.8.10"""
 
-    tags: Optional[list[str]] = None
-    summary: Optional[str] = None
-    description: Optional[str | CommonMark] = None
-    externalDocs: Optional[ExternalDocumentationObject] = None
-    operationId: Optional[str] = None
-    parameters: Optional[list["ParameterObject | ReferenceObject"]] = None
+    tags: list[str] | None = None
+    summary: str | None = None
+    description: str | CommonMark | None = None
+    externalDocs: ExternalDocumentationObject | None = None
+    operationId: str | None = None
+    parameters: list["ParameterObject | ReferenceObject"] | None = None
     requestBody: Optional["RequestBodyObject | ReferenceObject"] = None
     responses: Optional["ResponsesObject"] = None
-    callbacks: Optional[dict[str, "CallbackObject | ReferenceObject"]] = None
-    deprecated: Optional[bool] = False
-    security: Optional[list["SecurityRequirementObject"]] = None
-    servers: Optional[list[ServerObject]] = None
+    callbacks: dict[str, "CallbackObject | ReferenceObject"] | None = None
+    deprecated: bool | None = False
+    security: list["SecurityRequirementObject"] | None = None
+    servers: list[ServerObject] | None = None
 
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#operation-object"
@@ -266,17 +263,17 @@ class ParameterObject(GenericObject):
 
     name: str
     in_: str = Field(alias="in")
-    description: Optional[str | CommonMark] = None
-    required: Optional[bool] = None
-    deprecated: Optional[bool] = None
-    allowEmptyValue: Optional[bool] = None
-    style: Optional[str] = None
-    explode: Optional[bool] = None
-    allowReserved: Optional[bool] = None
+    description: str | CommonMark | None = None
+    required: bool | None = None
+    deprecated: bool | None = None
+    allowEmptyValue: bool | None = None
+    style: str | None = None
+    explode: bool | None = None
+    allowReserved: bool | None = None
     schema_: Optional["SchemaObject"] = Field(alias="schema")
-    example: Optional[Any] = None
-    examples: Optional[dict[str, "ExampleObject | ReferenceObject"]] = None
-    content: Optional[dict[str, "MediaTypeObject"]] = None
+    example: Any | None = None
+    examples: dict[str, "ExampleObject | ReferenceObject"] | None = None
+    content: dict[str, "MediaTypeObject"] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#parameter-object"
     )
@@ -322,8 +319,8 @@ class MediaTypeObject(GenericObject):
 
     schema_: Optional["SchemaObject"] = Field(alias="schema", default=None)
     # FIXME: Define example
-    example: Optional[Any] = None
-    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
+    example: Any | None = None
+    examples: dict[str, ExampleObject | ReferenceObject] | None = None
     encoding: Optional["EncodingObject"] = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#media-type-object"
@@ -345,20 +342,18 @@ class SchemaObject(GenericObject):
     )
 
     # OpenAPI-specific fields not in standard JSON Schema
-    nullable: Optional[bool] = None  # OAS 3.0 style nullable flag
-    discriminator: Optional[DiscriminatorObject] = None  # Polymorphism support
-    readOnly: Optional[bool] = None  # Declares property as read-only for requests
-    writeOnly: Optional[bool] = None  # Declares property as write-only for responses
-    xml: Optional[XMLObject] = None  # XML metadata
-    externalDocs: Optional[ExternalDocumentationObject] = None  # External documentation
-    example: Optional[Any] = None  # Example of schema
-    examples: Optional[list[Any]] = None  # Examples of schema (OAS 3.1)
-    deprecated: Optional[bool] = None  # Specifies schema is deprecated
+    nullable: bool | None = None  # OAS 3.0 style nullable flag
+    discriminator: DiscriminatorObject | None = None  # Polymorphism support
+    readOnly: bool | None = None  # Declares property as read-only for requests
+    writeOnly: bool | None = None  # Declares property as write-only for responses
+    xml: XMLObject | None = None  # XML metadata
+    externalDocs: ExternalDocumentationObject | None = None  # External documentation
+    example: Any | None = None  # Example of schema
+    examples: list[Any] | None = None  # Examples of schema (OAS 3.1)
+    deprecated: bool | None = None  # Specifies schema is deprecated
 
     # JSON Schema fields that need special handling in OAS context
-    ref: Optional[str] = Field(
-        default=None, alias="$ref"
-    )  # Reference to another schema
+    ref: str | None = Field(default=None, alias="$ref")  # Reference to another schema
 
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#schema-object"
@@ -446,16 +441,16 @@ class ComponentsObject(GenericObject):
     Validates the OpenAPI Specification components object - §4.8.7
     """
 
-    schemas: Optional[dict[str, SchemaObject | ReferenceObject]] = None
-    responses: Optional[dict[str, ResponseObject | ReferenceObject]] = None
-    parameters: Optional[dict[str, ParameterObject | ReferenceObject]] = None
-    examples: Optional[dict[str, ExampleObject | ReferenceObject]] = None
-    requestBodies: Optional[dict[str, RequestBodyObject | ReferenceObject]] = None
-    headers: Optional[dict[str, HeaderObject | ReferenceObject]] = None
-    securitySchemes: Optional[dict[str, SecuritySchemeObject | ReferenceObject]] = None
-    links: Optional[dict[str, LinkObject | ReferenceObject]] = None
-    callbacks: Optional[dict[str, CallbackObject | ReferenceObject]] = None
-    pathItems: Optional[dict[str, PathItemObject]] = None
+    schemas: dict[str, SchemaObject | ReferenceObject] | None = None
+    responses: dict[str, ResponseObject | ReferenceObject] | None = None
+    parameters: dict[str, ParameterObject | ReferenceObject] | None = None
+    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    requestBodies: dict[str, RequestBodyObject | ReferenceObject] | None = None
+    headers: dict[str, HeaderObject | ReferenceObject] | None = None
+    securitySchemes: dict[str, SecuritySchemeObject | ReferenceObject] | None = None
+    links: dict[str, LinkObject | ReferenceObject] | None = None
+    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
+    pathItems: dict[str, PathItemObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#components-object"
     )
@@ -490,7 +485,7 @@ class ComponentsObject(GenericObject):
             for key in value.keys():
                 if not re.match(pattern, key):
                     raise ValueError(
-                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # pylint: disable=line-too-long
+                        f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # noqa: E501
                     )
 
         return data
@@ -504,14 +499,14 @@ class OpenAPIObject(GenericObject):
 
     openapi: OpenAPI
     info: InfoObject
-    jsonSchemaDialect: Optional[URI] = None
-    servers: Optional[list[ServerObject]] = Field(default=[ServerObject(url=URI("/"))])
-    paths: Optional[PathsObject] = None
-    webhooks: Optional[dict[str, PathItemObject]] = None
-    components: Optional[ComponentsObject] = None
-    security: Optional[list[SecurityRequirementObject]] = None
-    tags: Optional[list[TagObject]] = None
-    externalDocs: Optional[ExternalDocumentationObject] = None
+    jsonSchemaDialect: URI | None = None
+    servers: list[ServerObject] | None = Field(default=[ServerObject(url=URI("/"))])
+    paths: PathsObject | None = None
+    webhooks: dict[str, PathItemObject] | None = None
+    components: ComponentsObject | None = None
+    security: list[SecurityRequirementObject] | None = None
+    tags: list[TagObject] | None = None
+    externalDocs: ExternalDocumentationObject | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/3.1.1.html#openapi-object"
     )

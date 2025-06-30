@@ -2,9 +2,10 @@
 Logging utilities for Amati.
 """
 
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, ClassVar, Generator, NotRequired, TypedDict
+from typing import Any, ClassVar, NotRequired, TypedDict
 
 type LogType = Exception | Warning
 
@@ -42,7 +43,7 @@ class Logger:
 
     @classmethod
     @contextmanager
-    def context(cls) -> Generator[list[Log], None, None]:
+    def context(cls) -> Generator[list[Log]]:
         """Create a context manager for handling logs.
 
         Yields:

@@ -9,7 +9,6 @@ import pytest
 
 
 def test_specifc_spec():
-
     subprocess.run(
         [
             "python",
@@ -23,7 +22,6 @@ def test_specifc_spec():
 
 
 def test_discover_without_directory_failure():
-
     with pytest.raises(subprocess.CalledProcessError):
         subprocess.run(["python", "amati/amati.py", "--consistency-check"], check=True)
 

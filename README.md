@@ -90,11 +90,9 @@ This project uses:
 
 * [Pytest](https://docs.pytest.org/en/stable/) as a testing framework
 * [Pyright](https://microsoft.github.io/pyright/#/) on strict mode for type checking
-* [Pylint](https://www.pylint.org/) as a linter, using a modified version from [Google's style guide](https://google.github.io/styleguide/pyguide.html)
+* [Ruff](https://docs.astral.sh/ruff/) as a linter and formatter
 * [Hypothesis](https://hypothesis.readthedocs.io/en/latest/index.html) for test data generation
 * [Coverage](https://coverage.readthedocs.io/en/7.6.8/) on both the tests and code for test coverage
-* [Black](https://black.readthedocs.io/en/stable/index.html) for automated formatting
-* [isort](https://pycqa.github.io/isort/) for import sorting
 
 It's expected that there are no errors and 100% of the code is reached and executed. The strategy for test coverage is based on parsing test specifications and not unit tests.
 amati runs tests on the external specifications, detailed in `tests/data/.amati.tests.yaml`. To be able to run these tests the GitHub repos containing the specifications need to be available locally. Specific revisions of the repos can be downloaded by running the following, which will clone the repos into `../amati-tests-specs/<repo-name>`.

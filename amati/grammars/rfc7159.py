@@ -14,9 +14,7 @@ from abnf.parser import Rule as _Rule
 class Rule(_Rule):
     """Parser rules for grammar from RFC 7159"""
 
-    grammar: ClassVar[
-        list[str] | str
-    ] = r"""
+    grammar: ClassVar[list[str] | str] = r"""
 JSON-text = ws value ws
 begin-array     = ws %x5B ws  ; [ left square bracket
 begin-object    = ws %x7B ws  ; { left curly bracket

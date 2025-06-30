@@ -115,7 +115,6 @@ def test_conditions_met_invalid():
 
 @given(role=st.sampled_from(["admin", "user", ""]), permission=st.booleans())
 def test_property_based(role: str, permission: bool):
-
     with Logger.context():
         ModelWithConditions(role=role, permission=permission)
 

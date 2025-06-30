@@ -3,7 +3,7 @@ Tests amati.model_validators.at_least_one_of
 """
 
 from sys import float_info
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -21,25 +21,25 @@ class EmptyObject(BaseModel):
 
 
 class AtLeastOneNoRestrictions(BaseModel):
-    name: Optional[str] = None
-    age: Optional[int] = None
-    music: Optional[list[int]] = None
+    name: str | None = None
+    age: int | None = None
+    music: list[int] | None = None
     _at_least_one_of = mv.at_least_one_of()
     _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class AtLeastOneWithRestrictions(BaseModel):
-    name: Optional[str] = None
-    age: Optional[int] = None
-    music: Optional[list[int]] = None
+    name: str | None = None
+    age: int | None = None
+    music: list[int] | None = None
     _at_least_one_of = mv.at_least_one_of(fields=["name", "age"])
     _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class AtLeastOneWithTwoRestrictions(BaseModel):
-    name: Optional[str] = None
-    age: Optional[int] = None
-    music: Optional[list[int]] = None
+    name: str | None = None
+    age: int | None = None
+    music: list[int] | None = None
     _at_least_one_of_name = mv.at_least_one_of(fields=["name"])
     _at_least_one_of_age = mv.at_least_one_of(fields=["age"])
     _reference_uri: ClassVar[str] = "https://example.com"

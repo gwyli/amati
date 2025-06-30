@@ -1,25 +1,10 @@
 repos:
-  # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.8.0
-    hooks:
-      - id: black
-        language_version: python3.13
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-  - repo: local
-    hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]
-        require_serial: true
-        args:
-          [
-            "-rn", # Only display messages
-            "--rcfile=.pylintrc", # Link to your config file
-          ]
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.12.1
+  hooks:
+    # Run the linter.
+    - id: ruff-check
+      args: [--fix]
+    # Run the formatter.
+    - id: ruff-format

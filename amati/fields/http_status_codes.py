@@ -9,7 +9,7 @@ or the numeric codes can be accessed via HTTPStatusCodeN.
 import json
 import pathlib
 import re
-from typing import Optional, Self
+from typing import Self
 
 from amati import AmatiValueError
 from amati.fields import Str as _Str
@@ -20,7 +20,7 @@ reference_uri = (
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
-with open(DATA_DIRECTORY / "http-status-codes.json", "r", encoding="utf-8") as f:
+with open(DATA_DIRECTORY / "http-status-codes.json", encoding="utf-8") as f:
     HTTP_STATUS_CODES = json.loads(f.read())
 
 
@@ -42,7 +42,7 @@ class HTTPStatusCode(_Str):
         is_range (bool): Whether the status code represents a range (e.g., "2XX").
     """
 
-    description: Optional[str] = None
+    description: str | None = None
     is_registered: bool = False
     is_assigned: bool = False
     is_range: bool = False
@@ -72,7 +72,6 @@ class HTTPStatusCode(_Str):
         # Type-hinting that something should be a string is not enough
         # double check that a string will be returned in the models.
         if not isinstance(value, str):  # type: ignore
-
             type_ = type(value).__name__
             raise AmatiValueError(
                 f"{value} of type {type_} cannot be a valid HTTP Status code."

@@ -40,7 +40,6 @@ def test_name_valid(name: str, identifier: str, url: str):
     st.sampled_from(VALID_URLS),
 )
 def test_name_invalid(name: str, identifier: str, url: str):
-
     with pytest.raises(ValidationError):
         LicenceObject(name=name, identifier=identifier)  # type: ignore
 
