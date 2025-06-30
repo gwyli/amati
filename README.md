@@ -79,9 +79,7 @@ The project uses a [`pyproject.toml` file](https://packaging.python.org/en/lates
 To get started run:
 
 ```sh
-uv python install
-uv venv
-uv sync
+sh bin/startup.sh
 ```
 
 ### Testing and formatting
