@@ -17,7 +17,7 @@ def get_test_data() -> dict[str, Any]:
     Gathers the set of test data.
     """
 
-    with open("tests/data/.amati.tests.yaml", "r", encoding="utf-8") as f:
+    with open("tests/data/.amati.tests.yaml", encoding="utf-8") as f:
         content = yaml.safe_load(f)
 
     return content
@@ -29,7 +29,7 @@ def get_errors(error_file: Path) -> list[dict[str, Any]]:
     with a given test specification.
     """
 
-    with open(error_file, "r", encoding="utf-8") as f:
+    with open(error_file, encoding="utf-8") as f:
         expected_errors = json.loads(f.read())
 
     return expected_errors
@@ -58,13 +58,11 @@ def determine_file_names(file: Path) -> dict[str, Path]:
 
 @pytest.mark.external
 def test_specs():
-
     content = get_test_data()
 
     directory = Path(content["directory"])
 
     for name, repo in content["repos"].items():
-
         file: Path = Path(directory) / name / repo["spec"]
         files = determine_file_names(file)
 
@@ -77,7 +75,7 @@ def test_specs():
         if errors := repo.get("error_file"):
             error_file = get_errors(Path(errors))
 
-            with open(files["error_json"], "r", encoding="utf-8") as f:
+            with open(files["error_json"], encoding="utf-8") as f:
                 json_encoded = json.loads(f.read())
 
             assert json.dumps(json_encoded, sort_keys=True) == json.dumps(

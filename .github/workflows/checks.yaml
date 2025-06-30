@@ -28,7 +28,6 @@ jobs:
               - '**/*.toml'
               - '**/*.lock'
               - 'tests/**/*.yaml'
-              - '.pylintrc'
               - '.python-version'
               - '.Dockerfile'
       
@@ -51,21 +50,11 @@ jobs:
         if: steps.check_changes.outputs.relevant == 'true'
         run: uv sync --locked --all-extras --dev
 
-      - name: Formatting
+      - name: Run linting and formatting
         if: steps.check_changes.outputs.relevant == 'true'
-        run: uv run black .
-
-      - name: Import sorting
-        if: steps.check_changes.outputs.relevant == 'true'
-        run: uv run isort .
-
-      - name: Linting
-        if: steps.check_changes.outputs.relevant == 'true'
-        run: uv run pylint amati
-      
-      - name: Test Linting
-        if: steps.check_changes.outputs.relevant == 'true'
-        run: uv run pylint tests
+        uses: astral-sh/ruff-action@v3
+      - run: ruff check --fix
+      - run: ruff format
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'

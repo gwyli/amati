@@ -12,9 +12,7 @@ reference_uri = "https://www.rfc-editor.org/rfc/rfc5322#section-3"
 
 
 class Email(_Str):
-
     def __init__(self, value: str):
-
         try:
             rfc5322.Rule("address").parse_all(value)
         except ParseError as e:

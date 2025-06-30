@@ -25,7 +25,8 @@ ABSOLUTE_IRIS = [
     "https://xn--fsqu00a.xn--fiqs8s/文档/索引.html",
     "https://xn--fsqu00a.xn--fiqs8s",
     "https://דוגמה.ישראל/עמוד/ראשי.html",
-    "https://xn--4dbs7bf/דוגמה.ישראל/עמוד.html" "https://ตัวอย่าง.ไทย/หน้า/หลัก.html",
+    "https://xn--4dbs7bf/דוגמה.ישראל/עמוד.html",
+    "https://ตัวอย่าง.ไทย/หน้า/หลัก.html",
     "https://xn--72c1a1bt4awk9o.xn--o3cw4h/หน้า/หลัก.html",
 ]
 
@@ -72,7 +73,7 @@ def relative_uris(draw: st.DrawFn) -> str:
     # urlparse parses the URI http://a.com// with a path of //, which indicates that
     # the succeeding item is the authority in RFC 2986 when actual authority/netloc
     # is removed.
-    path = f"/{parsed.path.lstrip("/")}"
+    path = f"/{parsed.path.lstrip('/')}"
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
 
@@ -81,7 +82,6 @@ def relative_uris(draw: st.DrawFn) -> str:
 
 @st.composite
 def json_pointers(draw: st.DrawFn) -> str:
-
     while True:
         pointer = draw(relative_uris())
         try:
@@ -143,7 +143,6 @@ def test_json_pointer_iri(value: str):
 
 @given(urls())
 def test_json_pointer_invalid(value: str):
-
     # Guard to prevent valid JSON pointer being tested
     if value.startswith("/"):  # pragma: no cover
         return
@@ -155,9 +154,8 @@ def test_json_pointer_invalid(value: str):
 
 @given(urls())
 def test_uri_non_relative(value: str):
-
     # the urls() strategy doesn't necessarily provide absolute URIs
-    candidate: str = f"//{re.split("//", value)[1]}"
+    candidate: str = f"//{re.split('//', value)[1]}"
 
     result = URI(candidate)
     assert result == candidate
@@ -167,9 +165,8 @@ def test_uri_non_relative(value: str):
 
 @given(st.sampled_from(NON_RELATIVE_IRIS))
 def test_iri_non_relative(value: str):
-
     # the urls() strategy doesn't necessarily provide absolute URIs
-    candidate: str = f"//{re.split("//", value)[1]}"
+    candidate: str = f"//{re.split('//', value)[1]}"
 
     result = URI(candidate)
     assert result == candidate
@@ -186,7 +183,6 @@ def test_uri_none():
 
 
 def test_uri_with_variables_valid():
-
     uri = r"https://{subdomain}.example.com/api/v1/users/{user_id}"
     result = URIWithVariables(uri)
     assert result == uri
@@ -199,7 +195,6 @@ def test_uri_with_variables_valid():
 
 
 def test_uri_with_variables_invalid():
-
     with pytest.raises(ValueError):
         URIWithVariables(r"https://{{subdomain}.example.com/api/users/{user_id}")
 

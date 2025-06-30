@@ -1,6 +1,5 @@
-black .
-isort .
-pylint $(git ls-files '*.py')
+ruff check --fix
+ruff format
 python scripts/tests/setup_test_specs.py
 pytest --cov-report term-missing --cov=amati tests
 pytest --doctest-modules amati/

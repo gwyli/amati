@@ -3,7 +3,7 @@ Tests amati.model_validators.only_one_of
 """
 
 from sys import float_info
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -22,17 +22,17 @@ class EmptyObject(BaseModel):
 
 
 class OnlyOneNoRestrictions(BaseModel):
-    name: Optional[str] = None
-    age: Optional[int] = None
-    music: Optional[list[int]] = None
+    name: str | None = None
+    age: int | None = None
+    music: list[int] | None = None
     _only_one_of = mv.only_one_of()
     _reference_uri: ClassVar[str] = "https://example.com"
 
 
 class OnlyOneWithRestrictions(BaseModel):
-    name: Optional[str] = None
-    age: Optional[int] = None
-    music: Optional[list[int]] = None
+    name: str | None = None
+    age: int | None = None
+    music: list[int] | None = None
     _only_one_of = mv.only_one_of(fields=["name", "age"])
     _reference_uri: ClassVar[str] = "https://example.com"
 

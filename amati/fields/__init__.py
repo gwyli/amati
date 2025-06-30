@@ -3,8 +3,8 @@ Convenience, can import all types from one place
 """
 
 # Imports are here for convenience, they're not going to be used here
-# pylint: disable=unused-import
 # pyright: reportUnusedImport=false
+# ruff: noqa: F401
 
 from amati.fields._custom_types import Str
 from amati.fields.email import Email

@@ -5,15 +5,11 @@ Should be used as the base class for all classes in the project.
 """
 
 import re
+from collections.abc import Callable
 from typing import (
     Any,
-    Callable,
     ClassVar,
-    Optional,
-    Pattern,
-    Type,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -30,10 +26,9 @@ class GenericObject(BaseModel):
     """
 
     _reference_uri: ClassVar[str] = PrivateAttr()
-    _extra_field_pattern: Optional[Pattern[str]] = PrivateAttr()
+    _extra_field_pattern: re.Pattern[str] | None = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
-
         super().__init__(**data)
 
         if self.model_config.get("extra") == "allow":
@@ -72,7 +67,7 @@ class GenericObject(BaseModel):
 
         excess_fields: set[str] = set()
 
-        pattern: Pattern[str] = re.compile(self._extra_field_pattern)
+        pattern: re.Pattern[str] = re.compile(self._extra_field_pattern)
         excess_fields.update(
             key for key in self.model_extra.keys() if not pattern.match(key)
         )
@@ -110,7 +105,7 @@ class GenericObject(BaseModel):
 T = TypeVar("T", bound=GenericObject)
 
 
-def allow_extra_fields(pattern: Optional[str] = None) -> Callable[[Type[T]], Type[T]]:
+def allow_extra_fields(pattern: str | None = None) -> Callable[[type[T]], type[T]]:
     """
     A decorator that modifies a Pydantic BaseModel to allow extra fields and optionally
     sets a pattern for those extra fields
@@ -124,15 +119,15 @@ def allow_extra_fields(pattern: Optional[str] = None) -> Callable[[Type[T]], Typ
         and the pattern those fields should follow to the class.
     """
 
-    def decorator(cls: Type[T]) -> Type[T]:
+    def decorator(cls: type[T]) -> type[T]:
         """
         A decorator function that adds a ConfigDict allowing extra fields.
         """
-        namespace: dict[str, Union[ConfigDict, Optional[str]]] = {
+        namespace: dict[str, ConfigDict | str | None] = {
             "model_config": ConfigDict(extra="allow"),
             "_extra_field_pattern": pattern,
         }
         # Create a new class with the updated configuration
-        return cast(Type[T], type(cls.__name__, (cls,), namespace))
+        return cast(type[T], type(cls.__name__, (cls,), namespace))
 
     return decorator

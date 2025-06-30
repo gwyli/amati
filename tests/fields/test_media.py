@@ -70,7 +70,6 @@ def test_media_type_valid(value: str):
 
 @given(st.text().filter(lambda x: x not in MEDIA_TYPES))
 def test_media_type_invalid(value: str):
-
     # Exists just in case a valid media type is returned
     # NB: A RFC 7230 "token" is a valid sub-media-type
     # according to RFC

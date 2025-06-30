@@ -2,8 +2,6 @@
 Exceptions, declared here to not put in __init__
 """
 
-from typing import Optional
-
 
 class AmatiValueError(ValueError):
     """
@@ -19,6 +17,6 @@ class AmatiValueError(ValueError):
         ValueError
     """
 
-    def __init__(self, message: str, reference_uri: Optional[str] = None):
+    def __init__(self, message: str, reference_uri: str | None = None):
         self.message = message
         self.reference_uri = reference_uri

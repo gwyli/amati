@@ -78,7 +78,7 @@ class FileProcessor:
             with open(file_path, "rb") as f:
                 magic = f.read(2)
                 return magic == b"\x1f\x8b"
-        except (IOError, OSError):
+        except OSError:
             return False
 
     def _get_decompressed_path(self, file_path: Path) -> Path:
@@ -93,7 +93,7 @@ class FileProcessor:
             with gzip.open(file_path, "rt", encoding="utf-8") as f:
                 return f.read()
         else:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 return f.read()
 
     def _get_appropriate_loader(self, file_path: Path) -> FileLoader:
@@ -135,7 +135,7 @@ class FileProcessor:
             return loader.load(content)
         except (json.JSONDecodeError, yaml.YAMLError) as e:
             raise TypeError(f"Failed to parse {path}: {e}") from e
-        except (IOError, OSError) as e:
+        except OSError as e:
             raise OSError(f"Failed to read file {path}: {e}") from e
 
 

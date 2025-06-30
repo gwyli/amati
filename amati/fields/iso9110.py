@@ -19,13 +19,13 @@ reference_uri = (
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
-with open(DATA_DIRECTORY / "iso9110.json", "r", encoding="utf-8") as f:
+with open(DATA_DIRECTORY / "iso9110.json", encoding="utf-8") as f:
     data = json.loads(f.read())
 
 
-HTTP_AUTHENTICATION_SCHEMES: set[str] = set(
-    [x["Authentication Scheme Name"].lower() for x in data]
-)
+HTTP_AUTHENTICATION_SCHEMES: set[str] = {
+    x["Authentication Scheme Name"].lower() for x in data
+}
 
 
 class HTTPAuthenticationScheme(_Str):
@@ -52,7 +52,6 @@ class HTTPAuthenticationScheme(_Str):
     """
 
     def __init__(self, value: str):
-
         if value.lower() not in HTTP_AUTHENTICATION_SCHEMES:
             raise AmatiValueError(
                 f"{value} is not a valid HTTP authentication schema.",

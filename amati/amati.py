@@ -11,8 +11,6 @@ from jinja2 import Environment, FileSystemLoader
 from loguru import logger
 from pydantic import BaseModel, ValidationError
 
-# pylint: disable=wrong-import-position
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from amati._error_handler import handle_errors
 from amati._logging import Log, Logger
@@ -119,7 +117,6 @@ def run(
         logs.extend(Logger.logs)
 
     if errors or logs:
-
         handled_errors: list[JSONObject] = handle_errors(errors, logs)
 
         file_name = Path(Path(file_path).parts[-1])
@@ -217,18 +214,17 @@ def discover(spec: str, discover_dir: str = ".") -> list[Path]:
 
 
 if __name__ == "__main__":
-
     import argparse
 
     parser = argparse.ArgumentParser(
         prog="amati",
         description="""
         Tests whether a OpenAPI specification is valid. Will look an openapi.json
-        or openapi.yaml file in the directory that amati is called from. If 
+        or openapi.yaml file in the directory that amati is called from. If
         --discover is set will search the directory tree. If the specification
         does not follow the naming recommendation the --spec switch should be
         used.
-        
+
         Creates a file <filename>.errors.json alongside the original specification
         containing a JSON representation of all the errors.
         """,
@@ -284,12 +280,11 @@ if __name__ == "__main__":
 
     try:
         specifications = discover(args.spec, args.discover)
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:
         logger.error(str(e))
         sys.exit(1)
 
     for specification in specifications:
-
         successful_check = False
         logger.info(f"Processing specification {specification}")
 
@@ -298,7 +293,7 @@ if __name__ == "__main__":
                 specification, args.consistency_check, args.local, args.html_report
             )
             logger.info(f"Specification {specification} processed successfully.")
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        except Exception as e:
             logger.error(f"Error processing {specification}, {str(e)}")
             sys.exit(1)
 

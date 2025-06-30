@@ -17,7 +17,7 @@ from amati.validators.oas311 import SecuritySchemeObject
 from tests.helpers import text_excluding_empty_string
 
 VALID_SECURITY_SCHEME_TYPES: list[str] = list(
-    SecuritySchemeObject._SECURITY_SCHEME_TYPES  # pylint: disable=protected-access # type: ignore
+    SecuritySchemeObject._SECURITY_SCHEME_TYPES  # type: ignore
 )
 INVALID_SECURITY_SCHEME_TYPES: st.SearchStrategy[str] = (
     st.text()
@@ -33,7 +33,6 @@ INVALID_HTTP_AUTHENTICATION_SCHEMES: st.SearchStrategy[str] = st.text().filter(
 
 @given(INVALID_SECURITY_SCHEME_TYPES)
 def test_security_scheme_invalid(scheme_type: str):
-
     with Logger.context():
         SecuritySchemeObject(type=scheme_type)
         assert Logger.logs

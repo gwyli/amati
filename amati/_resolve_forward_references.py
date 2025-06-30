@@ -36,7 +36,6 @@ class ModelDependencyResolver:
         dependencies: set[str] = set()
 
         for field_info in model.model_fields.values():
-
             # Use a magic value that's an invalid class name for getattr so if
             # there is no __name__ attribute it won't appear in self.models
             if (name := getattr(field_info.annotation, "__name__", "!")) in self.models:
@@ -151,7 +150,6 @@ class ModelDependencyResolver:
 
         for _, phase_models in enumerate(rebuild_order):
             for model_name in phase_models:
-
                 model = self.models[model_name]
 
                 # Temporarily modify the model's module globals

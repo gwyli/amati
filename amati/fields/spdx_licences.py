@@ -15,7 +15,7 @@ reference_uri = "https://spdx.org/licenses/"
 
 DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
 
-with open(DATA_DIRECTORY / "spdx-licences.json", "r", encoding="utf-8") as f:
+with open(DATA_DIRECTORY / "spdx-licences.json", encoding="utf-8") as f:
     data = json.loads(f.read())
 
 # `seeAlso` is the list of URLs associated with each licence
@@ -49,14 +49,13 @@ class SPDXIdentifier(_Str):
     """
 
     def __init__(self, value: str):
-
         if value not in VALID_LICENCES:
             raise AmatiValueError(
                 f"{value} is not a valid SPDX licence identifier", reference_uri
             )
 
 
-class SPDXURL(URI):  # pylint: disable=invalid-name
+class SPDXURL(URI):
     """
     A class representing a valid SPDX license URL.
 
@@ -80,7 +79,6 @@ class SPDXURL(URI):  # pylint: disable=invalid-name
     """
 
     def __init__(self, value: str):
-
         super().__init__(value)
 
         if value not in VALID_URLS:
