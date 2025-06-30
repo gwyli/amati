@@ -10,6 +10,7 @@ __version__ = importlib.metadata.version("amati")
 # Imports are here for convenience, they're not going to be used here
 # pylint: disable=unused-import
 # pyright: reportUnusedImport=false
+# ruff: noqa: F401
 
 from amati.amati import dispatch, run
 from amati.exceptions import AmatiValueError

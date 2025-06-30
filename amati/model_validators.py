@@ -412,7 +412,7 @@ def if_then(
 
         for k, v in candidates.items():
             # Unfulfilled condition
-            if not conditions[k] in (v, UNKNOWN):
+            if conditions[k] not in (v, UNKNOWN):
                 return self
 
             # None and UNKNOWN are opposites
