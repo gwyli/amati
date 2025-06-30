@@ -6,7 +6,6 @@ Should be used as the base class for all classes in the project.
 
 import re
 from collections.abc import Callable
-from re import Pattern
 from typing import (
     Any,
     ClassVar,
@@ -27,7 +26,7 @@ class GenericObject(BaseModel):
     """
 
     _reference_uri: ClassVar[str] = PrivateAttr()
-    _extra_field_pattern: Pattern[str] | None = PrivateAttr()
+    _extra_field_pattern: re.Pattern[str] | None = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -68,7 +67,7 @@ class GenericObject(BaseModel):
 
         excess_fields: set[str] = set()
 
-        pattern: Pattern[str] = re.compile(self._extra_field_pattern)
+        pattern: re.Pattern[str] = re.compile(self._extra_field_pattern)
         excess_fields.update(
             key for key in self.model_extra.keys() if not pattern.match(key)
         )
