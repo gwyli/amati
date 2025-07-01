@@ -1,8 +1,9 @@
 name: Checks
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [ "main" ]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -15,6 +16,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: dorny/paths-filter@v3
         id: check_changes
