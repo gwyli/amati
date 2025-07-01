@@ -6,10 +6,9 @@ to the IANA registry defined in ISO9110. It includes constants, data loading uti
 and a class for scheme validation.
 """
 
-import json
-import pathlib
+from typing import cast
 
-from amati import AmatiValueError
+from amati import AmatiValueError, get
 from amati.fields import Str as _Str
 
 reference_uri = (
@@ -17,10 +16,7 @@ reference_uri = (
 )
 
 
-DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
-
-with open(DATA_DIRECTORY / "iso9110.json", encoding="utf-8") as f:
-    data = json.loads(f.read())
+data = cast(list[dict[str, str]], get("iso9110"))
 
 
 HTTP_AUTHENTICATION_SCHEMES: set[str] = {

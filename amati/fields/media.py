@@ -2,21 +2,17 @@
 Validates a media type or media type range according to RFC7321
 """
 
-import json
-import pathlib
+from typing import cast
 
 from abnf import ParseError
 from abnf.grammars import rfc7231
 
-from amati import AmatiValueError
+from amati import AmatiValueError, get
 from amati.fields import Str as _Str
 
 reference_uri = "https://datatracker.ietf.org/doc/html/rfc7231#appendix-D"
 
-DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
-
-with open(DATA_DIRECTORY / "media-types.json", encoding="utf-8") as f:
-    MEDIA_TYPES = json.loads(f.read())
+MEDIA_TYPES: dict[str, list[str]] = cast(dict[str, list[str]], get("media_types"))
 
 
 class MediaType(_Str):
