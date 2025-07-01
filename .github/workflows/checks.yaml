@@ -50,11 +50,15 @@ jobs:
         if: steps.check_changes.outputs.relevant == 'true'
         run: uv sync --locked --all-extras --dev
 
-      - name: Run linting and formatting
+      - name: Run linting
         if: steps.check_changes.outputs.relevant == 'true'
         uses: astral-sh/ruff-action@v3
       - run: ruff check --fix
-      - run: ruff format
+      
+      - name: Run formatting
+        if: steps.check_changes.outputs.relevant == 'true'
+        uses: astral-sh/ruff-action@v3
+        run: ruff format
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
