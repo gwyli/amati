@@ -14,9 +14,8 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
-  pull_request_target:
+  pull_request:
     branches: [ "main" ]
-    types: [opened, synchronize, reopened]
   schedule:
     - cron: '35 2 * * 3'
 
@@ -59,8 +58,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
