@@ -3,20 +3,15 @@ Validates the idenfitier and licences from the System Package Data
 Exchange (SPDX) licence list.
 """
 
-import json
-import pathlib
+from typing import Any, cast
 
-from amati import AmatiValueError
+from amati import AmatiValueError, get
 from amati.fields import Str as _Str
 from amati.fields.uri import URI
 
 reference_uri = "https://spdx.org/licenses/"
 
-
-DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
-
-with open(DATA_DIRECTORY / "spdx-licences.json", encoding="utf-8") as f:
-    data = json.loads(f.read())
+data = cast(dict[str, Any], get("spdx_licences"))
 
 # `seeAlso` is the list of URLs associated with each licence
 VALID_LICENCES: dict[str, list[str]] = {

@@ -11,5 +11,7 @@ __version__ = importlib.metadata.version("amati")
 # pyright: reportUnusedImport=false
 # ruff: noqa: F401
 
+
+from amati._data.refresh import get, refresh
 from amati.amati import dispatch, run
 from amati.exceptions import AmatiValueError

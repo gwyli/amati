@@ -116,7 +116,14 @@ def unassociated_url(identifier: str) -> str:  # type: ignore
             choices = VALID_LICENCES.get(id_)
 
             if choices:
-                return random.choice(choices)
+                choice = random.choice(choices)
+
+                # If the randomly chosen URL exists in
+                # multiple separate identifiers,
+                if choice in VALID_LICENCES[identifier]:
+                    continue
+
+                return choice
 
         # Won't always be hit, but some identifiers
         # don't have any associated URLs
@@ -138,10 +145,13 @@ def test_case_4_id_url_match(name: str, identifier: str):
 @given(text_excluding_empty_string(), st.sampled_from(VALID_IDENTIFIERS_WITH_URLS))
 def test_case_4_id_url_match_no(name: str, identifier: str):
     url = unassociated_url(identifier)
+    print(url)
     with Logger.context():
         LicenceObject(name=name, identifier=identifier, url=url)  # type: ignore
         assert Logger.logs[0]["msg"]
         assert Logger.logs[0]["type"] == "value_error"
+        for i in Logger.logs:
+            print(i)
         assert (
             Logger.logs[1]["msg"]
             == f"{url} is not associated with the identifier {identifier}"

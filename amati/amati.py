@@ -12,6 +12,7 @@ from loguru import logger
 from pydantic import BaseModel, ValidationError
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from amati._data.refresh import refresh
 from amati._error_handler import handle_errors
 from amati._logging import Log, Logger
 from amati._resolve_forward_references import resolve_forward_references
@@ -270,6 +271,14 @@ if __name__ == "__main__":
         " is used",
     )
 
+    parser.add_argument(
+        "--refresh-data",
+        required=False,
+        action="store_true",
+        help="Refreshes the local data files used by amati, such as HTTP status codes "
+        "or , media types from IANA",
+    )
+
     args = parser.parse_args()
 
     logger.remove()  # Remove the default logger
@@ -277,6 +286,16 @@ if __name__ == "__main__":
     logger.add(sys.stderr, format="{time} | {level} | {message}")
 
     logger.info("Starting amati")
+
+    if args.refresh_data:
+        logger.info("Refreshing data.")
+        try:
+            refresh("all")
+            logger.info("Data refreshed successfully.")
+            sys.exit(0)
+        except Exception as e:
+            logger.error(f"Error refreshing data: {str(e)}")
+            sys.exit(1)
 
     try:
         specifications = discover(args.spec, args.discover)

@@ -2,23 +2,18 @@
 Validates a URI according to the RFC3986 ABNF grammar
 """
 
-import json
-import pathlib
 from enum import Enum
-from typing import Self
+from typing import Self, cast
 
 import idna
 from abnf import Node, ParseError, Rule
 from abnf.grammars import rfc3986, rfc3987
 
-from amati import AmatiValueError
+from amati import AmatiValueError, get
 from amati.fields import Str as _Str
 from amati.grammars import rfc6901
 
-DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
-
-with open(DATA_DIRECTORY / "schemes.json", encoding="utf-8") as f:
-    SCHEMES = json.loads(f.read())
+SCHEMES: dict[str, str] = cast(dict[str, str], get("schemes"))
 
 
 class Scheme(_Str):

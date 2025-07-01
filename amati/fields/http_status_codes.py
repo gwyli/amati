@@ -6,22 +6,17 @@ but are in common usage. They can be accessed separately via HTTPStatusCodeX,
 or the numeric codes can be accessed via HTTPStatusCodeN.
 """
 
-import json
-import pathlib
 import re
-from typing import Self
+from typing import Self, cast
 
-from amati import AmatiValueError
+from amati import AmatiValueError, get
 from amati.fields import Str as _Str
 
 reference_uri = (
     "https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml"
 )
 
-DATA_DIRECTORY = pathlib.Path(__file__).parent.parent.resolve() / "data"
-
-with open(DATA_DIRECTORY / "http-status-codes.json", encoding="utf-8") as f:
-    HTTP_STATUS_CODES = json.loads(f.read())
+HTTP_STATUS_CODES = cast(dict[str, str], get("http_status_code"))
 
 
 class HTTPStatusCode(_Str):

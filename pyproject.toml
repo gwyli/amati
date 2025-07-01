@@ -19,6 +19,7 @@ licence = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
     "abnf>=2.3.1",
+    "bs4>=0.0.2",
     "idna>=3.10",
     "jinja2>=3.1.6",
     "jsonpickle>=4.1.1",
@@ -58,6 +59,10 @@ profile="black"
 
 [tool.coverage.run]
 relative_files=true
+omit=[
+    "tests/*",
+    "amati/_data/*",
+]
 
 [tool.pyright]
 reportMissingTypeStubs=false
