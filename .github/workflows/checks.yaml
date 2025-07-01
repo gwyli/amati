@@ -54,13 +54,13 @@ jobs:
         if: steps.check_changes.outputs.relevant == 'true'
         uses: astral-sh/ruff-action@v3
         with: 
-          args: ruff check --fix
+          args: check --fix
       
       - name: Run formatting
         if: steps.check_changes.outputs.relevant == 'true'
         uses: astral-sh/ruff-action@v3
         with: 
-          args: ruff format
+          args: format
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
