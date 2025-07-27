@@ -182,6 +182,7 @@
     "framework-attributes+xml",
     "geo+json",
     "geo+json-seq",
+    "geofeed+csv",
     "geopackage+sqlite3",
     "geopose+json",
     "geoxacml+json",
