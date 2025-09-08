@@ -100,7 +100,7 @@ jobs:
 
     - name: Create Pull Request
       if: steps.run_script.outputs.script_exit_code == '0' && steps.check_changes.outputs.changes == 'true'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         github-token: ${{ secrets.DATA_REFRESH_PAT }}
         script: |
@@ -145,7 +145,7 @@ jobs:
 
     - name: Create issue on script failure
       if: failure() && steps.run_script.outputs.script_exit_code != '0'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         github-token: ${{ secrets.DATA_REFRESH_PAT }}
         script: |
