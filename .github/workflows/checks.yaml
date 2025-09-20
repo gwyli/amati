@@ -40,6 +40,10 @@ jobs:
         if: steps.check_changes.outputs.relevant == 'true'
         uses: astral-sh/setup-uv@v6
 
+      - name: uv lock
+        if: steps.check_changes.outputs.relevant == 'true'
+        run: uv lock --check
+
       - name: Set up Python
         if: steps.check_changes.outputs.relevant == 'true'
         uses: actions/setup-python@v6
