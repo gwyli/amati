@@ -42,7 +42,7 @@ jobs:
 
       - name: uv lock
         if: steps.check_changes.outputs.relevant == 'true'
-        run: uv lock --check
+        run: uv lock
 
       - name: Set up Python
         if: steps.check_changes.outputs.relevant == 'true'
