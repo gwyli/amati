@@ -11,11 +11,11 @@ from amati.fields.uri import URI
 
 reference_uri = "https://spdx.org/licenses/"
 
-data = cast(dict[str, Any], get("spdx_licences"))
+data = cast(list[dict[str, Any]], get("spdx_licences"))
 
 # `seeAlso` is the list of URLs associated with each licence
 VALID_LICENCES: dict[str, list[str]] = {
-    licence["licenseId"]: licence["seeAlso"] for licence in data["licenses"]
+    licence["licenseId"]: licence["seeAlso"] for licence in data
 }
 VALID_URLS: list[str] = [url for urls in VALID_LICENCES.values() for url in urls]
 
