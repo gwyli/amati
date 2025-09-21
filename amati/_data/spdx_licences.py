@@ -13,6 +13,11 @@ def get() -> Any:
     response = requests.get(DATA_SOURCE, timeout=20)
     response.raise_for_status()
 
-    data = json.loads(json.dumps(response.json()))
+    # Removes licenseListVersion
+    data = json.loads(json.dumps(response.json()))["licenses"]
+
+    # The reference number keeps changing
+    for item in data:
+        item.pop("referenceNumber")
 
     return data
