@@ -2,6 +2,7 @@
 Clones the repositories containing open source API specs for testing
 """
 
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -46,25 +47,31 @@ def clone(content: dict[str, Any]):
         directory.mkdir()
 
     for local, remote in content["repos"].items():
-        clone_directory: Path = directory / local
+        local_directory: Path = directory / local
 
-        if clone_directory.exists():
-            print(f"{clone_directory} already exists. Skipping.")
+        if local_directory.exists():
+            print(f"{local_directory} already exists. Skipping.")
             continue
 
-        clone_directory.mkdir()
+        clone_directory: Path = Path("/tmp") / local
 
         subprocess.run(
             [
                 "git",
                 "clone",
                 remote["uri"],
-                str(clone_directory),
+                f"/tmp/{local}",
                 "--depth=1",
                 f"--revision={remote['revision']}",
             ],
             check=True,
         )
+
+        local_directory.mkdir()
+
+        subprocess.run(["mv", clone_directory, directory], check=True)
+
+        shutil.rmtree(clone_directory, ignore_errors=True)
 
 
 if __name__ == "__main__":
