@@ -132,7 +132,7 @@ cython_debug/
 # Mac
 .DS_Store
 
-# Logging output
+# Logging output/test specs
 .amati/*
 
 # ruff
