@@ -1,9 +1,17 @@
 name: Version Bump and Release
 
 on:
+  workflow_dispatch: # Allow manual triggering
   push:
     branches: ["main"]
     paths-ignore:
+      - '.github/**'
+      - 'bin/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.dockerignore'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
       - 'pyproject.toml'
       - 'uv.lock'
 
