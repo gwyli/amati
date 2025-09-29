@@ -3,6 +3,9 @@ name: Version Bump and Release
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - 'pyproject.toml'
+      - 'uv.lock'
 
 permissions:
   contents: write
