@@ -4,10 +4,12 @@ Clones the repositories containing open source API specs for testing
 
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
+from loguru import logger
 
 
 def guard():
@@ -50,10 +52,11 @@ def clone(content: dict[str, Any]):
         local_directory: Path = directory / local
 
         if local_directory.exists():
-            print(f"{local_directory} already exists. Skipping.")
+            logger.info(f"{local_directory} already exists. Skipping.")
             continue
 
         clone_directory: Path = Path("/tmp") / local
+        logger.info(f"Cloning {remote['uri']} into {clone_directory}")
 
         subprocess.run(
             [
@@ -67,6 +70,7 @@ def clone(content: dict[str, Any]):
             check=True,
         )
 
+        logger.info(f"Moving {clone_directory} to {local_directory}")
         local_directory.mkdir()
 
         subprocess.run(["mv", clone_directory, directory], check=True)
@@ -75,5 +79,9 @@ def clone(content: dict[str, Any]):
 
 
 if __name__ == "__main__":
+    logger.remove()  # Remove the default logger
+    # Add a new logger that outputs to stderr with a specific format
+    logger.add(sys.stderr, format="{time} | {level} | {message}")
+
     data = get_repos()
     clone(data)
