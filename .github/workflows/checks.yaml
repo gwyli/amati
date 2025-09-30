@@ -14,9 +14,9 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: check_changes
         with:
           filters: |
@@ -38,7 +38,7 @@ jobs:
 
       - name: Install uv
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
 
       - name: uv lock
         if: steps.check_changes.outputs.relevant == 'true'
@@ -46,7 +46,7 @@ jobs:
 
       - name: Set up Python
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version-file: ".python-version"
 
@@ -56,13 +56,13 @@ jobs:
 
       - name: Run linting
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
         with: 
           args: check --fix
       
       - name: Run formatting
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
         with: 
           args: format
 
@@ -77,13 +77,13 @@ jobs:
       - name: Coverage comment
         if: steps.check_changes.outputs.relevant == 'true'
         id: coverage_comment
-        uses: py-cov-action/python-coverage-comment-action@v3
+        uses: py-cov-action/python-coverage-comment-action@f42698b01895a96d2b804caf4d217d3383895af7 # v3
         with:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Store Pull Request comment to be posted
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: python-coverage-comment-action
           path: python-coverage-comment-action.txt
