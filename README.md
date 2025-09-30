@@ -132,6 +132,4 @@ docker run --detach -v "$(pwd):/data" amati <options>
 
 There are some scripts to create the data needed by the project, for example, all the registered TLDs. To refresh the data, run the contents of `/scripts/data`.
 
-
-
-
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/gwyli/amati/badge)](https://scorecard.dev/viewer/?uri=github.com/gwyli/amati)
