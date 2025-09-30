@@ -5,6 +5,9 @@ on:
     types: [published]
 
 
+permissions:
+  contents: read
+
 jobs:
   run:
     name: "Build and publish release"
