@@ -12,6 +12,7 @@ on:
       - '.dockerignore'
       - '.gitignore'
       - '.pre-commit-config.yaml'
+      - 'security.md'
       - 'pyproject.toml'
       - 'uv.lock'
 
