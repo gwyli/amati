@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -81,7 +81,7 @@ jobs:
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@f42698b01895a96d2b804caf4d217d3383895af7 # v3
         with:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.BOT_COMMENT_TOKEN }}
 
       - name: Store Pull Request comment to be posted
         if: steps.check_changes.outputs.relevant == 'true'

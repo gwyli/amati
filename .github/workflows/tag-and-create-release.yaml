@@ -15,11 +15,12 @@ on:
       - 'pyproject.toml'
       - 'uv.lock'
 
+permissions:
+  contents: read
+
 jobs:
   bump-version-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
