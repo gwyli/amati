@@ -93,7 +93,7 @@ This project uses:
 * [Coverage](https://coverage.readthedocs.io/en/7.6.8/) on both the tests and code for test coverage
 
 It's expected that there are no errors and 100% of the code is reached and executed. The strategy for test coverage is based on parsing test specifications and not unit tests.
-amati runs tests on the external specifications, detailed in `tests/data/.amati.tests.yaml`. To be able to run these tests the GitHub repos containing the specifications need to be available locally. Specific revisions of the repos can be downloaded by running the following, which will clone the repos into `../amati-tests-specs/<repo-name>`.
+amati runs tests on the external specifications, detailed in `tests/data/.amati.tests.yaml`. To be able to run these tests the GitHub repos containing the specifications need to be available locally. Specific revisions of the repos can be downloaded by running the following, which will clone the repos into `.amati/amati-tests-specs/<repo-name>`.
 
 ```sh
 python scripts/tests/setup_test_specs.py
