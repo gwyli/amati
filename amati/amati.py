@@ -141,7 +141,8 @@ def run(
 
         if html_report:
             env = Environment(
-                loader=FileSystemLoader(".")
+                loader=FileSystemLoader("."),
+                autoescape=True,
             )  # Assumes template is in the same directory
             template = env.get_template("TEMPLATE.html")
 
