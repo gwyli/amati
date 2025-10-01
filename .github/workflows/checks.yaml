@@ -81,12 +81,11 @@ jobs:
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@f42698b01895a96d2b804caf4d217d3383895af7 # v3
         with:
-          GITHUB_TOKEN: ${{ github.BOT_COMMENT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_COMMENT_TOKEN }}
 
       - name: Store Pull Request comment to be posted
         if: steps.check_changes.outputs.relevant == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          GITHUB_TOKEN: ${{ github.BOT_COMMENT_TOKEN }}
           name: python-coverage-comment-action
           path: python-coverage-comment-action.txt
