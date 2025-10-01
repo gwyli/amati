@@ -105,6 +105,8 @@ def run(
     Args:
         file_path: The specification to be validated
         consistency_check: Whether or not to verify the output against the input
+        local: Whether or not to store the errors in the .amati/ directory
+        html_report: Whether or not to create an HTML report of the errors
     """
 
     spec = Path(file_path)

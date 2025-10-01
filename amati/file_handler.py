@@ -72,7 +72,8 @@ class FileProcessor:
     def __init__(self) -> None:
         self.loaders: list[FileLoader] = [JSONLoader(), YAMLLoader()]
 
-    def _is_gzip_file(self, file_path: Path) -> bool:
+    @staticmethod
+    def _is_gzip_file(file_path: Path) -> bool:
         """Check if file is gzipped by reading magic bytes."""
         try:
             with open(file_path, "rb") as f:
@@ -81,7 +82,8 @@ class FileProcessor:
         except OSError:
             return False
 
-    def _get_decompressed_path(self, file_path: Path) -> Path:
+    @staticmethod
+    def _get_decompressed_path(file_path: Path) -> Path:
         """Get the path without .gz extension for determining file type."""
         if file_path.suffix.lower() == ".gz":
             return file_path.with_suffix("")

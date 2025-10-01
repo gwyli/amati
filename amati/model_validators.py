@@ -186,6 +186,8 @@ def only_one_of(
         fields: Optional sequence of field names to check. If provided, only these
             fields will be validated. If not provided, all public fields will be
             checked.
+        type_: Optional string specifying the type of error to log.
+            Defaults to "value_error".
 
     Returns:
         The validator that ensures at one public field is non-empty.
