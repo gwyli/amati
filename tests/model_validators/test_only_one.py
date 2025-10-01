@@ -54,19 +54,19 @@ def test_only_one_of_no_restrictions(name: str, age: int, music: list[int]):
 
     # Tests with None
     with Logger.context():
-        model = OnlyOneNoRestrictions(name=name, age=age, music=music)
+        OnlyOneNoRestrictions(name=name, age=age, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneNoRestrictions(name=None, age=age, music=music)
+        OnlyOneNoRestrictions(name=None, age=age, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneNoRestrictions(name=name, age=None, music=music)
+        OnlyOneNoRestrictions(name=name, age=None, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneNoRestrictions(name=name, age=age, music=None)
+        OnlyOneNoRestrictions(name=name, age=age, music=None)
         assert Logger.logs
 
     model = OnlyOneNoRestrictions(name=None, age=None, music=music)
@@ -80,15 +80,15 @@ def test_only_one_of_no_restrictions(name: str, age: int, music: list[int]):
 
     # Tests with falsy values
     with Logger.context():
-        model = OnlyOneNoRestrictions(name="", age=age, music=music)
+        OnlyOneNoRestrictions(name="", age=age, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneNoRestrictions(name=name, age=None, music=music)
+        OnlyOneNoRestrictions(name=name, age=None, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneNoRestrictions(name=name, age=age, music=[])
+        OnlyOneNoRestrictions(name=name, age=age, music=[])
         assert Logger.logs
 
     model = OnlyOneNoRestrictions(name="", age=None, music=music)
@@ -130,7 +130,7 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
 
     # Tests with None
     with Logger.context():
-        model = OnlyOneWithRestrictions(name=name, age=age, music=music)
+        OnlyOneWithRestrictions(name=name, age=age, music=music)
         assert Logger.logs
 
     model = OnlyOneWithRestrictions(name=None, age=age, music=music)
@@ -140,11 +140,11 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
     assert model.name and model.music
 
     with Logger.context():
-        model = OnlyOneWithRestrictions(name=name, age=age, music=None)
+        OnlyOneWithRestrictions(name=name, age=age, music=None)
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneWithRestrictions(name=None, age=None, music=music)
+        OnlyOneWithRestrictions(name=None, age=None, music=music)
         assert Logger.logs
 
     model = OnlyOneWithRestrictions(name=name, age=None, music=None)
@@ -161,11 +161,11 @@ def test_only_one_of_with_restrictions(name: str, age: int, music: list[int]):
     assert model.name and model.music
 
     with Logger.context():
-        model = OnlyOneWithRestrictions(name=name, age=age, music=[])
+        OnlyOneWithRestrictions(name=name, age=age, music=[])
         assert Logger.logs
 
     with Logger.context():
-        model = OnlyOneWithRestrictions(name="", age=None, music=music)
+        OnlyOneWithRestrictions(name="", age=None, music=music)
         assert Logger.logs
 
     model = OnlyOneWithRestrictions(name=name, age=None, music=[])
