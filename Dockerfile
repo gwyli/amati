@@ -9,8 +9,8 @@ COPY pyproject.toml uv.lock README.md ./
 COPY amati/ amati/
 
 RUN uv lock \
-&& RUN uv sync --locked --no-dev \
-&&  RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
+&& uv sync --locked --no-dev \
+&& adduser --disabled-password --gecos '' appuser && chown -R appuser /app
 
 USER appuser
 
