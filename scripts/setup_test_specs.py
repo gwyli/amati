@@ -79,7 +79,16 @@ def clone(content: dict[str, Any]):
         logger.info(f"Moving {tmp_directory} to {local_directory}")
         local_directory.mkdir()
 
-        subprocess.run(["mv", tmp_directory, directory], check=True)
+        subprocess.run(
+            [
+                "rsync",
+                "-a",
+                "--remove-source-files",
+                f"{tmp_directory}/",
+                local_directory,
+            ],
+            check=True,
+        )
 
         shutil.rmtree(tmp_directory, ignore_errors=True)
 
