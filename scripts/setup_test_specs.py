@@ -5,6 +5,7 @@ Clones the repositories containing open source API specs for testing
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -55,7 +56,12 @@ def clone(content: dict[str, Any]):
             logger.info(f"{local_directory} already exists. Skipping.")
             continue
 
-        clone_directory: Path = Path("/tmp") / local
+        clone_directory: Path = Path("/tmp/.amati")
+        clone_directory.parent.mkdir(parents=True, exist_ok=True)
+        tmp_directory = tempfile.mkdtemp(
+            dir=clone_directory.parent, prefix=clone_directory.name
+        )
+
         logger.info(f"Cloning {remote['uri']} into {clone_directory}")
 
         subprocess.run(
@@ -63,19 +69,28 @@ def clone(content: dict[str, Any]):
                 "git",
                 "clone",
                 remote["uri"],
-                f"/tmp/{local}",
+                f"{tmp_directory}",
                 "--depth=1",
                 f"--revision={remote['revision']}",
             ],
             check=True,
         )
 
-        logger.info(f"Moving {clone_directory} to {local_directory}")
+        logger.info(f"Moving {tmp_directory} to {local_directory}")
         local_directory.mkdir()
 
-        subprocess.run(["mv", clone_directory, directory], check=True)
+        subprocess.run(
+            [
+                "rsync",
+                "-a",
+                "--remove-source-files",
+                f"{tmp_directory}/",
+                local_directory,
+            ],
+            check=True,
+        )
 
-        shutil.rmtree(clone_directory, ignore_errors=True)
+        shutil.rmtree(tmp_directory, ignore_errors=True)
 
 
 if __name__ == "__main__":

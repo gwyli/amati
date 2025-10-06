@@ -205,50 +205,50 @@ def test_at_least_one_of_with_two_restrictions(name: str, age: int, music: list[
     assert model.name and model.age == age and model.music
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=None, age=age, music=music)
+        AtLeastOneWithTwoRestrictions(name=None, age=age, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=music)
+        AtLeastOneWithTwoRestrictions(name=name, age=None, music=music)
         assert Logger.logs
 
     model = AtLeastOneWithTwoRestrictions(name=name, age=age, music=None)
     assert model.name and model.age == age
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=None, age=None, music=music)
+        AtLeastOneWithTwoRestrictions(name=None, age=None, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=None)
+        AtLeastOneWithTwoRestrictions(name=name, age=None, music=None)
         assert Logger.logs
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=None, age=age, music=None)
+        AtLeastOneWithTwoRestrictions(name=None, age=age, music=None)
         assert Logger.logs
 
     # Tests with falsy values
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name="", age=age, music=music)
+        AtLeastOneWithTwoRestrictions(name="", age=age, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=music)
+        AtLeastOneWithTwoRestrictions(name=name, age=None, music=music)
         assert Logger.logs
 
     model = AtLeastOneWithTwoRestrictions(name=name, age=age, music=[])
     assert model.name and model.age == age
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name="", age=None, music=music)
+        AtLeastOneWithTwoRestrictions(name="", age=None, music=music)
         assert Logger.logs
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name=name, age=None, music=[])
+        AtLeastOneWithTwoRestrictions(name=name, age=None, music=[])
         assert Logger.logs
 
     with Logger.context():
-        model = AtLeastOneWithTwoRestrictions(name="", age=age, music=[])
+        AtLeastOneWithTwoRestrictions(name="", age=age, music=[])
         assert Logger.logs
 
     # Test when no fields are provided
