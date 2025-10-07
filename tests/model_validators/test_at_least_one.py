@@ -143,7 +143,7 @@ def test_at_least_one_of_with_restrictions(name: str, age: int, music: list[int]
     assert model.name and model.age == age
 
     with Logger.context():
-        model = AtLeastOneWithRestrictions(name=None, age=None, music=music)
+        AtLeastOneWithRestrictions(name=None, age=None, music=music)
         assert Logger.logs
 
     model = AtLeastOneWithRestrictions(name=name, age=None, music=None)
@@ -163,7 +163,7 @@ def test_at_least_one_of_with_restrictions(name: str, age: int, music: list[int]
     assert model.name and model.age == age
 
     with Logger.context():
-        model = AtLeastOneWithRestrictions(name="", age=None, music=music)
+        AtLeastOneWithRestrictions(name="", age=None, music=music)
         assert Logger.logs
 
     model = AtLeastOneWithRestrictions(name=name, age=None, music=[])
