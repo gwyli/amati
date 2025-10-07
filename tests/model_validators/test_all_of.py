@@ -149,7 +149,7 @@ def test_all_of_with_restrictions(name: str, age: int, music: list[int]):
     assert model.name and model.age == age
 
     with Logger.context():
-        model = AllWithRestrictions(name=None, age=None, music=music)
+        AllWithRestrictions(name=None, age=None, music=music)
         assert Logger.logs
 
     with Logger.context():
@@ -173,7 +173,7 @@ def test_all_of_with_restrictions(name: str, age: int, music: list[int]):
     assert model.name and model.age == age
 
     with Logger.context():
-        model = AllWithRestrictions(name="", age=None, music=music)
+        AllWithRestrictions(name="", age=None, music=music)
         assert Logger.logs
 
     with Logger.context():
