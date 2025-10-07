@@ -10,7 +10,8 @@ COPY amati/ amati/
 
 RUN uv lock \
 && uv sync --locked --no-dev \
-&& adduser --disabled-password --gecos '' appuser && chown -R appuser /app
+&& adduser --disabled-password --gecos '' appuser \
+&& chown -R appuser /app
 
 USER appuser
 
