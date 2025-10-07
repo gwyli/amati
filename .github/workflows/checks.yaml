@@ -43,7 +43,7 @@ jobs:
 
       - name: Install uv
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
 
       - name: uv lock
         if: steps.check_changes.outputs.relevant == 'true'
@@ -82,7 +82,7 @@ jobs:
       - name: Coverage comment
         if: steps.check_changes.outputs.relevant == 'true'
         id: coverage_comment
-        uses: py-cov-action/python-coverage-comment-action@f42698b01895a96d2b804caf4d217d3383895af7 # v3
+        uses: py-cov-action/python-coverage-comment-action@d3db80fe08c357443fa62f4ce5ce4c753d61eba8 # v3
         with:
           GITHUB_TOKEN: ${{ secrets.BOT_COMMENT_TOKEN }}
 
