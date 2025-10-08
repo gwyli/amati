@@ -79,17 +79,14 @@ jobs:
       - name: Doctests
         if: steps.check_changes.outputs.relevant == 'true'
         run: uv run pytest --doctest-modules amati/
-      # Debug token
-      - name: Check rate limit
-        run: |
-          curl -H "Authorization: token ${{ secrets.BOT_COMMENT_TOKEN }}" \
-            https://api.github.com/rate_limit
+
       - name: Coverage comment
         if: steps.check_changes.outputs.relevant == 'true'
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@d3db80fe08c357443fa62f4ce5ce4c753d61eba8 # v3
         with:
           GITHUB_TOKEN: ${{ secrets.BOT_COMMENT_TOKEN }}
+        continue-on-error: true
 
       - name: Store Pull Request comment to be posted
         if: steps.check_changes.outputs.relevant == 'true'
