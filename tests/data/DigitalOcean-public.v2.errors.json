@@ -10,6 +10,6 @@
         "input": {
             "$ref": "description.yml#/introduction"
         },
-        "url": "https://errors.pydantic.dev/2.11/v/string_type"
+        "url": "https://errors.pydantic.dev/2.12/v/string_type"
     }
 ]
