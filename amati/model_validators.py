@@ -21,15 +21,15 @@ class UnknownValue:
 
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls) -> "UnknownValue":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "UNKNOWN"
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         return "UNKNOWN"
 
 
