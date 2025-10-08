@@ -306,10 +306,14 @@ if __name__ == "__main__":
         logger.error(str(e))
         sys.exit(1)
 
-    for specification in specifications:  # type: Path
+    specification: Path
+    for specification in specifications:
         successful_check: bool = False
         logger.info(f"Processing specification {specification}")
 
+        # Top-level try/except to ensure one failed spec doesn't stop the rest
+        # from being processed.
+        e: Exception
         try:
             successful_check = run(
                 specification, args.consistency_check, args.local, args.html_report
