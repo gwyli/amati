@@ -62,7 +62,7 @@ def clone(content: dict[str, Any]):
             dir=clone_directory.parent, prefix=clone_directory.name
         )
 
-        logger.info(f"Cloning {remote['uri']} into {clone_directory}")
+        logger.info(f"Cloning {remote['uri']} into {tmp_directory}")
 
         subprocess.run(
             [

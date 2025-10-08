@@ -51,13 +51,6 @@ dev = [
     "ruff>=0.12.1",
 ]
 
-[tool.isort]
-src_paths = ["amati", "tests"]
-known_first_party=["amati"]
-known_third_party=["pytest","pydantic","yaml","abnf", "rfc3987"]
-extra_standard_library=["typing_extensions"]
-profile="black"
-
 [tool.coverage.run]
 relative_files=true
 omit=[
@@ -99,3 +92,8 @@ select = [
     "UP",  # pyupgrade
 ]
 extend-fixable = ["UP015"]
+
+[tool.ruff.lint.isort]
+known-first-party=["amati"]
+known-third-party=["pytest","pydantic","yaml","abnf", "rfc3987"]
+extra-standard-library=["typing_extensions", "annotationlib", "compression"]

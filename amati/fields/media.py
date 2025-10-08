@@ -2,6 +2,7 @@
 Validates a media type or media type range according to RFC7321
 """
 
+from annotationlib import get_annotations
 from typing import cast
 
 from abnf import ParseError
@@ -55,7 +56,7 @@ class MediaType(_Str):
             media_type = rfc7231.Rule("media-type").parse_all(value)
 
             for node in media_type.children:
-                if node.name in self.__annotations__:
+                if node.name in get_annotations(self.__class__):
                     self.__dict__[node.name] = node.value
 
         except ParseError as e:

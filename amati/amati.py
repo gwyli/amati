@@ -232,6 +232,7 @@ if __name__ == "__main__":
         Creates a file <filename>.errors.json alongside the original specification
         containing a JSON representation of all the errors.
         """,
+        suggest_on_error=True,
     )
 
     parser.add_argument(

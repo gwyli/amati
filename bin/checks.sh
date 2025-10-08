@@ -6,6 +6,6 @@ pytest --cov-report term-missing --cov=amati tests
 pytest --doctest-modules amati/
 pyright --verifytypes amati --ignoreexternal
 docker build -t amati -f Dockerfile . 
-cd tests/ || exit
+cd .amati/test-specs/swagger/src/main/resources/ || exit
 docker run -v "$(pwd):/data" amati -d /data --consistency-check
-cd ..
+cd - || exit

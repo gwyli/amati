@@ -19,9 +19,9 @@ Supported File Types:
     - YAML: .yaml, .yml (optionally gzip compressed)
 """
 
-import gzip
 import json
 from abc import ABC, abstractmethod
+from compression import gzip
 from pathlib import Path
 
 import yaml
