@@ -80,15 +80,10 @@ jobs:
         if: steps.check_changes.outputs.relevant == 'true'
         run: uv run pytest --doctest-modules amati/
       # Debug token
-      - name: Debug token presence
+      - name: Check rate limit
         run: |
-          if [ -z "${{ secrets.BOT_COMMENT_TOKEN }}" ]; then
-            echo "ERROR: Token is empty"
-            exit 1
-          else
-            echo "Token exists and has length: $(echo -n '${{ secrets.BOT_COMMENT_TOKEN }}' | wc -c)"
-            echo "First 10 chars: $(echo -n '${{ secrets.BOT_COMMENT_TOKEN }}' | cut -c1-10)"
-          fi
+          curl -H "Authorization: token ${{ secrets.BOT_COMMENT_TOKEN }}" \
+            https://api.github.com/rate_limit
       - name: Coverage comment
         if: steps.check_changes.outputs.relevant == 'true'
         id: coverage_comment
