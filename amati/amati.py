@@ -306,7 +306,7 @@ if __name__ == "__main__":
         logger.error(str(e))
         sys.exit(1)
 
-    for specification in specifications:
+    for specification in specifications:  # type: Path
         successful_check: bool = False
         logger.info(f"Processing specification {specification}")
 
