@@ -94,7 +94,9 @@ class ReferenceObject(GenericObject):
     as per RFC6901.
     """
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        extra="forbid", populate_by_name=True
+    )
 
     ref: URI = Field(alias="$ref")
     _reference_uri: ClassVar[str] = (
@@ -225,7 +227,7 @@ class ExternalDocumentationObject(GenericObject):
 class PathsObject(GenericObject):
     """Validates the OpenAPI Specification paths object - §4.8.8"""
 
-    model_config = ConfigDict(extra="allow")
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     @model_validator(mode="before")
     @classmethod
@@ -403,7 +405,7 @@ class ResponsesObject(GenericObject):
     Validates the OpenAPI Specification responses object - §4.8.16
     """
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         extra="allow",
     )
 
@@ -498,7 +500,7 @@ class CallbackObject(GenericObject):
     Validates the OpenAPI Specification callback object - §4.8.18
     """
 
-    model_config = ConfigDict(extra="allow")
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     # The keys are runtime expressions that resolve to a URL
     # The values are Response Objects or Reference Objects
@@ -664,7 +666,7 @@ class SchemaObject(GenericObject):
     and validated through jsonschema.
     """
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         populate_by_name=True,
         extra="allow",  # Allow all standard JSON Schema fields
     )

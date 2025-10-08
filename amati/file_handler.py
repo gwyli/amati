@@ -33,16 +33,37 @@ type JSONValue = JSONPrimitive | JSONArray | JSONObject
 
 
 class FileLoader(ABC):
-    """Abstract base class for file loaders."""
+    """Abstract base class for file loaders.
+
+    Defines the interface for loading and parsing files of different formats.
+    Implementations should provide format-specific handling logic.
+    """
 
     @abstractmethod
     def can_handle(self, file_path: Path) -> bool:
-        """Check if this loader can handle the given file."""
+        """Check if this loader can handle the given file.
+
+        Args:
+            file_path: Path to the file to check.
+
+        Returns:
+            True if this loader can handle the file, False otherwise.
+        """
         pass
 
     @abstractmethod
     def load(self, content: str) -> JSONObject:
-        """Load and parse the file content."""
+        """Load and parse the file content.
+
+        Args:
+            content: The raw file content as a string.
+
+        Returns:
+            The parsed content as a JSONObject.
+
+        Raises:
+            May raise implementation-specific exceptions for parsing errors.
+        """
         pass
 
 
@@ -50,9 +71,28 @@ class JSONLoader(FileLoader):
     """Loader for JSON files."""
 
     def can_handle(self, file_path: Path) -> bool:
+        """Check if this loader can handle the given file.
+
+        Args:
+            file_path: Path to the file to check.
+
+        Returns:
+            True if this loader can handle the file, False otherwise.
+        """
         return file_path.suffix.lower() in {".json", ".js"}
 
     def load(self, content: str) -> JSONObject:
+        """Load and parse the file content.
+
+        Args:
+            content: The raw file content as a string.
+
+        Returns:
+            The parsed content as a JSONObject.
+
+        Raises:
+            May raise implementation-specific exceptions for parsing errors.
+        """
         return json.loads(content)
 
 
@@ -60,21 +100,56 @@ class YAMLLoader(FileLoader):
     """Loader for YAML files."""
 
     def can_handle(self, file_path: Path) -> bool:
+        """Check if this loader can handle the given file.
+
+        Args:
+            file_path: Path to the file to check.
+
+        Returns:
+            True if this loader can handle the file, False otherwise.
+        """
         return file_path.suffix.lower() in {".yaml", ".yml"}
 
     def load(self, content: str) -> JSONObject:
+        """Load and parse the file content.
+
+        Args:
+            content: The raw file content as a string.
+
+        Returns:
+            The parsed content as a JSONObject.
+
+        Raises:
+            May raise implementation-specific exceptions for parsing errors.
+        """
         return yaml.safe_load(content)
 
 
 class FileProcessor:
-    """Main processor for handling gzipped and regular files."""
+    """Main processor for handling gzipped and regular files.
+
+    Processes files in various formats (JSON, YAML) with optional gzip compression.
+    Automatically detects compression and selects the appropriate loader based on
+    file extension.
+
+    Attributes:
+        loaders: List of available file loaders for different formats.
+    """
 
     def __init__(self) -> None:
+        """Initialize the FileProcessor with default loaders."""
         self.loaders: list[FileLoader] = [JSONLoader(), YAMLLoader()]
 
     @staticmethod
     def _is_gzip_file(file_path: Path) -> bool:
-        """Check if file is gzipped by reading magic bytes."""
+        """Check if file is gzipped by reading magic bytes.
+
+        Args:
+            file_path: Path to the file to check.
+
+        Returns:
+            True if the file is gzip-compressed, False otherwise.
+        """
         try:
             with open(file_path, "rb") as f:
                 magic = f.read(2)
@@ -84,13 +159,32 @@ class FileProcessor:
 
     @staticmethod
     def _get_decompressed_path(file_path: Path) -> Path:
-        """Get the path without .gz extension for determining file type."""
+        """Get the path without .gz extension for determining file type.
+
+        Args:
+            file_path: Path to the potentially compressed file.
+
+        Returns:
+            The file path with .gz extension removed if present, otherwise
+            the original path unchanged.
+        """
         if file_path.suffix.lower() == ".gz":
             return file_path.with_suffix("")
         return file_path
 
     def _read_file_content(self, file_path: Path) -> str:
-        """Read file content, decompressing if necessary."""
+        """Read file content, decompressing if necessary.
+
+        Args:
+            file_path: Path to the file to read.
+
+        Returns:
+            The file content as a UTF-8 encoded string.
+
+        Raises:
+            OSError: If the file cannot be read.
+            gzip.BadGzipFile: If the file appears to be gzipped but is corrupted.
+        """
         if self._is_gzip_file(file_path):
             with gzip.open(file_path, "rt", encoding="utf-8") as f:
                 return f.read()
@@ -99,7 +193,20 @@ class FileProcessor:
                 return f.read()
 
     def _get_appropriate_loader(self, file_path: Path) -> FileLoader:
-        """Get the appropriate loader for the file type."""
+        """Get the appropriate loader for the file type.
+
+        Determines the correct loader based on the file extension, ignoring
+        any .gz compression extension.
+
+        Args:
+            file_path: Path to the file needing a loader.
+
+        Returns:
+            The appropriate FileLoader instance for the file type.
+
+        Raises:
+            ValueError: If no suitable loader is found for the file type.
+        """
         # Use the decompressed path to determine file type
         target_path = self._get_decompressed_path(file_path)
 

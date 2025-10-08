@@ -11,7 +11,7 @@ from amati.fields.uri import URI
 
 reference_uri = "https://spdx.org/licenses/"
 
-data = cast(list[dict[str, Any]], get("spdx_licences"))
+data: list[dict[str, Any]] = cast(list[dict[str, Any]], get("spdx_licences"))
 
 # `seeAlso` is the list of URLs associated with each licence
 VALID_LICENCES: dict[str, list[str]] = {

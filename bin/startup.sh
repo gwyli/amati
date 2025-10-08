@@ -1,4 +1,5 @@
+#!/bin/sh
 uv python install
-source .venv/bin/activate
+. .venv/bin/activate
 uv sync
 pre-commit install

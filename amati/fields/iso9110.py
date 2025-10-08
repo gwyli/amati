@@ -16,7 +16,7 @@ reference_uri = (
 )
 
 
-data = cast(list[dict[str, str]], get("iso9110"))
+data: list[dict[str, str]] = cast(list[dict[str, str]], get("iso9110"))
 
 
 HTTP_AUTHENTICATION_SCHEMES: set[str] = {

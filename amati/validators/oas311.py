@@ -142,7 +142,9 @@ class ReferenceObject(GenericObject):
     as per RFC6901.
     """
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        extra="forbid", populate_by_name=True
+    )
 
     ref: URI = Field(alias="$ref")
     summary: str | None
@@ -336,7 +338,7 @@ class SchemaObject(GenericObject):
     and validated through jsonschema.
     """
 
-    model_config = ConfigDict(
+    model_config: ClassVar[ConfigDict] = ConfigDict(
         populate_by_name=True,
         extra="allow",  # Allow all standard JSON Schema fields
     )

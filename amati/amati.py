@@ -92,7 +92,7 @@ def run(
     consistency_check: bool = False,
     local: bool = False,
     html_report: bool = False,
-):
+) -> bool:
     """
     Runs the full amati process on a specific specification file.
 
@@ -220,7 +220,7 @@ def discover(spec: str, discover_dir: str = ".") -> list[Path]:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
         prog="amati",
         description="""
         Tests whether a OpenAPI specification is valid. Will look an openapi.json
@@ -282,7 +282,7 @@ if __name__ == "__main__":
         "or , media types from IANA",
     )
 
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
     logger.remove()  # Remove the default logger
     # Add a new logger that outputs to stderr with a specific format
@@ -301,15 +301,19 @@ if __name__ == "__main__":
             sys.exit(1)
 
     try:
-        specifications = discover(args.spec, args.discover)
+        specifications: list[Path] = discover(args.spec, args.discover)
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
 
+    specification: Path
     for specification in specifications:
-        successful_check = False
+        successful_check: bool = False
         logger.info(f"Processing specification {specification}")
 
+        # Top-level try/except to ensure one failed spec doesn't stop the rest
+        # from being processed.
+        e: Exception
         try:
             successful_check = run(
                 specification, args.consistency_check, args.local, args.html_report
