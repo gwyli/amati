@@ -19,12 +19,12 @@ Supported File Types:
     - YAML: .yaml, .yml (optionally gzip compressed)
 """
 
-import gzip
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 import yaml
+from compression import gzip
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]
