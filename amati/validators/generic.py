@@ -20,15 +20,30 @@ from amati._logging import Logger
 
 
 class GenericObject(BaseModel):
-    """
-    A generic model to overwrite provide extra functionality
-    to pydantic.BaseModel.
+    """A generic model extending Pydantic BaseModel with enhanced validation.
+
+    Provides additional functionality for handling extra fields, including pattern
+    matching validation and detailed logging of invalid fields. This class validates
+    extra fields against optional regex patterns and logs violations without raising
+    exceptions.
+
+    Attributes:
+        _reference_uri: URI reference for error reporting and documentation.
+        _extra_field_pattern: Optional regex pattern to validate extra field names.
     """
 
     _reference_uri: ClassVar[str] = PrivateAttr()
     _extra_field_pattern: re.Pattern[str] | None = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
+        """Initialize the model and validate extra fields.
+
+        Logs any fields that are not recognized as valid model fields or aliases
+        when extra fields are not allowed by the model configuration.
+
+        Args:
+            **data: Arbitrary keyword arguments representing model data.
+        """
         super().__init__(**data)
 
         if self.model_config.get("extra") == "allow":
@@ -53,6 +68,15 @@ class GenericObject(BaseModel):
                 )
 
     def model_post_init(self, __context: Any) -> None:
+        """Validate extra fields against the configured pattern after initialization.
+
+        If an extra field pattern is configured, checks all extra fields against
+        the pattern and logs any fields that don't match. This allows for flexible
+        validation of dynamically named fields.
+
+        Args:
+            __context: Pydantic context object passed during initialization.
+        """
         if not self.model_extra:
             return
 
@@ -85,12 +109,14 @@ class GenericObject(BaseModel):
             )
 
     def get_field_aliases(self) -> list[str]:
-        """
-        Gets a list of aliases for confirming whether extra
-        fields are allowed.
+        """Get all field aliases defined for the model.
+
+        Collects aliases from all model fields to help validate whether provided
+        field names are valid, even if they use alias names instead of field names.
 
         Returns:
-            A list of field aliases for the class.
+            A list of all field aliases defined in the model. Empty list if no
+            aliases are defined.
         """
 
         aliases: list[str] = []
