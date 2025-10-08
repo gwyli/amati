@@ -65,9 +65,22 @@ class Scheme(_Str):
 
 
 class URIType(str, Enum):
+    """Enumeration of URI reference types.
+
+    Categorizes different types of URI references as defined in RFC 3986,
+    along with JSON Pointer references from RFC 6901.
+
+    Attributes:
+        ABSOLUTE: A URI with a scheme component (e.g., "https://example.com/path").
+        RELATIVE: A relative reference without a scheme (e.g., "../path/file.json").
+        NETWORK_PATH: A network path reference starting with "//"
+            (e.g., "//example.com").
+        JSON_POINTER: A JSON Pointer as defined in RFC 6901 (e.g., "#/foo/bar/0").
+    """
+
     ABSOLUTE = "absolute"
     RELATIVE = "relative"
-    NON_RELATIVE = "non-relative"
+    NETWORK_PATH = "network-path"
     JSON_POINTER = "JSON pointer"
 
 
@@ -152,7 +165,7 @@ class URI(_Str):
         if self.scheme:
             return URIType.ABSOLUTE
         if self.authority:
-            return URIType.NON_RELATIVE
+            return URIType.NETWORK_PATH
         if self.path:
             if str(self).startswith("#"):
                 return URIType.JSON_POINTER

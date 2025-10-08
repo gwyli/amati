@@ -159,7 +159,7 @@ def test_uri_non_relative(value: str):
 
     result = URI(candidate)
     assert result == candidate
-    assert result.type == URIType.NON_RELATIVE
+    assert result.type == URIType.NETWORK_PATH
     assert result.is_iri == ("xn--" in candidate.lower())
 
 
@@ -170,7 +170,7 @@ def test_iri_non_relative(value: str):
 
     result = URI(candidate)
     assert result == candidate
-    assert result.type == URIType.NON_RELATIVE
+    assert result.type == URIType.NETWORK_PATH
     assert result.is_iri is True
 
 
