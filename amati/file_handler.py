@@ -21,10 +21,10 @@ Supported File Types:
 
 import json
 from abc import ABC, abstractmethod
+from compression import gzip
 from pathlib import Path
 
 import yaml
-from compression import gzip
 
 type JSONPrimitive = str | int | float | bool | None
 type JSONArray = list["JSONValue"]
