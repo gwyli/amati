@@ -12,8 +12,10 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 
 """
 
+from __future__ import annotations
+
 import re
-from typing import Any, ClassVar, Optional, Self
+from typing import Any, ClassVar, Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
 from jsonschema.protocols import Validator as JSONSchemaValidator
@@ -235,12 +237,12 @@ class OperationObject(GenericObject):
     description: str | CommonMark | None = None
     externalDocs: ExternalDocumentationObject | None = None
     operationId: str | None = None
-    parameters: list["ParameterObject | ReferenceObject"] | None = None
-    requestBody: Optional["RequestBodyObject | ReferenceObject"] = None
-    responses: Optional["ResponsesObject"] = None
-    callbacks: dict[str, "CallbackObject | ReferenceObject"] | None = None
+    parameters: list[ParameterObject | ReferenceObject] | None = None
+    requestBody: RequestBodyObject | ReferenceObject | None = None
+    responses: ResponsesObject | None = None
+    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
     deprecated: bool | None = False
-    security: list["SecurityRequirementObject"] | None = None
+    security: list[SecurityRequirementObject] | None = None
     servers: list[ServerObject] | None = None
 
     _reference_uri: ClassVar[str] = (
@@ -272,10 +274,10 @@ class ParameterObject(GenericObject):
     style: str | None = None
     explode: bool | None = None
     allowReserved: bool | None = None
-    schema_: Optional["SchemaObject"] = Field(alias="schema")
+    schema_: SchemaObject | None = Field(alias="schema")
     example: Any | None = None
-    examples: dict[str, "ExampleObject | ReferenceObject"] | None = None
-    content: dict[str, "MediaTypeObject"] | None = None
+    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    content: dict[str, MediaTypeObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#parameter-object"
     )
@@ -319,11 +321,11 @@ class MediaTypeObject(GenericObject):
     Validates the OpenAPI Specification media type object - §4.8.14
     """
 
-    schema_: Optional["SchemaObject"] = Field(alias="schema", default=None)
+    schema_: SchemaObject | None = Field(alias="schema", default=None)
     # FIXME: Define example
     example: Any | None = None
     examples: dict[str, ExampleObject | ReferenceObject] | None = None
-    encoding: Optional["EncodingObject"] = None
+    encoding: EncodingObject | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#media-type-object"
     )
