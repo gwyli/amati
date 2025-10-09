@@ -12,8 +12,10 @@ Note that per https://spec.openapis.org/oas/v3.0.4.html#relative-references-in-a
 
 """
 
+from __future__ import annotations
+
 import re
-from typing import Any, ClassVar, Optional, Self
+from typing import Any, ClassVar, Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
 from jsonschema.protocols import Validator as JSONSchemaValidator
@@ -258,12 +260,12 @@ class OperationObject(GenericObject):
     description: str | CommonMark | None = None
     externalDocs: ExternalDocumentationObject | None = None
     operationId: str | None = None
-    parameters: list["ParameterObject | ReferenceObject"] | None = None
-    requestBody: Optional["RequestBodyObject | ReferenceObject"] = None
-    responses: "ResponsesObject"
-    callbacks: dict[str, "CallbackObject | ReferenceObject"] | None = None
+    parameters: list[ParameterObject | ReferenceObject] | None = None
+    requestBody: RequestBodyObject | ReferenceObject | None = None
+    responses: ResponsesObject
+    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
     deprecated: bool | None = False
-    security: list["SecurityRequirementObject"] | None = None
+    security: list[SecurityRequirementObject] | None = None
     servers: list[ServerObject] | None = None
 
     _reference_uri: ClassVar[str] = (
@@ -295,10 +297,10 @@ class ParameterObject(GenericObject):
     style: str | None = None
     explode: bool | None = None
     allowReserved: bool | None = None
-    schema_: Optional["SchemaObject | ReferenceObject"] = Field(alias="schema")
+    schema_: SchemaObject | ReferenceObject | None = Field(alias="schema")
     example: Any | None = None
-    examples: dict[str, "ExampleObject | ReferenceObject"] | None = None
-    content: dict[str, "MediaTypeObject"] | None = None
+    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    content: dict[str, MediaTypeObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#parameter-object"
     )
@@ -343,7 +345,7 @@ class RequestBodyObject(GenericObject):
     """
 
     description: CommonMark | str | None = None
-    content: dict[str, "MediaTypeObject"]
+    content: dict[str, MediaTypeObject]
     required: bool | None = False
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#request-body-object"
@@ -356,13 +358,11 @@ class MediaTypeObject(GenericObject):
     Validates the OpenAPI Specification media type object - §4.8.14
     """
 
-    schema_: Optional["SchemaObject | ReferenceObject"] = Field(
-        alias="schema", default=None
-    )
+    schema_: SchemaObject | ReferenceObject | None = Field(alias="schema", default=None)
     # FIXME: Define example
     example: Any | None = None
     examples: dict[str, ExampleObject | ReferenceObject] | None = None
-    encoding: Optional["EncodingObject"] = None
+    encoding: EncodingObject | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#media-type-object"
     )
@@ -375,7 +375,7 @@ class EncodingObject(GenericObject):
     """
 
     contentType: str | None = None
-    headers: dict[str, "HeaderObject | ReferenceObject"] | None = None
+    headers: dict[str, HeaderObject | ReferenceObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#encoding object-object"
     )
@@ -409,7 +409,7 @@ class ResponsesObject(GenericObject):
         extra="allow",
     )
 
-    default: Optional["ResponseObject | ReferenceObject"] = None
+    default: ResponseObject | ReferenceObject | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#responses-object"
     )
@@ -417,7 +417,7 @@ class ResponsesObject(GenericObject):
     @classmethod
     def _choose_model(
         cls, value: Any, field_name: str
-    ) -> "ReferenceObject | ResponseObject":
+    ) -> ReferenceObject | ResponseObject:
         """
         Choose the model to use for validation based on the type of value.
 
@@ -486,9 +486,9 @@ class ResponseObject(GenericObject):
     """
 
     description: str | CommonMark
-    headers: dict[str, "HeaderObject | ReferenceObject"] | None = None
+    headers: dict[str, HeaderObject | ReferenceObject] | None = None
     content: dict[str, MediaTypeObject] | None = None
-    links: dict[str, "LinkObject | ReferenceObject"] | None = None
+    links: dict[str, LinkObject | ReferenceObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#response-object"
     )
@@ -510,7 +510,7 @@ class CallbackObject(GenericObject):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, "PathItemObject"]:
+    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, PathItemObject]:
         """
         Validates the callback object.
         """
@@ -605,9 +605,7 @@ class HeaderObject(GenericObject):
     # Schema fields
     style: str | None = Field(default="simple")
     explode: bool | None = Field(default=False)
-    schema_: Optional["SchemaObject | ReferenceObject"] = Field(
-        alias="schema", default=None
-    )
+    schema_: SchemaObject | ReferenceObject | None = Field(alias="schema", default=None)
     example: JSONValue | None = None
     examples: dict[str, ExampleObject | ReferenceObject] | None = None
 
