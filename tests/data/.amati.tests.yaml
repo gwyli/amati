@@ -84,3 +84,9 @@ repos:
     licence: MIT
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/vrp-openapi.json
+  discourse:
+    uri: https://github.com/discourse/discourse_api_docs.git
+    revision: 11ac69848bdfa50b39ca037361feef87701efe57
+    licence: MIT
+    licence_permalink: https://github.com/discourse/discourse_api_docs/blob/11ac69848bdfa50b39ca037361feef87701efe57/LICENSE.txt
+    spec: openapi.yml
