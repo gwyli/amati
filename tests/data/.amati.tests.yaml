@@ -90,3 +90,9 @@ repos:
     licence: MIT
     licence_permalink: https://github.com/discourse/discourse_api_docs/blob/11ac69848bdfa50b39ca037361feef87701efe57/LICENSE.txt
     spec: openapi.yml
+  elasticsearch:
+    uri: https://github.com/elastic/elasticsearch-specification.git
+    revision: 88ed8664f1c6662d0a277627092255bde3259c5c
+    licence: Apache 2.0
+    licence_permalink: https://github.com/elastic/elasticsearch-specification/blob/88ed8664f1c6662d0a277627092255bde3259c5c/LICENSE
+    spec: output/openapi/elasticsearch-openapi.json
