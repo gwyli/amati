@@ -87,6 +87,7 @@ repos:
   discourse:
     uri: https://github.com/discourse/discourse_api_docs.git
     revision: 11ac69848bdfa50b39ca037361feef87701efe57
+    error_file: tests/data/discourse.yml.errors.json
     licence: MIT
     licence_permalink: https://github.com/discourse/discourse_api_docs/blob/11ac69848bdfa50b39ca037361feef87701efe57/LICENSE.txt
     spec: openapi.yml
