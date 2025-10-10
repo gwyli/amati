@@ -1,0 +1,1 @@
+[{"msg": "https://docs.discourse.org/LICENSE.txt is not a valid SPDX URL", "type": "warning", "loc": ["LicenceObject"], "input": "https://docs.discourse.org/LICENSE.txt", "url": "https://spec.openapis.org/oas/v3.1.1.html#license-object"}]
