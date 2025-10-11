@@ -64,7 +64,7 @@ jobs:
         with:
           verify-types: amati
           ignore-external: true
-          working-directory: amati/
+          working-directory: .
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
