@@ -62,7 +62,7 @@ jobs:
         if: steps.check_changes.outputs.relevant == 'true'
         uses: jakebailey/pyright-action@v2
         with:
-          verify-types: true
+          verify-types: amati
           ignore-external: true
 
       - name: Testing
