@@ -57,6 +57,13 @@ jobs:
         uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
         with: 
           args: format
+    
+      - name: Type checking
+        if: steps.check_changes.outputs.relevant == 'true'
+        uses: jakebailey/pyright-action@v2
+        with:
+          verify-types: true
+          ingnore-external: true
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
