@@ -63,6 +63,8 @@ jobs:
         uses: jakebailey/pyright-action@6cabc0f01c4994be48fd45cd9dbacdd6e1ee6e5e
         with:
           project: pyproject.toml
+          python-path: ${{ steps.setup-python.outputs.python-path }}
+          extra-args: amati 
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
