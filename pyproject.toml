@@ -66,7 +66,9 @@ omit=[
 
 [tool.pyright]
 reportMissingTypeStubs=false
+reportMisingImports=false # Ignore external dependencies
 typeCheckingMode="strict"
+src = ["amati"]
 
 [tool.pytest.ini_options]
 doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"

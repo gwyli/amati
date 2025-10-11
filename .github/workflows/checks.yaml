@@ -60,11 +60,9 @@ jobs:
     
       - name: Type checking
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: jakebailey/pyright-action@v2
+        uses: jakebailey/pyright-action@6cabc0f01c4994be48fd45cd9dbacdd6e1ee6e5e
         with:
-          verify-types: amati
-          ignore-external: true
-          working-directory: .
+          pyright-config: pyproject.toml
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
