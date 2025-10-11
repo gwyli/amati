@@ -63,7 +63,7 @@ jobs:
         uses: jakebailey/pyright-action@v2
         with:
           verify-types: true
-          ingnore-external: true
+          ignore-external: true
 
       - name: Testing
         if: steps.check_changes.outputs.relevant == 'true'
