@@ -44,7 +44,7 @@ jobs:
 
       - name: Setup project
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: ./.github/actions/setup'
+        uses: ../actions/setup'
         run: uv sync --locked --all-extras --dev
 
       - name: Run linting
