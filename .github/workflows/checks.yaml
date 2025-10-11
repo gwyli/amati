@@ -44,7 +44,7 @@ jobs:
 
       - name: Setup project
         if: steps.check_changes.outputs.relevant == 'true'
-        uses: ../actions/setup'
+        uses: ./.github/actions/setup
 
       - name: Run linting
         if: steps.check_changes.outputs.relevant == 'true'
