@@ -11,9 +11,15 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Topic :: Software Development :: Documentation",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
-    "Topic :: Software Development :: Testing :: Acceptance"
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Testing :: Acceptance",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
 ]
 licence = "MIT"
 license-files = ["LICENSE"]
@@ -31,8 +37,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ben-alexander/amati"
-Issues = "https://github.com/ben-alexander/amati/issues"
+Homepage = "https://github.com/gwyil/amati"
+Issues = "https://github.com/gwyil/amati/issues"
 
 [project.scripts]
 amati = "amati:main"
@@ -60,7 +66,9 @@ omit=[
 
 [tool.pyright]
 reportMissingTypeStubs=false
+reportMisingImports=false # Ignore external dependencies
 typeCheckingMode="strict"
+src = ["amati"]
 
 [tool.pytest.ini_options]
 doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
@@ -73,6 +81,7 @@ markers = [
 name = "pypi"
 url = "https://pypi.org/simple/"
 default = true
+
 [[tool.uv.index]]
 name = "testpypi"
 url = "https://test.pypi.org/legacy/"
