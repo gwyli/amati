@@ -414,6 +414,8 @@
     "sbml+xml",
     "scaip+xml",
     "scim+json",
+    "scitt-receipt+cose",
+    "scitt-statement+cose",
     "scvp-cv-request",
     "scvp-cv-response",
     "scvp-vp-request",

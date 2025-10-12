@@ -4064,6 +4064,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/HPND-SMC.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/HPND-SMC.json",
+    "name": "Historical Permission Notice and Disclaimer - SMC variant",
+    "licenseId": "HPND-SMC",
+    "seeAlso": [
+      "https://docs.python.org/3/license.html#execution-tracing"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/HPND-UC.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/HPND-UC.json",
@@ -4138,7 +4149,9 @@
     "name": "Independent JPEG Group License",
     "licenseId": "IJG",
     "seeAlso": [
-      "http://dev.w3.org/cvsweb/Amaya/libjpeg/Attic/README?rev=1.2"
+      "http://dev.w3.org/cvsweb/Amaya/libjpeg/Attic/README?rev=1.2",
+      "https://github.com/vstroebel/jpeg-encoder/blob/main/src/fdct.rs#L1-L72",
+      "https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/README.ijg#L117-L161"
     ],
     "isOsiApproved": false,
     "isFsfLibre": true
