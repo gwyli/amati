@@ -12,8 +12,6 @@ Note that per https://spec.openapis.org/oas/v3.0.4.html#relative-references-in-a
 
 """
 
-from __future__ import annotations
-
 import re
 from typing import Any, ClassVar, Self
 
