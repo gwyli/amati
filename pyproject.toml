@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Ben", email = "2551337+ben-alexander@users.noreply.github.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

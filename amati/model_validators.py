@@ -1,7 +1,5 @@
 """Generic factories to add repetitive validators to Pydantic models."""
 
-from __future__ import annotations
-
 from collections.abc import Iterable, Sequence
 from numbers import Number
 from typing import Any
