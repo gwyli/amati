@@ -37,8 +37,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/gwyil/amati"
-Issues = "https://github.com/gwyil/amati/issues"
+Homepage = "https://github.com/gwyli/amati"
+Issues = "https://github.com/gwyli/amati/issues"
 
 [project.scripts]
 amati = "amati:main"
