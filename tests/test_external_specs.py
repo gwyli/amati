@@ -66,8 +66,6 @@ def test_specs():
         file: Path = Path(directory) / name / repo["spec"]
         files = determine_file_names(file)
 
-        print(f"Testing {file}")
-
         consistency_check = run(
             file_path=file, consistency_check=True, local=True, html_report=True
         )

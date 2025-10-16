@@ -106,6 +106,7 @@ select = [
     "DTZ", # flake8-datetimez
     "UP",  # pyupgrade
     "RUF", # ruff-specific rules
+    "T20", # flake8-print
     "YTT", # flake8-2020
 ]
 extend-fixable = ["UP015"]
