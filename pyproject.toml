@@ -107,6 +107,7 @@ select = [
     "DTZ", # flake8-datetimez
     "UP",  # pyupgrade
     "RUF", # ruff-specific rules
+    "PTH", # flake8-pathlib
     "SIM", # flake8-simplify
     "T20", # flake8-print
     "YTT", # flake8-2020

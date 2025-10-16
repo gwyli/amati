@@ -19,7 +19,7 @@ def guard():
     of the top-level directory for amati
     """
 
-    if Path("pyproject.toml") not in Path(".").iterdir():
+    if Path("pyproject.toml") not in Path().iterdir():
         raise ValueError("setup_test_specs.py must be run in the top-level directory")
 
 
@@ -30,7 +30,8 @@ def get_repos() -> dict[str, Any]:
 
     guard()
 
-    with open("tests/data/.amati.tests.yaml", encoding="utf-8") as f:
+    config: Path = Path("tests/data/.amati.tests.yaml")
+    with config.open(encoding="utf-8") as f:
         content = yaml.safe_load(f)
 
     return content

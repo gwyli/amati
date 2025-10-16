@@ -132,11 +132,11 @@ def run(
             if not error_path.exists():
                 error_path.mkdir()
 
-        with open(
-            error_path / error_file.with_suffix(error_file.suffix + ".json"),
-            "w",
-            encoding="utf-8",
-        ) as f:
+        json_error_file: Path = error_path / error_file.with_suffix(
+            error_file.suffix + ".json"
+        )
+
+        with json_error_file.open("w", encoding="utf-8") as f:
             f.write(json.dumps(handled_errors))
 
         if html_report:
@@ -150,11 +150,11 @@ def run(
             html_output = template.render(errors=handled_errors)
 
             # Save the output to a file
-            with open(
-                error_path / error_file.with_suffix(error_file.suffix + ".html"),
-                "w",
-                encoding="utf-8",
-            ) as f:
+
+            html_error_file: Path = error_path / error_file.with_suffix(
+                error_file.suffix + ".html"
+            )
+            with html_error_file.open("w", encoding="utf-8") as f:
                 f.write(html_output)
 
     if result and consistency_check:

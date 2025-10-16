@@ -16,8 +16,8 @@ def get_test_data() -> dict[str, Any]:
     """
     Gathers the set of test data.
     """
-
-    with open("tests/data/.amati.tests.yaml", encoding="utf-8") as f:
+    config: Path = Path("tests/data/.amati.tests.yaml")
+    with config.open(encoding="utf-8") as f:
         content = yaml.safe_load(f)
 
     return content
@@ -29,7 +29,7 @@ def get_errors(error_file: Path) -> list[dict[str, Any]]:
     with a given test specification.
     """
 
-    with open(error_file, encoding="utf-8") as f:
+    with error_file.open(encoding="utf-8") as f:
         expected_errors = json.loads(f.read())
 
     return expected_errors
@@ -73,7 +73,7 @@ def test_specs():
         if errors := repo.get("error_file"):
             error_file = get_errors(Path(errors))
 
-            with open(files["error_json"], encoding="utf-8") as f:
+            with Path(files["error_json"]).open(encoding="utf-8") as f:
                 json_encoded = json.loads(f.read())
 
             assert json.dumps(json_encoded, sort_keys=True) == json.dumps(
