@@ -10,7 +10,7 @@ from typing import Any, ClassVar, NotRequired, TypedDict
 type LogType = Exception | Warning
 
 
-@dataclass
+@dataclass(frozen=True)
 class Log(TypedDict):
     type: str
     loc: NotRequired[tuple[int | str, ...]]
@@ -20,11 +20,10 @@ class Log(TypedDict):
 
 
 class Logger:
-    """
-    A mixin class that provides logging functionality.
+    """A simple class-level logger for collecting Log objects.
 
-    This class maintains a list of Log messages that are added.
-    It is NOT thread-safe. State is maintained at a global level.
+    This class provides methods for appending logs and managing
+    a logging context that automatically clears the logs.
     """
 
     logs: ClassVar[list[Log]] = []
