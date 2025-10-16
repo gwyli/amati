@@ -7,5 +7,5 @@ pytest --doctest-modules amati/
 pyright --verifytypes amati --ignoreexternal
 docker build -t amati -f Dockerfile . 
 cd .amati/test-specs/swagger/src/main/resources/ || exit
-docker run -v "$(pwd):/data" amati -d /data --consistency-check
+docker run -v "$(pwd):/data" amati validate -s /data/openapi.yaml --consistency-check
 cd - || exit
