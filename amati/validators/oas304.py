@@ -700,7 +700,7 @@ class SchemaObject(GenericObject):
             if isinstance(type_val, str) and type_val != "null":
                 schema_dict["type"] = [type_val, "null"]
             elif isinstance(type_val, list) and "null" not in type_val:
-                schema_dict["type"] = type_val + ["null"]
+                schema_dict["type"] = [*type_val, ["null"]]
 
         # 2. Validate the schema structure using jsonschema's meta-schema
         # Get the right validator based on the declared $schema or default
@@ -748,7 +748,7 @@ class OAuthFlowObject(GenericObject):
     authorizationUrl: URI | None = None
     tokenUrl: URI | None = None
     refreshUrl: URI | None = None
-    scopes: dict[str, str] = {}
+    scopes: dict[str, str] = Field(default={})
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#oauth-flow-object"
     )

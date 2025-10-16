@@ -247,7 +247,7 @@ if __name__ == "__main__":
             logger.info("Data refreshed successfully.")
             sys.exit(0)
         except Exception as e:
-            logger.error(f"Error refreshing data: {str(e)}")
+            logger.error(f"Error refreshing data: {e}")
             sys.exit(1)
 
     specification: Path = Path(args.spec)
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         )
         logger.info(f"Specification {specification} processed successfully.")
     except Exception as e:
-        logger.error(f"Error processing {specification}, {str(e)}")
+        logger.error(f"Error processing {specification}, {e}")
         sys.exit(1)
 
     if args.consistency_check and successful_check:

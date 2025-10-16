@@ -101,6 +101,7 @@ select = [
     "S",   # flake8-bandit
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
+    "RUF", # ruff-specific rules
 ]
 extend-fixable = ["UP015"]
 
@@ -116,6 +117,7 @@ extra-standard-library=["typing_extensions", "annotationlib", "compression"]
     "S311", # Allow random choice
     "S603", # Allow subprocess calls
     "S607", # Allow partially executable paths
+    "RUF001", # Allow ambiguous unicode characters
 ]
 
 # Disable certain checks in internal script
