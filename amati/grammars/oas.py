@@ -36,10 +36,10 @@ class Rule(_Rule):
         # reference-token = *( unescaped / escaped )
         # unescaped       = %x00-2E / %x30-7D / %x7F-10FFFF
         #               ; %x2F ('/') and %x7E ('~') are excluded from 'unescaped'
-        # escaped         = "~" ( "0" / "1" )
+        # escaped         = "~" ( "0" / "1" ) # noqa: ERA001
         #               ; representing '~' and '/', respectively
         "name = *( CHAR )",
-        # token = 1*tchar,
-        # tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "."
+        # token = 1*tchar, # noqa: ERA001
+        # tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." # noqa: ERA001 E501
         #     / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
     ]

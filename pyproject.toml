@@ -99,9 +99,14 @@ select = [
     "I",   # isort
     "B",   # flake8-bugbear
     "S",   # flake8-bandit
+    "A",   # flake8-builtins
     "C4",  # flake8-comprehensions
+    "ERA", # eradicate (commented out code)
+    "ISC", # flake8-implicit-str-concat
+    "DTZ", # flake8-datetimez
     "UP",  # pyupgrade
     "RUF", # ruff-specific rules
+    "YTT", # flake8-2020
 ]
 extend-fixable = ["UP015"]
 
