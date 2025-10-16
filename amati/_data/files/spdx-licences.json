@@ -2818,6 +2818,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/ESA-PL-strong-copyleft-2.4.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/ESA-PL-strong-copyleft-2.4.json",
+    "name": "European Space Agency Public License (ESA-PL) - V2.4 - Strong Copyleft (Type 1)",
+    "licenseId": "ESA-PL-strong-copyleft-2.4",
+    "seeAlso": [
+      "https://essr.esa.int/license/european-space-agency-public-license-v2-4-strong-copyleft-type-1"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/ESA-PL-weak-copyleft-2.4.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/ESA-PL-weak-copyleft-2.4.json",
@@ -6417,6 +6428,17 @@
     "isFsfLibre": true
   },
   {
+    "reference": "https://spdx.org/licenses/OSSP.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/OSSP.json",
+    "name": "OSSP License",
+    "licenseId": "OSSP",
+    "seeAlso": [
+      "https://git.sr.ht/~nabijaczleweli/ossp-var"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/PADL.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/PADL.json",
@@ -6931,6 +6953,17 @@
     "licenseId": "SGI-OpenGL",
     "seeAlso": [
       "https://gitlab.freedesktop.org/mesa/glw/-/blob/master/README?ref_type=heads"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/SGMLUG-PM.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/SGMLUG-PM.json",
+    "name": "SGMLUG Parser Materials License",
+    "licenseId": "SGMLUG-PM",
+    "seeAlso": [
+      "https://gitweb.gentoo.org/repo/gentoo.git/tree/licenses/SGMLUG?id=7d999af4a47bf55e53e54713d98d145f935935c1"
     ],
     "isOsiApproved": false
   },
