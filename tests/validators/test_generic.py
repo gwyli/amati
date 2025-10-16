@@ -33,7 +33,7 @@ class ModelExtraPattern(GenericObject):
     st.data(),
 )
 def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObject):
-    if "value" not in data.keys():
+    if "value" not in data:
         data["value"] = data_strategy.draw(st.text())
 
     with Logger.context():
@@ -55,7 +55,7 @@ def test_valid_generic_object(data: dict[str, str]):
     st.data(),
 )
 def test_allow_extra_fields(data: dict[str, str], data_strategy: st.DataObject):
-    if "value" not in data.keys():
+    if "value" not in data:
         data["value"] = data_strategy.draw(st.text())
 
     with Logger.context():
@@ -78,7 +78,7 @@ def text_matching_pattern(draw: st.DrawFn) -> dict[str, str]:
 def test_allow_extra_fields_with_pattern(
     data: dict[str, str], data_strategy: st.DataObject
 ):
-    if "value" not in data.keys():
+    if "value" not in data:
         data["value"] = data_strategy.draw(st.text())
 
     with Logger.context():
@@ -90,7 +90,7 @@ def test_allow_extra_fields_with_pattern(
 def test_allow_extra_fields_with_pattern_and_extra(
     data: dict[str, str], data_strategy: st.DataObject
 ):
-    if "value" not in data.keys():
+    if "value" not in data:
         data["value"] = data_strategy.draw(st.text())
 
     # Add another field not begining with 'x-'

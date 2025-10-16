@@ -52,10 +52,7 @@ class GenericObject(BaseModel):
         # If extra fields aren't allowed log those that aren't going to be added
         # to the model.
         for field in data:
-            if (
-                field not in self.model_dump().keys()
-                and field not in self.get_field_aliases()
-            ):
+            if field not in self.model_dump() and field not in self.get_field_aliases():
                 message = f"{field} is not a valid field for {self.__repr_name__()}."
                 Logger.log(
                     {
@@ -92,9 +89,7 @@ class GenericObject(BaseModel):
         excess_fields: set[str] = set()
 
         pattern: re.Pattern[str] = re.compile(self._extra_field_pattern)
-        excess_fields.update(
-            key for key in self.model_extra.keys() if not pattern.match(key)
-        )
+        excess_fields.update(key for key in self.model_extra if not pattern.match(key))
 
         for field in excess_fields:
             message = f"{field} is not a valid field for {self.__repr_name__()}."

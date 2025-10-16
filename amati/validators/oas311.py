@@ -484,7 +484,7 @@ class ComponentsObject(GenericObject):
                     f"Invalid type for '{field_name}': expected dict, got {type(value)}"
                 )
 
-            for key in value.keys():
+            for key in value:
                 if not re.match(pattern, key):
                     raise ValueError(
                         f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # noqa: E501

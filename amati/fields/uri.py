@@ -61,7 +61,7 @@ class Scheme(_Str):
 
         # Look up the scheme in the IANA registry to get status info
         # Returns None if the scheme is not in the registry
-        self.status = SCHEMES.get(value, None)
+        self.status = SCHEMES.get(value)
 
 
 class URIType(str, Enum):

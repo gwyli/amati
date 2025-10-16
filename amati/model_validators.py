@@ -154,7 +154,7 @@ def at_least_one_of(
             if is_truthy_with_numeric_zero(value):
                 return self
 
-        public_fields = ", ".join(f"{name}" for name in candidates.keys())
+        public_fields = ", ".join(f"{name}" for name in candidates)
 
         msg = f"{public_fields} do not have values, expected at least one."
         Logger.log(
@@ -245,10 +245,8 @@ def only_one_of(
                 truthy.append(name)
 
         if len(truthy) != 1:
-            if truthy:
-                field_string = ", ".join(truthy)
-            else:
-                field_string = "none"
+            field_string = ", ".join(truthy) if truthy else "none"
+
             msg = f"Expected at most one field to have a value, {field_string} did"
 
             Logger.log(

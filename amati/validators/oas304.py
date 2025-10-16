@@ -239,7 +239,7 @@ class PathsObject(GenericObject):
         Special-case specification extensions, which are also allowed.
         """
 
-        for field in data.keys():
+        for field in data:
             # Specification extensions
             if field.startswith("x-"):
                 continue
@@ -956,7 +956,7 @@ class ComponentsObject(GenericObject):
                     f"Invalid type for '{field_name}': expected dict, got {type(value)}"
                 )
 
-            for key in value.keys():
+            for key in value:
                 if not re.match(pattern, key):
                     raise ValueError(
                         f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # noqa: E501
