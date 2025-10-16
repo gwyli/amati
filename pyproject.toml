@@ -100,6 +100,7 @@ select = [
     "B",   # flake8-bugbear
     "S",   # flake8-bandit
     "A",   # flake8-builtins
+    "ARG", # flake8-arguments
     "C4",  # flake8-comprehensions
     "ERA", # eradicate (commented out code)
     "ISC", # flake8-implicit-str-concat
