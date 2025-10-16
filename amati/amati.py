@@ -163,86 +163,39 @@ def run(
     return True
 
 
-def discover(spec: str, discover_dir: str = ".") -> list[Path]:
-    """
-    Finds OpenAPI Specification files to validate
-
-    Args:
-        spec: The path to a specific OpenAPI specification file.
-        discover_dir: The directory to search through.
-    Returns:
-        A list of specifications to validate.
-    """
-
-    specs: list[Path] = []
-
-    # If a spec is provided, check if it exists and erorr if not
-    if spec:
-        spec_path = Path(spec)
-
-        if not spec_path.exists():
-            raise FileNotFoundError(f"File {spec} does not exist.")
-
-        if not spec_path.is_file():
-            raise IsADirectoryError(f"{spec} is a directory, not a file.")
-
-        specs.append(spec_path)
-
-        # End early if we're not also trying to find files
-        if not discover_dir:
-            return specs
-
-    if Path("openapi.json").exists():
-        specs.append(Path("openapi.json"))
-
-    if Path("openapi.yaml").exists():
-        specs.append(Path("openapi.yaml"))
-
-    if specs:
-        return specs
-
-    if discover_dir == ".":
-        raise FileNotFoundError(
-            "openapi.json or openapi.yaml can't be found, use --discover or --spec."
-        )
-
-    specs = specs + list(Path(discover_dir).glob("**/openapi.json"))
-    specs = specs + list(Path(discover_dir).glob("**/openapi.yaml"))
-
-    if not specs:
-        raise FileNotFoundError(
-            "openapi.json or openapi.yaml can't be found, use --spec."
-        )
-
-    return specs
-
-
 if __name__ == "__main__":
+    logger.remove()  # Remove the default logger
+    # Add a new logger that outputs to stderr with a specific format
+    logger.add(sys.stderr, format="{time} | {level} | {message}")
+
     import argparse
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         prog="amati",
         description="""
-        Tests whether a OpenAPI specification is valid. Will look an openapi.json
-        or openapi.yaml file in the directory that amati is called from. If
-        --discover is set will search the directory tree. If the specification
-        does not follow the naming recommendation the --spec switch should be
-        used.
+        Tests whether a OpenAPI specification is valid. Creates a file
+        <filename>.errors.json alongside the original specification containing
+        a JSON representation of all the errors.
 
-        Creates a file <filename>.errors.json alongside the original specification
-        containing a JSON representation of all the errors.
+        Optionally creates an HTML report of the errors, and performs an internal
+        consistency check to verify that the output of the validation is identical
+        to the input.
         """,
         suggest_on_error=True,
     )
 
-    parser.add_argument(
+    subparsers: argparse.Action = parser.add_subparsers(required=True, dest="command")
+
+    validation: argparse.ArgumentParser = subparsers.add_parser("validate")
+
+    validation.add_argument(
         "-s",
         "--spec",
-        required=False,
-        help="The specification to be parsed",
+        required=True,
+        help="The specification to be validated",
     )
 
-    parser.add_argument(
+    validation.add_argument(
         "--consistency-check",
         required=False,
         action="store_true",
@@ -250,48 +203,44 @@ if __name__ == "__main__":
         " parsed specification",
     )
 
-    parser.add_argument(
-        "-d",
-        "--discover",
-        required=False,
-        default=".",
-        help="Searches the specified directory tree for openapi.yaml or openapi.json.",
-    )
-
-    parser.add_argument(
+    validation.add_argument(
         "--local",
         required=False,
         action="store_true",
-        help="Store errors local to the caller in a file called <file-name>.errors.json"
-        "; a .amati/ directory will be created.",
+        help="Store errors local to the caller in .amati/<file-name>.errors.json",
     )
 
-    parser.add_argument(
+    validation.add_argument(
         "--html-report",
         required=False,
         action="store_true",
         help="Creates an HTML report of the errors, called <file-name>.errors.html,"
-        " alongside the original file or in a .amati/ directory if the --local switch"
-        " is used",
+        " alongside <filename>.errors.json",
     )
 
-    parser.add_argument(
-        "--refresh-data",
+    refreshment: argparse.ArgumentParser = subparsers.add_parser("refresh")
+
+    refreshment.add_argument(
+        "--type",
         required=False,
-        action="store_true",
-        help="Refreshes the local data files used by amati, such as HTTP status codes "
-        "or , media types from IANA",
+        default="all",
+        choices=[
+            "all",
+            "http_status_code",
+            "iso9110",
+            "media_types",
+            "schemes",
+            "spdx_licences",
+            "tlds",
+        ],
+        help="The type of data to refresh. Defaults to all.",
     )
 
     args: argparse.Namespace = parser.parse_args()
 
-    logger.remove()  # Remove the default logger
-    # Add a new logger that outputs to stderr with a specific format
-    logger.add(sys.stderr, format="{time} | {level} | {message}")
-
     logger.info("Starting amati")
 
-    if args.refresh_data:
+    if args.command == "refresh":
         logger.info("Refreshing data.")
         try:
             refresh("all")
@@ -301,32 +250,24 @@ if __name__ == "__main__":
             logger.error(f"Error refreshing data: {str(e)}")
             sys.exit(1)
 
+    specification: Path = Path(args.spec)
+    logger.info(f"Processing specification {specification}")
+
+    # Top-level try/except to ensure one failed spec doesn't stop the rest
+    # from being processed.
+    e: Exception
     try:
-        specifications: list[Path] = discover(args.spec, args.discover)
+        successful_check: bool = run(
+            specification, args.consistency_check, args.local, args.html_report
+        )
+        logger.info(f"Specification {specification} processed successfully.")
     except Exception as e:
-        logger.error(str(e))
+        logger.error(f"Error processing {specification}, {str(e)}")
         sys.exit(1)
 
-    specification: Path
-    for specification in specifications:
-        successful_check: bool = False
-        logger.info(f"Processing specification {specification}")
-
-        # Top-level try/except to ensure one failed spec doesn't stop the rest
-        # from being processed.
-        e: Exception
-        try:
-            successful_check = run(
-                specification, args.consistency_check, args.local, args.html_report
-            )
-            logger.info(f"Specification {specification} processed successfully.")
-        except Exception as e:
-            logger.error(f"Error processing {specification}, {str(e)}")
-            sys.exit(1)
-
-        if args.consistency_check and successful_check:
-            logger.info(f"Consistency check successful for {specification}")
-        elif args.consistency_check:
-            logger.info(f"Consistency check failed for {specification}")
+    if args.consistency_check and successful_check:
+        logger.info(f"Consistency check successful for {specification}")
+    elif args.consistency_check:
+        logger.info(f"Consistency check failed for {specification}")
 
     logger.info("Stopping amati.")

@@ -2,10 +2,8 @@
 Tests amati/amati.py, especially the args.
 """
 
-import os
 import subprocess
-
-import pytest
+from pathlib import Path
 
 
 def test_specifc_spec():
@@ -13,6 +11,7 @@ def test_specifc_spec():
         [
             "python",
             "amati/amati.py",
+            "validate",
             "-s",
             "tests/data/openapi.yaml",
             "--consistency-check",
@@ -26,6 +25,7 @@ def test_gzip():
         [
             "python",
             "amati/amati.py",
+            "validate",
             "-s",
             "tests/data/openapi.yaml.gz",
             "--consistency-check",
@@ -34,18 +34,54 @@ def test_gzip():
     )
 
 
-def test_discover_without_directory_failure():
-    with pytest.raises(subprocess.CalledProcessError):
-        subprocess.run(["python", "amati/amati.py", "--consistency-check"], check=True)
+def test_errors_created_local():
+    error_file: Path = Path(".amati/invalid-openapi.yaml.errors.json")
+    html_file: Path = Path(".amati/invalid-openapi.yaml.errors.html")
 
+    if error_file.exists():
+        error_file.unlink()
+    if html_file.exists():
+        html_file.unlink()
 
-def test_discover_without_directory_success():
-    os.chdir("tests/data")
     subprocess.run(
-        ["python", "../../amati/amati.py", "--consistency-check"], check=True
+        [
+            "python",
+            "amati/amati.py",
+            "validate",
+            "-s",
+            "tests/data/invalid-openapi.yaml",
+            "--local",
+            "--html-report",
+        ],
+        check=True,
     )
-    os.chdir("../../")
+    assert error_file.exists()
+    assert html_file.exists()
+    error_file.unlink()
+    html_file.unlink()
 
 
-def test_discover_with_directory():
-    subprocess.run(["python", "amati/amati.py", "-d", "tests/data/"], check=True)
+def test_errors_created():
+    error_file: Path = Path("tests/data/invalid-openapi.yaml.errors.json")
+    html_file: Path = Path("tests/data/invalid-openapi.yaml.errors.html")
+
+    if error_file.exists():
+        error_file.unlink()
+    if html_file.exists():
+        html_file.unlink()
+
+    subprocess.run(
+        [
+            "python",
+            "amati/amati.py",
+            "validate",
+            "-s",
+            "tests/data/invalid-openapi.yaml",
+            "--html-report",
+        ],
+        check=True,
+    )
+    assert error_file.exists()
+    assert html_file.exists()
+    error_file.unlink()
+    html_file.unlink()
