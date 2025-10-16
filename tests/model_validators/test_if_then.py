@@ -290,7 +290,7 @@ def test_multiple_iterable_consequences_valid():
         )
         assert not Logger.logs
         assert model.status == "active"
-        assert model.level == 2
+        assert model.level == 2  # noqa: PLR2004
 
 
 def test_multiple_iterable_consequences_partial_invalid():

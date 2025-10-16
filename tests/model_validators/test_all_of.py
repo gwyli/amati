@@ -49,7 +49,7 @@ def test_empty_object():
     st.integers(min_value=MIN),
     st.lists(st.integers(min_value=MIN), min_size=1),
 )
-def test_all_of_no_restrictions(name: str, age: int, music: list[int]):
+def test_all_of_no_restrictions(name: str, age: int, music: list[int]):  # noqa: PLR0915
     """Test when at least one field is not empty. Uses both None and falsy values."""
 
     # Tests with None

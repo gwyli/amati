@@ -107,9 +107,16 @@ select = [
     "DTZ", # flake8-datetimez
     "UP",  # pyupgrade
     "RUF", # ruff-specific rules
+    "PL",  # Pylint
+    "PLC", # Pylint - Convention
+    "PLE", # Pylint - Error
+    "PLR", # Pylint - Refactor
+    "PLW", # Pylint - Warning
     "PTH", # flake8-pathlib
     "SIM", # flake8-simplify
+    "C90", # McCabe complexity
     "T20", # flake8-print
+    "UP",  # pyupgrade
     "YTT", # flake8-2020
 ]
 extend-fixable = ["UP015"]
