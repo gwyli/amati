@@ -157,7 +157,9 @@ def get(data_type: data_types) -> dict[str, JSONValue] | list[JSONValue] | None:
     for module_ in to_get:
         module = importlib.import_module(f"amati._data.{module_}")
 
-        with open(current_path / module.DATA_FILE, encoding="utf-8") as f:
+        data_file: Path = current_path / module.DATA_FILE
+
+        with data_file.open(encoding="utf-8") as f:
             data = json.loads(f.read())
 
         if not data:

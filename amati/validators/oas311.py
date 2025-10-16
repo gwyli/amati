@@ -104,7 +104,7 @@ class LicenceObject(GenericObject):
             except AmatiValueError:
                 Logger.log(
                     {
-                        "msg": f"{str(self.url)} is not a valid SPDX URL",
+                        "msg": f"{self.url} is not a valid SPDX URL",
                         "type": "warning",
                         "loc": (self.__class__.__name__,),
                         "input": self.url,
@@ -376,7 +376,7 @@ class SchemaObject(GenericObject):
             if isinstance(type_val, str) and type_val != "null":
                 schema_dict["type"] = [type_val, "null"]
             elif isinstance(type_val, list) and "null" not in type_val:
-                schema_dict["type"] = type_val + ["null"]
+                schema_dict["type"] = [*type_val, ["null"]]
 
         # 2. Validate the schema structure using jsonschema's meta-schema
         # Get the right validator based on the declared $schema or default
@@ -484,7 +484,7 @@ class ComponentsObject(GenericObject):
                     f"Invalid type for '{field_name}': expected dict, got {type(value)}"
                 )
 
-            for key in value.keys():
+            for key in value:
                 if not re.match(pattern, key):
                     raise ValueError(
                         f"Invalid key '{key}' in '{field_name}': must match pattern {pattern}"  # noqa: E501

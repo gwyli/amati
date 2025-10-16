@@ -3,7 +3,7 @@ Validates a URI according to the RFC3986 ABNF grammar
 """
 
 from enum import Enum
-from typing import Self, cast
+from typing import ClassVar, Self, cast
 
 import idna
 from abnf import Node, ParseError, Rule
@@ -61,7 +61,7 @@ class Scheme(_Str):
 
         # Look up the scheme in the IANA registry to get status info
         # Returns None if the scheme is not in the registry
-        self.status = SCHEMES.get(value, None)
+        self.status = SCHEMES.get(value)
 
 
 class URIType(str, Enum):
@@ -123,7 +123,7 @@ class URI(_Str):
     # RFC 3987 Internationalized Resource Identifier (IRI) flag
     is_iri: bool = False
 
-    _attribute_map: dict[str, str] = {
+    _attribute_map: ClassVar[dict[str, str]] = {
         "authority": "authority",
         "iauthority": "authority",
         "host": "host",
@@ -176,7 +176,7 @@ class URI(_Str):
         # an additional return there is a code path in type() that doesn't return a
         # value. It's better to deal with the potential error case than ignore the
         # lack of a return value.
-        raise TypeError(f"{str(self)} does not have a URI type.")  # pragma: no cover
+        raise TypeError(f"{self!s} does not have a URI type.")  # pragma: no cover
 
     def __init__(self, value: str):
         """

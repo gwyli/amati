@@ -151,7 +151,7 @@ class FileProcessor:
             True if the file is gzip-compressed, False otherwise.
         """
         try:
-            with open(file_path, "rb") as f:
+            with file_path.open("rb") as f:
                 magic = f.read(2)
                 return magic == b"\x1f\x8b"
         except OSError:
@@ -189,7 +189,7 @@ class FileProcessor:
             with gzip.open(file_path, "rt", encoding="utf-8") as f:
                 return f.read()
         else:
-            with open(file_path, encoding="utf-8") as f:
+            with file_path.open(encoding="utf-8") as f:
                 return f.read()
 
     def _get_appropriate_loader(self, file_path: Path) -> FileLoader:

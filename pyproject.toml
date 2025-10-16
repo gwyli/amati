@@ -7,6 +7,7 @@ authors = [
     { name = "Ben", email = "2551337+ben-alexander@users.noreply.github.com" }
 ]
 requires-python = ">=3.14"
+keywords = ["openapi", "openapi3", "openapi3.0", "openapi3.1", "swagger", "validator", "validation", "yaml", "json"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -92,13 +93,30 @@ line-length = 88
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings  
-    "F",   # pyflakes
-    "I",   # isort
+    "A",   # flake8-builtins
+    "ARG", # flake8-arguments
     "B",   # flake8-bugbear
     "C4",  # flake8-comprehensions
+    "C90", # McCabe complexity
+    "DTZ", # flake8-datetimez
+    "E",   # pycodestyle errors
+    "ERA", # eradicate (commented out code)
+    "F",   # pyflakes
+    "I",   # isort
+    "ISC", # flake8-implicit-str-concat
+    "PL",  # Pylint
+    "PLC", # Pylint - Convention
+    "PLE", # Pylint - Error
+    "PTH", # flake8-pathlib
+    "PLR", # Pylint - Refactor
+    "PLW", # Pylint - warnings
+    "RUF", # ruff-specific rules
+    "S",   # flake8-bandit
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
     "UP",  # pyupgrade
+    "W",   # pycodestyle warnings  
+    "YTT", # flake8-2020
 ]
 extend-fixable = ["UP015"]
 
@@ -106,3 +124,20 @@ extend-fixable = ["UP015"]
 known-first-party=["amati"]
 known-third-party=["pytest","pydantic","yaml","abnf", "rfc3987"]
 extra-standard-library=["typing_extensions", "annotationlib", "compression"]
+
+[tool.ruff.lint.per-file-ignores]
+# Disable certain checks in tests
+"tests/**/*.py" = [
+    "S101", # Allow assert
+    "S311", # Allow random choice
+    "S603", # Allow subprocess calls
+    "S607", # Allow partially executable paths
+    "RUF001", # Allow ambiguous unicode characters
+]
+
+# Disable certain checks in internal script
+"scripts/setup_test_specs.py" = [
+    "S108", # Allow use of temp files
+    "S603", # Allow subprocess calls
+    "S607", # Allow partially executable paths
+]

@@ -8,7 +8,7 @@ DATA_FILE = Path("media-types.json")
 DATA_SOURCE: dict[str, str] = {
     "application": "https://www.iana.org/assignments/media-types/application.csv",
     "audio": "https://www.iana.org/assignments/media-types/audio.csv",
-    # "example": "currently no valid values",
+    # "example": "currently no valid values", # noqa ERA001
     "font": "https://www.iana.org/assignments/media-types/font.csv",
     "haptics": "https://www.iana.org/assignments/media-types/haptics.csv",
     "image": "https://www.iana.org/assignments/media-types/image.csv",
