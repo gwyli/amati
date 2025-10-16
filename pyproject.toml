@@ -7,6 +7,7 @@ authors = [
     { name = "Ben", email = "2551337+ben-alexander@users.noreply.github.com" }
 ]
 requires-python = ">=3.14"
+keywords = ["openapi", "openapi3", "openapi3.0", "openapi3.1", "swagger", "validator", "validation", "yaml", "json"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
