@@ -98,6 +98,7 @@ select = [
     "F",   # pyflakes
     "I",   # isort
     "B",   # flake8-bugbear
+    "S",   # flake8-bandit
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
 ]
@@ -107,3 +108,19 @@ extend-fixable = ["UP015"]
 known-first-party=["amati"]
 known-third-party=["pytest","pydantic","yaml","abnf", "rfc3987"]
 extra-standard-library=["typing_extensions", "annotationlib", "compression"]
+
+[tool.ruff.lint.per-file-ignores]
+# Disable certain checks in tests
+"tests/**/*.py" = [
+    "S101", # Allow assert
+    "S311", # Allow random choice
+    "S603", # Allow subprocess calls
+    "S607", # Allow partially executable paths
+]
+
+# Disable certain checks in internal script
+"scripts/setup_test_specs.py" = [
+    "S108", # Allow use of temp files
+    "S603", # Allow subprocess calls
+    "S607", # Allow partially executable paths
+]
