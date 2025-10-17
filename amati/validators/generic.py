@@ -17,9 +17,10 @@ from pydantic import BaseModel, ConfigDict, PrivateAttr
 from pydantic_core._pydantic_core import PydanticUndefined
 
 from amati._logging import Logger
+from amati._references import URICollectorMixin
 
 
-class GenericObject(BaseModel):
+class GenericObject(URICollectorMixin, BaseModel):
     """A generic model extending Pydantic BaseModel with enhanced validation.
 
     Provides additional functionality for handling extra fields, including pattern

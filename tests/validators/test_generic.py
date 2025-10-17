@@ -29,7 +29,9 @@ class ModelExtraPattern(GenericObject):
 
 
 @given(
-    st.dictionaries(keys=st.text(), values=st.text()).filter(lambda x: x != {}),
+    st.dictionaries(keys=st.text(), values=st.text(), min_size=1).filter(
+        lambda x: x != {}
+    ),
     st.data(),
 )
 def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObject):
@@ -47,7 +49,9 @@ def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObje
     st.dictionaries(keys=st.just("value"), values=st.text()).filter(lambda x: x != {})
 )
 def test_valid_generic_object(data: dict[str, str]):
-    Model(**data)
+    with Logger.context():
+        Model(**data)
+        assert not Logger.logs
 
 
 @given(
