@@ -6,6 +6,8 @@
     "3gppHal+json",
     "3gppHalForms+json",
     "3gpp-ims+xml",
+    "3gpp-mbs-object-manifest+json",
+    "3gpp-mbs-user-service-descriptions+json",
     "A2L",
     "ace-groupcomm+cbor",
     "ace-trl+cbor",
