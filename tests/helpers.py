@@ -32,6 +32,6 @@ def text_excluding_empty_string() -> st.SearchStrategy[str]:
     return st.text().filter(lambda x: x != "")
 
 
-def none_and_empty_string(type_: Any) -> st.SearchStrategy[Any]:
+def none_and_empty_object(type_: Any) -> st.SearchStrategy[Any]:
     """Returns a Hypothesis strategy for generating an empty object and None"""
     return st.sampled_from([None, type_()])
