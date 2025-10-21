@@ -13,7 +13,7 @@ from pydantic import ValidationError
 from amati._logging import Logger
 from amati.fields.spdx_licences import VALID_LICENCES, VALID_URLS
 from amati.validators.oas311 import LicenceObject
-from tests.helpers import none_and_empty_object, text_excluding_empty_string
+from tests.strategies import none_and_empty_object, text_excluding_empty_string
 
 VALID_IDENTIFIERS = list(VALID_LICENCES.keys())
 VALID_IDENTIFIERS_WITH_URLS = [k for k, v in VALID_LICENCES.items() if v]
