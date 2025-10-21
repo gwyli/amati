@@ -20,9 +20,9 @@ def everything_except(excluded_types: ExcludedTypes) -> st.SearchStrategy[Any]:
         A strategy that generates values not matching the excluded type(s).
     """
     return (
-        st.from_type(type)  # type: ignore
-        .flatmap(st.from_type)
-        .filter(lambda x: not isinstance(x, excluded_types))  # type: ignore
+        st.from_type(object)
+        .map(type)
+        .filter(lambda x: not isinstance(x, excluded_types))
     )
 
 
