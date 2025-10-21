@@ -3,8 +3,6 @@ Helper functions for tests, e.g. create a search strategy for all all data
 types but one.
 """
 
-import random
-from collections.abc import Sequence
 from typing import Any
 
 from hypothesis import strategies as st
@@ -37,15 +35,3 @@ def text_excluding_empty_string() -> st.SearchStrategy[str]:
 def none_and_empty_string(type_: Any) -> st.SearchStrategy[Any]:
     """Returns a Hypothesis strategy for generating an empty object and None"""
     return st.sampled_from([None, type_()])
-
-
-def random_choice_empty(sequence: Sequence[Any]) -> Any | None:
-    """Return a random element from a sequence, or None if the sequence is empty.
-
-    Args:
-        sequence: A sequence of elements to choose from.
-
-    Returns:
-        A random element from the sequence, or None if sequence is empty.
-    """
-    return random.choice(sequence) if sequence else None
