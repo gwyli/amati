@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from amati.fields import URI
+from amati.fields import URI, URIType
 
 
 @dataclass(frozen=True)
@@ -18,12 +18,42 @@ class URIReference:
     target_model: type[BaseModel]  # The model type to validate with
 
     def resolve(self) -> Path:
-        """Resolve URI relative to source document"""
-        uri_path = Path(self.uri)
-        if uri_path.is_absolute():
-            return uri_path
-        # Resolve relative to the source document's directory
-        return (self.source_document.parent / self.uri).resolve()
+        """Resolve URI relative to source document, see
+        https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-api-description-uris
+        """
+
+        if self.uri.scheme == "file":
+            if not self.uri.path:
+                raise ValueError("File URI must have a path component")
+
+            netloc: Path | None = None
+            if self.uri.authority:
+                netloc = Path(self.uri.authority)
+
+            if self.uri.host and not netloc:
+                netloc = Path(self.uri.host)
+
+            return (
+                (netloc / self.uri.path).resolve()
+                if netloc
+                else Path(self.uri.path).resolve()
+            )
+
+        if self.uri.type == URIType.ABSOLUTE:
+            raise NotImplementedError("Absolute URI resolution not implemented")
+
+        if self.uri.type == URIType.NETWORK_PATH:
+            return Path(self.uri).resolve()
+
+        if self.uri.type == URIType.RELATIVE:
+            path: Path = self.source_document.parent / self.uri.lstrip("/")
+            return path.resolve()
+
+        if self.uri.type == URIType.JSON_POINTER:
+            path: Path = self.source_document.parent / self.uri.lstrip("#/")
+            return path.resolve()
+
+        raise ValueError(f"Unknown URI type: {self.uri.type}")
 
 
 class URIRegistry:

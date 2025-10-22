@@ -3,6 +3,8 @@ Helper functions for tests, e.g. create a search strategy for all all data
 types but one.
 """
 
+import string
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -10,9 +12,11 @@ from abnf.parser import ParseError
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
 
+from amati.fields import URI
 from amati.grammars import rfc6901
 
 ExcludedTypes = type[Any] | tuple[type[Any], ...]
+path_safe_chars = string.ascii_letters + string.digits + "-_."
 
 
 def everything_except(excluded_types: ExcludedTypes) -> st.SearchStrategy[Any]:
@@ -43,7 +47,18 @@ def none_and_empty_object(type_: Any) -> st.SearchStrategy[Any]:
 
 
 @st.composite
-def relative_uris(draw: st.DrawFn) -> str:
+def network_path_uris(draw: st.DrawFn) -> URI:
+    """
+    Generate network path URIs (e.g., //example.com/path)
+    """
+
+    candidate = draw(urls())
+
+    return URI(candidate.split(":")[1])  # Remove scheme to create network path
+
+
+@st.composite
+def relative_uris(draw: st.DrawFn) -> URI:
     """
     Generate relative URIs
     """
@@ -58,11 +73,11 @@ def relative_uris(draw: st.DrawFn) -> str:
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
 
-    return f"{path}{query}{fragment}"
+    return URI(f"{path}{query}{fragment}")
 
 
 @st.composite
-def json_pointers(draw: st.DrawFn) -> str:
+def json_pointers(draw: st.DrawFn) -> URI:
     while True:
         pointer = draw(relative_uris())
         try:
@@ -71,4 +86,39 @@ def json_pointers(draw: st.DrawFn) -> str:
         except ParseError:
             continue
 
-    return f"#{candidate}"
+    return URI(f"#{candidate}")
+
+
+def uri_strategy() -> st.SearchStrategy:
+    """
+    Generate URIs including absolute, relative, and JSON Pointer URIs"""
+    return st.one_of(urls(), relative_uris(), json_pointers())
+
+
+def relative_paths() -> st.SearchStrategy:
+    """
+    Generate relative file system paths
+    """
+    return st.text(alphabet=path_safe_chars, min_size=1).map(Path)
+
+
+def absolute_paths() -> st.SearchStrategy:
+    """
+    Generate absolute file system paths
+    """
+
+    def make_absolute_path(root: str, parts: list[str]) -> Path:
+        return Path("/", root, *parts)
+
+    return st.builds(
+        make_absolute_path,
+        st.text(alphabet=path_safe_chars, min_size=1),
+        st.lists(st.text(alphabet=path_safe_chars, min_size=1), max_size=3),
+    )
+
+
+def file_strategy() -> st.SearchStrategy:
+    """
+    Generate both relative and absolute file system paths
+    """
+    return st.one_of(relative_paths(), absolute_paths())
