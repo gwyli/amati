@@ -218,7 +218,7 @@ class URICollectorMixin(BaseModel):
                 ref = URIReference(
                     uri=field_value,
                     source_document=Path(current_doc),
-                    source_model_name=self.__class__.__qualname__,
+                    source_model_name=self.__class__.__name__,
                     source_field=field_name,
                     # The linked document should be validated with the same model type
                     target_model=self.__class__,

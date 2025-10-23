@@ -22,7 +22,7 @@ from tests.strategies import (
     relative_uris,
 )
 
-uri_ref_strategy = st.builds(
+uri_reference_strategy = st.builds(
     URIReference,
     uri=st.one_of(json_pointers(), network_path_uris(), relative_uris()).map(URI),
     source_document=file_strategy(),
@@ -49,7 +49,7 @@ class TestSingletonBehavior:
 
         assert instance1 is instance2
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_singleton_persists_state_across_calls(self, uri_ref: URIReference):
         """State changes should persist across get_instance() calls."""
         registry1 = clean_registry()
@@ -69,7 +69,7 @@ class TestSingletonBehavior:
 
         assert singleton is not direct
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_singleton_state_not_shared_with_direct_instances(
         self, uri_ref: URIReference
     ):
@@ -85,7 +85,7 @@ class TestSingletonBehavior:
 class TestURIRegistration:
     """Tests for URI reference registration."""
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_register_single_uri(self, uri_ref: URIReference):
         """Should register a single URI reference."""
         registry = clean_registry()
@@ -95,7 +95,7 @@ class TestURIRegistration:
         assert len(registry.get_all_references()) == 1
         assert registry.get_all_references()[0] == uri_ref
 
-    @given(uri_refs=st.lists(uri_ref_strategy))
+    @given(uri_refs=st.lists(uri_reference_strategy))
     def test_register_multiple_uris(self, uri_refs: list[URIReference]):
         """Should register multiple URI references in order."""
         registry = clean_registry()
@@ -106,7 +106,7 @@ class TestURIRegistration:
 
         assert registry.get_all_references() == uri_refs
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_register_duplicate_uris(self, uri_ref: URIReference):
         """Should allow duplicate URI references (no deduplication)."""
         registry = clean_registry()
@@ -116,7 +116,7 @@ class TestURIRegistration:
 
         assert len(registry.get_all_references()) == 2  # noqa: PLR2004
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_get_all_references_returns_copy(self, uri_ref: URIReference):
         """get_all_references() should return a copy, not the internal list."""
         registry = clean_registry()
@@ -128,7 +128,7 @@ class TestURIRegistration:
         assert refs1 is not refs2
         assert refs1 == refs2
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_external_modification_does_not_affect_registry(
         self, uri_ref: URIReference
     ):
@@ -141,7 +141,7 @@ class TestURIRegistration:
 
         assert len(registry.get_all_references()) == 1
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_register_with_empty_registry(self, uri_ref: URIReference):
         """Should handle registration when registry is empty."""
         registry = clean_registry()
@@ -239,7 +239,7 @@ class TestResolvable:
 class TestReset:
     """Tests for registry reset functionality."""
 
-    @given(uri_refs=st.lists(uri_ref_strategy))
+    @given(uri_refs=st.lists(uri_reference_strategy))
     def test_reset_clears_all_instances(self, uri_refs: list[URIReference]):
         """Should clear all registered URIs."""
         registry1 = clean_registry()
@@ -258,7 +258,7 @@ class TestReset:
             assert not registry1.is_processed(ref.resolve())
             assert not registry2.is_processed(ref.resolve())
 
-    @given(uri_ref=uri_ref_strategy)
+    @given(uri_ref=uri_reference_strategy)
     def test_reset_clears_both_uris_and_paths(self, uri_ref: URIReference):
         """Should clear both URIs and processed paths."""
         registry = clean_registry()
@@ -272,7 +272,7 @@ class TestReset:
         assert len(registry.get_all_references()) == 0
         assert not registry.is_processed(uri_ref.resolve())
 
-    @given(uri_ref1=uri_ref_strategy, uri_ref2=uri_ref_strategy)
+    @given(uri_ref1=uri_reference_strategy, uri_ref2=uri_reference_strategy)
     def test_reset_allows_reuse(
         self,
         uri_ref1: URIReference,

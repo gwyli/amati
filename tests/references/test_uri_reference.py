@@ -7,15 +7,13 @@ from pydantic import BaseModel
 
 from amati._references import URIReference
 from amati.fields import URI, URIType
-
-# Assume these strategies exist in your test suite
 from tests.strategies import (
-    absolute_paths,  # Absolute file paths (/absolute/path)
-    json_pointers,  # JSON pointers (#/foo/bar)
-    network_path_uris,  # Network paths (//host/path)
-    pydantic_models,  # Pydantic BaseModel subclasses
-    relative_paths,  # Relative file paths (subdir/file, ../file
-    relative_uris,  # Relative path URIs (../path, subdir/file)
+    absolute_paths,
+    json_pointers,
+    network_path_uris,
+    pydantic_models,
+    relative_paths,
+    relative_uris,
 )
 
 
@@ -119,9 +117,9 @@ class TestURIReferenceResolveExamples:
 
         resolved: Path = uri_ref.resolve()
 
-        # Should be the URI as a path, not resolved relatively
-        assert resolved == Path("/absolute/path/schema.json")
-        # Should NOT be under source document's directory
+        assert resolved == Path("/absolute/path/schema.json"), (
+            "Absolute URI resolved as whole path"
+        )
         assert resolved != Path("/project/schemas/file:///absolute/path/schema.json")
 
     def test_network_path_uri_resolves_to_itself(self) -> None:
@@ -245,10 +243,8 @@ class TestURIReferenceResolveProperties:
 
         resolved: Path = uri_ref.resolve()
 
-        # Resolved path should be absolute (normalized)
-        assert resolved.is_absolute()
+        assert resolved.is_absolute(), "Resolved path should be absolute (normalized)"
 
-        # Should not contain .. or . components after resolution
         assert ".." not in resolved.parts
         assert "." not in resolved.parts
 
@@ -284,9 +280,8 @@ class TestURIReferenceResolveProperties:
         resolved: Path = uri_ref.resolve()
         cwd_resolved: Path = (Path.cwd() / relative_uri.lstrip("/")).resolve()
 
-        # Should be different if source document is not in cwd
         if source_document.parent != Path.cwd():
-            assert resolved != cwd_resolved
+            assert resolved != cwd_resolved, "Should be different if source not in cwd"
 
     @given(
         relative_uri=relative_uris(),
@@ -322,6 +317,7 @@ class TestURIReferenceResolveProperties:
             source_document / relative_uri.lstrip("/")
         ).resolve()
 
-        # Should NOT resolve from the document itself (unless document is a directory)
         if source_document.parent != source_document:
-            assert resolved != wrong_from_document
+            assert resolved != wrong_from_document, (
+                "Should NOT resolve from the document itself"
+            )
