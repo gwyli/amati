@@ -35,15 +35,24 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
       - name: Install uv
         uses: astral-sh/setup-uv@2ddd2b9cb38ad8efd50337e8ab201519a34c9f24 # v7.1.1
-      - name: Set up Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
-        with:
-          python-version-file: ".python-version"
-      
+
+      - name: Current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(uv version | awk '{print $2}')
+          PATCH=$("$CURRENT_VERSION" | cut -d '.' -f 2)
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+
+      # If a new minor or major version tag has been pushed then don't
+      # bump the patch version.
       - name: Bump version
-        id: bump
+        if: steps.current_version.outputs.patch != '0'
         run: |
           uv version --bump patch
+      
+      - name: New version
+        id: new_version
+        run: |
           NEW_VERSION=$(uv version | awk '{print $2}')
           echo "tag=$NEW_VERSION" >> $GITHUB_OUTPUT
 
@@ -51,19 +60,19 @@ jobs:
         run: |
           git config --local user.email "218805929+amati-bot@users.noreply.github.com"
           git config --local user.name "amati[bot]"
-          git commit uv.lock pyproject.toml -m "Bump version to ${{ steps.bump.outputs.tag }}"
+          git commit uv.lock pyproject.toml -m "Bump version to ${{ steps.new_version.outputs.tag }}"
           git push origin
 
       - name: Create and push tag
         run: |
-          git tag ${{ steps.bump.outputs.tag }}
+          git tag ${{ steps.new_version.outputs.tag }}
           git push --tags
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          gh release create ${{ steps.bump.outputs.tag }} \
-            --title "${{ steps.bump.outputs.tag }}" \
+          gh release create ${{ steps.new_version.outputs.tag }} \
+            --title "${{ steps.new_version.outputs.tag }}" \
             --generate-notes \
             --latest
