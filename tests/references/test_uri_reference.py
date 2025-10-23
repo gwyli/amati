@@ -139,6 +139,19 @@ class TestURIReferenceResolveExamples:
         # Network paths are absolute per RFC 3987
         assert resolved == Path("/example.com/path/schema.json")
 
+    def test_pathless_uri_raises_value_error(self) -> None:
+        """File URI without a path component should raise ValueError"""
+        uri_ref: URIReference = URIReference(
+            uri=URI("file://a.com"),
+            source_document=Path("/project/schemas/main.json"),
+            source_model_name="MainModel",
+            source_field="ref_field",
+            target_model=BaseModel,
+        )
+
+        with pytest.raises(ValueError):
+            uri_ref.resolve()
+
 
 class TestURIReferenceResolveProperties:
     """Property-based tests for URIReference.resolve() invariants"""

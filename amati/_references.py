@@ -26,12 +26,13 @@ class URIReference:
             if not self.uri.path:
                 raise ValueError("File URI must have a path component")
 
-            netloc: Path | None = None
-            if self.uri.authority:
-                netloc = Path(self.uri.authority)
-
-            if self.uri.host and not netloc:
-                netloc = Path(self.uri.host)
+            netloc: Path | None = (
+                Path(self.uri.authority)
+                if self.uri.authority
+                else Path(self.uri.host)
+                if self.uri.host
+                else None
+            )
 
             return (
                 (netloc / self.uri.path).resolve()
@@ -53,7 +54,8 @@ class URIReference:
             path: Path = self.source_document.parent / self.uri.lstrip("#/")
             return path.resolve()
 
-        raise ValueError(f"Unknown URI type: {self.uri.type}")
+        # Guard against future changes
+        raise ValueError(f"Unknown URI type: {self.uri.type}")  # pragma: no cover
 
 
 class URIRegistry:
