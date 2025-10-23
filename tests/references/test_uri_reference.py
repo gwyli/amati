@@ -13,25 +13,10 @@ from tests.strategies import (
     absolute_paths,  # Absolute file paths (/absolute/path)
     json_pointers,  # JSON pointers (#/foo/bar)
     network_path_uris,  # Network paths (//host/path)
+    pydantic_models,  # Pydantic BaseModel subclasses
     relative_paths,  # Relative file paths (subdir/file, ../file
     relative_uris,  # Relative path URIs (../path, subdir/file)
 )
-
-
-@st.composite
-def pydantic_models(draw: st.DrawFn) -> type[BaseModel]:
-    """Generate Pydantic BaseModel subclasses for testing"""
-    class_name = draw(
-        st.text(
-            alphabet=st.characters(whitelist_categories=("Lu",)),
-            min_size=1,
-            max_size=10,
-        )
-    )
-
-    # Dynamically create a Pydantic model
-    model: type = type(class_name, (BaseModel,), {"__module__": "__main__"})
-    return model
 
 
 class TestURIReferenceResolveExamples:

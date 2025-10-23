@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 from abnf.parser import ParseError
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
+from pydantic import BaseModel
 
 from amati.fields import URI
 from amati.grammars import rfc6901
@@ -122,3 +123,19 @@ def file_strategy() -> st.SearchStrategy:
     Generate both relative and absolute file system paths
     """
     return st.one_of(relative_paths(), absolute_paths())
+
+
+@st.composite
+def pydantic_models(draw: st.DrawFn) -> type[BaseModel]:
+    """Generate Pydantic BaseModel subclasses for testing"""
+    class_name = draw(
+        st.text(
+            alphabet=st.characters(whitelist_categories=("Lu",)),
+            min_size=1,
+            max_size=10,
+        )
+    )
+
+    # Dynamically create a Pydantic model
+    model: type = type(class_name, (BaseModel,), {"__module__": "__main__"})
+    return model
