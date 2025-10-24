@@ -17,3 +17,8 @@ repos:
   hooks:
     - id: shellcheck
       args: [-x]
+repos:
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.406
+    hooks:
+    - id: pyright
