@@ -24,15 +24,15 @@ type JSONObject = dict[str, "JSONValue"]
 type JSONValue = JSONPrimitive | JSONArray | JSONObject
 
 
-def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[JSONObject] | None]:
+def _determine_version(data: JSONObject) -> str:
     """
-    Returns the correct model for the passed spec
+    Determines the OpenAPI specification version from the provided data.
 
     Args:
         data: A dictionary representing an OpenAPI specification
 
     Returns:
-        A pydantic model representing the API specification
+        The OpenAPI specification version as a string
     """
 
     version: JSONValue = data.get("openapi")
@@ -42,6 +42,27 @@ def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[JSONObject] | Non
 
     if not version:
         raise TypeError("An OpenAPI Specfication must contain a version.")
+
+    return version
+
+
+def dispatch(
+    data: JSONObject, version: str | None = None, obj: str = "OpenAPIObject"
+) -> tuple[BaseModel | None, list[JSONObject] | None]:
+    """
+    Returns the correct model for the passed spec
+
+    Args:
+        data: A dictionary representing an OpenAPI specification
+        version: An optional Open API version string to override automatic detection.
+            The most common reason to provide the version is when validating references
+            outside of the context of a full specification document.
+
+    Returns:
+        A pydantic model representing the API specification
+    """
+
+    version_: str = version or _determine_version(data)
 
     version_map: dict[str, str] = {
         "3.1.1": "311",
@@ -53,12 +74,13 @@ def dispatch(data: JSONObject) -> tuple[BaseModel | None, list[JSONObject] | Non
         "3.0.0": "304",
     }
 
-    module = importlib.import_module(f"amati.validators.oas{version_map[version]}")
+    module_name: str = f"amati.validators.oas{version_map[version_]}"
 
+    module = importlib.import_module(module_name)
     resolve_forward_references(module)
 
     try:
-        model = module.OpenAPIObject(**data)
+        model = getattr(module, obj)(**data)
     except ValidationError as e:
         return None, json.loads(e.json())
 
