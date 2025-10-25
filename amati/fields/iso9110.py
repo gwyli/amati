@@ -8,7 +8,8 @@ and a class for scheme validation.
 
 from typing import cast
 
-from amati import AmatiValueError, get
+from amati import get
+from amati.exceptions import AmatiValueError
 from amati.fields import Str as _Str
 
 reference_uri = (
