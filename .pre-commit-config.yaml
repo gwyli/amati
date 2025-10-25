@@ -22,3 +22,4 @@ repos:
     rev: v1.1.407
     hooks:
     - id: pyright
+      args: [--ignoreexternal]
