@@ -4,7 +4,7 @@ Tests amati/validators/generic.py
 
 from typing import Any, ClassVar
 
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from amati._logging import Logger
@@ -29,9 +29,7 @@ class ModelExtraPattern(GenericObject):
 
 
 @given(
-    st.dictionaries(keys=st.text(), values=st.text(), min_size=1).filter(
-        lambda x: x != {}
-    ),
+    st.dictionaries(keys=st.text(), values=st.text(), min_size=1),
     st.data(),
 )
 def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObject):
@@ -45,9 +43,7 @@ def test_invalid_generic_object(data: dict[str, str], data_strategy: st.DataObje
         assert Logger.logs[0]["type"] == "value_error"
 
 
-@given(
-    st.dictionaries(keys=st.just("value"), values=st.text()).filter(lambda x: x != {})
-)
+@given(st.dictionaries(keys=st.just("value"), values=st.text(), min_size=1))
 def test_valid_generic_object(data: dict[str, str]):
     with Logger.context():
         Model(**data)
@@ -55,10 +51,12 @@ def test_valid_generic_object(data: dict[str, str]):
 
 
 @given(
-    st.dictionaries(keys=st.text(), values=st.text()).filter(lambda x: x != {}),
+    st.dictionaries(keys=st.text(), values=st.text(), min_size=1),
     st.data(),
 )
 def test_allow_extra_fields(data: dict[str, str], data_strategy: st.DataObject):
+    assume("" not in data)
+
     if "value" not in data:
         data["value"] = data_strategy.draw(st.text())
 

@@ -13,7 +13,7 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, ConfigDict, PrivateAttr
+from pydantic import BaseModel, ConfigDict, PrivateAttr, ValidationInfo, model_validator
 from pydantic_core._pydantic_core import PydanticUndefined
 
 from amati._logging import Logger
@@ -36,34 +36,40 @@ class GenericObject(URICollectorMixin, BaseModel):
     _reference_uri: ClassVar[str] = PrivateAttr()
     _extra_field_pattern: re.Pattern[str] | None = PrivateAttr()
 
-    def __init__(self, **data: Any) -> None:
-        """Initialize the model and validate extra fields.
-
-        Logs any fields that are not recognized as valid model fields or aliases
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_extra_fields(cls, data: Any, info: ValidationInfo) -> Any:
+        """Logs any fields that are not recognized as valid model fields or aliases
         when extra fields are not allowed by the model configuration.
 
         Args:
-            **data: Arbitrary keyword arguments representing model data.
+            data: dict representing model data.
         """
-        super().__init__(**data)
-
-        if self.model_config.get("extra") == "allow":
-            return
+        if cls.model_config.get("extra") == "allow":
+            return data
 
         # If extra fields aren't allowed log those that aren't going to be added
         # to the model.
+
+        aliases = [field_info.alias for _, field_info in cls.model_fields.items()]
         for field in data:
-            if field not in self.model_dump() and field not in self.get_field_aliases():
-                message = f"{field} is not a valid field for {self.__repr_name__()}."
+            if field not in cls.model_fields and field not in aliases:
+                message = f"{field} is not a valid field for {cls.__name__}."
                 Logger.log(
                     {
                         "msg": message,
                         "type": "value_error",
-                        "loc": (self.__repr_name__(),),
-                        "input": field,
-                        "url": self._reference_uri,
+                        "loc": (
+                            info.context.get("current_document")
+                            if info.context
+                            else cls.__name__,
+                        ),
+                        "input": {field: data[field]},
+                        "url": cls._reference_uri,
                     }
                 )
+
+        return data
 
     def model_post_init(self, __context: Any) -> None:
         """Validate extra fields against the configured pattern after initialization.
@@ -149,6 +155,7 @@ def allow_extra_fields(pattern: str | None = None) -> Callable[[type[T]], type[T
             "model_config": ConfigDict(extra="allow"),
             "_extra_field_pattern": pattern,
         }
+
         # Create a new class with the updated configuration
         return cast(type[T], type(cls.__name__, (cls,), namespace))
 
