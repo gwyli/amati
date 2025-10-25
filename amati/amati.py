@@ -6,6 +6,7 @@ import importlib
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader
 from loguru import logger
@@ -13,9 +14,11 @@ from pydantic import BaseModel, ValidationError
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from amati._data.refresh import refresh
-from amati._error_handler import handle_errors
+from amati._error_handler import ErrorHandler
 from amati._logging import Log, Logger
+from amati._references import URIRegistry
 from amati._resolve_forward_references import resolve_forward_references
+from amati.fields import URIType
 from amati.file_handler import load_file
 
 type JSONPrimitive = str | int | float | bool | None
@@ -47,7 +50,10 @@ def _determine_version(data: JSONObject) -> str:
 
 
 def dispatch(
-    data: JSONObject, version: str | None = None, obj: str = "OpenAPIObject"
+    data: JSONObject,
+    context: dict[str, Any],
+    version: str,
+    obj: str = "OpenAPIObject",
 ) -> tuple[BaseModel | None, list[JSONObject] | None]:
     """
     Returns the correct model for the passed spec
@@ -62,8 +68,6 @@ def dispatch(
         A pydantic model representing the API specification
     """
 
-    version_: str = version or _determine_version(data)
-
     version_map: dict[str, str] = {
         "3.1.1": "311",
         "3.1.0": "311",
@@ -74,17 +78,89 @@ def dispatch(
         "3.0.0": "304",
     }
 
-    module_name: str = f"amati.validators.oas{version_map[version_]}"
+    module_name: str = f"amati.validators.oas{version_map[version]}"
 
     module = importlib.import_module(module_name)
     resolve_forward_references(module)
 
     try:
-        model = getattr(module, obj)(**data)
+        model = getattr(module, obj).model_validate(data, context=context)
     except ValidationError as e:
         return None, json.loads(e.json())
 
     return model, None
+
+
+def dispatch_all(spec: Path) -> tuple[BaseModel | None, ErrorHandler]:
+    """ """
+
+    registry = URIRegistry.get_instance()
+    registry.reset()
+
+    error_handler = ErrorHandler()
+    result: BaseModel | None = None
+    version: str | None = None
+
+    to_process: list[tuple[Path, str]] = [(spec, "OpenAPIObject")]
+
+    while to_process:
+        doc_path, obj = to_process.pop(0)
+
+        # Skip if already validated (handles circular references)
+        if registry.is_processed(doc_path):
+            continue
+
+        logger.info(f"Validating: {doc_path}")
+
+        data: JSONObject = load_file(spec)
+
+        # Create validation context with current document path
+        context = {"current_document": str(doc_path)}
+
+        if obj == "OpenAPIObject":
+            version = _determine_version(data)
+        elif version is None:
+            raise ValueError("Version must be set in the OpenAPI object")
+
+        with Logger.context():
+            result, errors = dispatch(data, context, version, obj)
+
+            if errors:
+                error_handler.register_errors(errors)
+
+            error_handler.register_logs(Logger.logs)
+
+        registry.mark_processed(doc_path)
+
+        references = registry.get_all_references()
+
+        # Find references that originated from the document we just validated
+        # and haven't been processed yet
+        for ref in references:
+            if ref.source_document != doc_path:
+                continue
+
+            resolved_path = ref.resolve()
+
+            if registry.is_processed(resolved_path):
+                continue
+
+            if resolved_path.exists() and ref.uri.type != URIType.ABSOLUTE:
+                to_process.append((resolved_path, ref.target_model.__name__))
+            else:
+                # File doesn't exist - record error
+                error_handler.register_log(
+                    Log(
+                        type="missing_reference",
+                        loc=(ref.source_document.name,),
+                        msg=f"Could not locate {ref.uri.type.value} URI",
+                        input=ref.uri,
+                    )
+                )
+
+        references = registry.get_all_references()
+
+    return result, error_handler
 
 
 def check(original: JSONObject, validated: BaseModel) -> bool:
@@ -135,15 +211,10 @@ def run(
 
     data = load_file(spec)
 
-    logs: list[Log] = []
+    result, handled_errors = dispatch_all(spec)
+    handled_errors.deduplicate()
 
-    with Logger.context():
-        result, errors = dispatch(data)
-        logs.extend(Logger.logs)
-
-    if errors or logs:
-        handled_errors: list[JSONObject] = handle_errors(errors, logs)
-
+    if handled_errors.errors:
         file_name = Path(Path(file_path).parts[-1])
         error_file = file_name.with_suffix(file_name.suffix + ".errors")
         error_path = spec.parent
@@ -159,7 +230,7 @@ def run(
         )
 
         with json_error_file.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(handled_errors))
+            f.write(json.dumps(handled_errors.errors))
 
         if html_report:
             env = Environment(
@@ -169,7 +240,7 @@ def run(
             template = env.get_template("TEMPLATE.html")
 
             # Render the template with your data
-            html_output = template.render(errors=handled_errors)
+            html_output = template.render(errors=handled_errors.errors)
 
             # Save the output to a file
 
