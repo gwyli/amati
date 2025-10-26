@@ -1073,7 +1073,8 @@
     "name": "BSD 4-Clause \"Original\" or \"Old\" License",
     "licenseId": "BSD-4-Clause",
     "seeAlso": [
-      "http://directory.fsf.org/wiki/License:BSD_4Clause"
+      "http://directory.fsf.org/wiki/License:BSD_4Clause",
+      "https://github.com/jsommers/pytricia/blob/master/patricia.c#L33-L67"
     ],
     "isOsiApproved": false,
     "isFsfLibre": true
@@ -4119,6 +4120,18 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/hyphen-bulgarian.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/hyphen-bulgarian.json",
+    "name": "hyphen-bulgarian License",
+    "licenseId": "hyphen-bulgarian",
+    "seeAlso": [
+      "https://ctan.math.illinois.edu/systems/texlive/tlnet/archive/hyphen-bulgarian.tar.xz",
+      "https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/959538769bfad6a73bdf34275d46520ec0f9cbb5/COPYING#L176-185"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/IBM-pibs.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/IBM-pibs.json",
@@ -5662,6 +5675,17 @@
     "seeAlso": [
       "https://github.com/usnistgov/jsip/blob/59700e6926cbe96c5cdae897d9a7d2656b42abe3/LICENSE",
       "https://github.com/usnistgov/fipy/blob/86aaa5c2ba2c6f1be19593c5986071cf6568cc34/LICENSE.rst"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/NIST-PD-TNT.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/NIST-PD-TNT.json",
+    "name": "NIST    Public Domain Notice TNT variant",
+    "licenseId": "NIST-PD-TNT",
+    "seeAlso": [
+      "https://math.nist.gov/tnt/download.html"
     ],
     "isOsiApproved": false
   },
