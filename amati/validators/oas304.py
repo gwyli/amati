@@ -13,15 +13,17 @@ Note that per https://spec.openapis.org/oas/v3.0.4.html#relative-references-in-a
 """
 
 import re
-from typing import Any, ClassVar, Self
+from typing import Annotated, Any, ClassVar, Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
 from jsonschema.protocols import Validator as JSONSchemaValidator
 from jsonschema.validators import validator_for  # type: ignore
 from pydantic import (
     ConfigDict,
+    Discriminator,
     Field,
     RootModel,
+    Tag,
     ValidationError,
     field_validator,
     model_validator,
@@ -42,6 +44,7 @@ from amati.fields import (
 from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI, RuntimeExpression
+from amati.validators._discriminators import reference_object_disciminator
 from amati.validators.generic import GenericObject, allow_extra_fields
 
 type JSONPrimitive = str | int | float | bool | None
@@ -55,6 +58,58 @@ TITLE = "OpenAPI Specification v3.0.4"
 # Convenience naming to ensure that it's clear what's happening.
 # https://spec.openapis.org/oas/v3.0.4.html#specification-extensions
 specification_extensions = allow_extra_fields
+
+
+CallbackReferenceType = Annotated[
+    Annotated["CallbackObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+ExampleReferenceType = Annotated[
+    Annotated["ExampleObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+HeaderReferenceType = Annotated[
+    Annotated["HeaderObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+LinkReferenceType = Annotated[
+    Annotated["LinkObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+
+ParameterReferenceType = Annotated[
+    Annotated["ParameterObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+ResponseReferenceType = Annotated[
+    Annotated["ResponseObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+RequestBodyReferenceType = Annotated[
+    Annotated["RequestBodyObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+SchemaReferenceType = Annotated[
+    Annotated["SchemaObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+SecuritySchemeReferenceType = Annotated[
+    Annotated["SecuritySchemeObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
 
 
 @specification_extensions("x-")
@@ -258,10 +313,10 @@ class OperationObject(GenericObject):
     description: str | CommonMark | None = None
     externalDocs: ExternalDocumentationObject | None = None
     operationId: str | None = None
-    parameters: list[ParameterObject | ReferenceObject] | None = None
-    requestBody: RequestBodyObject | ReferenceObject | None = None
+    parameters: list[ParameterReferenceType] | None = None
+    requestBody: RequestBodyReferenceType | None = None
     responses: ResponsesObject
-    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
+    callbacks: dict[str, CallbackReferenceType] | None = None
     deprecated: bool | None = False
     security: list[SecurityRequirementObject] | None = None
     servers: list[ServerObject] | None = None
@@ -295,9 +350,9 @@ class ParameterObject(GenericObject):
     style: str | None = None
     explode: bool | None = None
     allowReserved: bool | None = None
-    schema_: SchemaObject | ReferenceObject | None = Field(alias="schema")
+    schema_: SchemaReferenceType | None = Field(alias="schema")
     example: Any | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
     content: dict[str, MediaTypeObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#parameter-object"
@@ -356,10 +411,10 @@ class MediaTypeObject(GenericObject):
     Validates the OpenAPI Specification media type object - §4.8.14
     """
 
-    schema_: SchemaObject | ReferenceObject | None = Field(alias="schema", default=None)
+    schema_: SchemaReferenceType | None = Field(alias="schema", default=None)
     # FIXME: Define example
     example: Any | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
     encoding: EncodingObject | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#media-type-object"
@@ -373,7 +428,7 @@ class EncodingObject(GenericObject):
     """
 
     contentType: str | None = None
-    headers: dict[str, HeaderObject | ReferenceObject] | None = None
+    headers: dict[str, HeaderReferenceType] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#encoding object-object"
     )
@@ -394,7 +449,7 @@ class EncodingObject(GenericObject):
         return value
 
 
-type _ResponsesObjectReturnType = dict[str, "ReferenceObject | ResponseObject"]
+type _ResponsesObjectReturnType = dict[str, ResponseReferenceType]
 
 
 @specification_extensions(".*")
@@ -407,7 +462,7 @@ class ResponsesObject(GenericObject):
         extra="allow",
     )
 
-    default: ResponseObject | ReferenceObject | None = None
+    default: ResponseReferenceType | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#responses-object"
     )
@@ -484,9 +539,9 @@ class ResponseObject(GenericObject):
     """
 
     description: str | CommonMark
-    headers: dict[str, HeaderObject | ReferenceObject] | None = None
+    headers: dict[str, HeaderReferenceType] | None = None
     content: dict[str, MediaTypeObject] | None = None
-    links: dict[str, LinkObject | ReferenceObject] | None = None
+    links: dict[str, LinkReferenceType] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#response-object"
     )
@@ -603,9 +658,9 @@ class HeaderObject(GenericObject):
     # Schema fields
     style: str | None = Field(default="simple")
     explode: bool | None = Field(default=False)
-    schema_: SchemaObject | ReferenceObject | None = Field(alias="schema", default=None)
+    schema_: SchemaReferenceType | None = Field(alias="schema", default=None)
     example: JSONValue | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
 
     # Content fields
     content: dict[str, MediaTypeObject] | None = None
@@ -904,7 +959,7 @@ class PathItemObject(GenericObject):
     patch: OperationObject | None = None
     trace: OperationObject | None = None
     servers: list[ServerObject] | None = None
-    parameters: list[ParameterObject | ReferenceObject] | None = None
+    parameters: list[ParameterReferenceType] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#path-item-object"
     )
@@ -917,14 +972,14 @@ class ComponentsObject(GenericObject):
     """
 
     schemas: dict[str, SchemaObject] | None = None
-    responses: dict[str, ResponseObject | ReferenceObject] | None = None
-    parameters: dict[str, ParameterObject | ReferenceObject] | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
-    requestBodies: dict[str, RequestBodyObject | ReferenceObject] | None = None
-    headers: dict[str, HeaderObject | ReferenceObject] | None = None
-    securitySchemes: dict[str, SecuritySchemeObject | ReferenceObject] | None = None
-    links: dict[str, LinkObject | ReferenceObject] | None = None
-    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
+    responses: dict[str, ResponseReferenceType] | None = None
+    parameters: dict[str, ParameterReferenceType] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
+    requestBodies: dict[str, RequestBodyReferenceType] | None = None
+    headers: dict[str, HeaderReferenceType] | None = None
+    securitySchemes: dict[str, SecuritySchemeReferenceType] | None = None
+    links: dict[str, LinkReferenceType] | None = None
+    callbacks: dict[str, CallbackReferenceType] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.0.4.html#components-object"
     )

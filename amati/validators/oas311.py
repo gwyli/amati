@@ -13,15 +13,17 @@ Note that per https://spec.openapis.org/oas/v3.1.1.html#relative-references-in-a
 """
 
 import re
-from typing import Any, ClassVar, Self
+from typing import Annotated, Any, ClassVar, Self
 
 from jsonschema.exceptions import ValidationError as JSONVSchemeValidationError
 from jsonschema.protocols import Validator as JSONSchemaValidator
 from jsonschema.validators import validator_for  # type: ignore
 from pydantic import (
     ConfigDict,
+    Discriminator,
     Field,
     RootModel,
+    Tag,
     model_validator,
 )
 
@@ -37,6 +39,7 @@ from amati.fields.commonmark import CommonMark
 from amati.fields.json import JSON
 from amati.fields.oas import OpenAPI
 from amati.fields.spdx_licences import VALID_LICENCES
+from amati.validators._discriminators import reference_object_disciminator
 from amati.validators.generic import GenericObject, allow_extra_fields
 from amati.validators.oas304 import (
     CallbackObject,
@@ -62,6 +65,58 @@ TITLE = "OpenAPI Specification v3.1.1"
 # Convenience naming to ensure that it's clear what's happening.
 # https://spec.openapis.org/oas/v3.1.1.html#specification-extensions
 specification_extensions = allow_extra_fields
+
+
+CallbackReferenceType = Annotated[
+    Annotated["CallbackObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+ExampleReferenceType = Annotated[
+    Annotated["ExampleObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+HeaderReferenceType = Annotated[
+    Annotated["HeaderObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+LinkReferenceType = Annotated[
+    Annotated["LinkObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+
+ParameterReferenceType = Annotated[
+    Annotated["ParameterObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+ResponseReferenceType = Annotated[
+    Annotated["ResponseObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+RequestBodyReferenceType = Annotated[
+    Annotated["RequestBodyObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+SchemaReferenceType = Annotated[
+    Annotated["SchemaObject", Tag("other")] | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
+
+SecuritySchemeReferenceType = Annotated[
+    Annotated["SecuritySchemeObject", Tag("other")]
+    | Annotated["ReferenceObject", Tag("ref")],
+    Discriminator(reference_object_disciminator),
+]
 
 
 @specification_extensions("x-")
@@ -235,10 +290,10 @@ class OperationObject(GenericObject):
     description: str | CommonMark | None = None
     externalDocs: ExternalDocumentationObject | None = None
     operationId: str | None = None
-    parameters: list[ParameterObject | ReferenceObject] | None = None
-    requestBody: RequestBodyObject | ReferenceObject | None = None
+    parameters: list[ParameterReferenceType] | None = None
+    requestBody: RequestBodyReferenceType | None = None
     responses: ResponsesObject | None = None
-    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
+    callbacks: dict[str, CallbackReferenceType] | None = None
     deprecated: bool | None = False
     security: list[SecurityRequirementObject] | None = None
     servers: list[ServerObject] | None = None
@@ -274,7 +329,7 @@ class ParameterObject(GenericObject):
     allowReserved: bool | None = None
     schema_: SchemaObject | None = Field(alias="schema")
     example: Any | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
     content: dict[str, MediaTypeObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#parameter-object"
@@ -322,7 +377,7 @@ class MediaTypeObject(GenericObject):
     schema_: SchemaObject | None = Field(alias="schema", default=None)
     # FIXME: Define example
     example: Any | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
     encoding: EncodingObject | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#media-type-object"
@@ -443,15 +498,15 @@ class ComponentsObject(GenericObject):
     Validates the OpenAPI Specification components object - §4.8.7
     """
 
-    schemas: dict[str, SchemaObject | ReferenceObject] | None = None
-    responses: dict[str, ResponseObject | ReferenceObject] | None = None
-    parameters: dict[str, ParameterObject | ReferenceObject] | None = None
-    examples: dict[str, ExampleObject | ReferenceObject] | None = None
-    requestBodies: dict[str, RequestBodyObject | ReferenceObject] | None = None
-    headers: dict[str, HeaderObject | ReferenceObject] | None = None
-    securitySchemes: dict[str, SecuritySchemeObject | ReferenceObject] | None = None
-    links: dict[str, LinkObject | ReferenceObject] | None = None
-    callbacks: dict[str, CallbackObject | ReferenceObject] | None = None
+    schemas: dict[str, SchemaReferenceType] | None = None
+    responses: dict[str, ResponseReferenceType] | None = None
+    parameters: dict[str, ParameterReferenceType] | None = None
+    examples: dict[str, ExampleReferenceType] | None = None
+    requestBodies: dict[str, RequestBodyReferenceType] | None = None
+    headers: dict[str, HeaderReferenceType] | None = None
+    securitySchemes: dict[str, SecuritySchemeReferenceType] | None = None
+    links: dict[str, LinkReferenceType] | None = None
+    callbacks: dict[str, CallbackReferenceType] | None = None
     pathItems: dict[str, PathItemObject] | None = None
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#components-object"
