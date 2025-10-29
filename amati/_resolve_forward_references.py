@@ -5,6 +5,7 @@ without all its dependencies. This module rebuilds all models in a module.
 
 import inspect
 import sys
+import typing
 from collections import defaultdict
 from types import ModuleType
 
@@ -26,15 +27,46 @@ class ModelDependencyResolver:
         """Register a Pydantic model for dependency analysis."""
         self.models[model.__name__] = model
 
+    @staticmethod
+    def extract_all_references(annotation: typing.Any, refs: set[str] | None = None):
+        """
+        Recursively extract all ForwardRef and type references from an annotation.
+
+        Args:
+            annotation: A type annotation (potentially deeply nested)
+            refs: Set to accumulate references (used internally for recursion)
+
+        Returns:
+            Set of either ForwardRef objects or actual type/class objects
+        """
+        if refs is None:
+            refs = set()
+
+        # Direct ForwardRef
+        if isinstance(annotation, typing.ForwardRef):
+            refs.add(annotation.__forward_arg__)
+            return refs
+
+        # Direct class reference
+        if isinstance(annotation, type):
+            refs.add(annotation.__name__)
+            return refs
+
+        for origin in typing.get_args(annotation):
+            ModelDependencyResolver.extract_all_references(origin, refs)
+
+        return refs
+
     def _analyze_model_dependencies(self, model: type[BaseModel]) -> set[str]:
         """Analyze a single model's dependencies from its annotations."""
         dependencies: set[str] = set()
 
         for field_info in model.model_fields.values():
-            # Use a magic value that's an invalid class name for getattr so if
-            # there is no __name__ attribute it won't appear in self.models
-            if (name := getattr(field_info.annotation, "__name__", "!")) in self.models:
-                dependencies.update(name)
+            references = ModelDependencyResolver.extract_all_references(
+                field_info.annotation
+            )
+
+            dependencies.update(ref for ref in references if ref in self.models)
 
         return dependencies
 
