@@ -281,28 +281,6 @@ class ServerVariableObject(GenericObject):
         return self
 
 
-@specification_extensions("x-")
-class OperationObject(GenericObject):
-    """Validates the OpenAPI Specification operation object - §4.8.10"""
-
-    tags: list[str] | None = None
-    summary: str | None = None
-    description: str | CommonMark | None = None
-    externalDocs: ExternalDocumentationObject | None = None
-    operationId: str | None = None
-    parameters: list[ParameterReferenceType] | None = None
-    requestBody: RequestBodyReferenceType | None = None
-    responses: ResponsesObject | None = None
-    callbacks: dict[str, CallbackReferenceType] | None = None
-    deprecated: bool | None = False
-    security: list[SecurityRequirementObject] | None = None
-    servers: list[ServerObject] | None = None
-
-    _reference_uri: ClassVar[str] = (
-        "https://spec.openapis.org/oas/v3.1.1.html#operation-object"
-    )
-
-
 PARAMETER_STYLES: set[str] = {
     "matrix",
     "label",
@@ -327,10 +305,10 @@ class ParameterObject(GenericObject):
     style: str | None = None
     explode: bool | None = None
     allowReserved: bool | None = None
-    schema_: SchemaObject | None = Field(alias="schema")
+    schema_: "SchemaObject | None" = Field(alias="schema")  # noqa: UP037
     example: Any | None = None
     examples: dict[str, ExampleReferenceType] | None = None
-    content: dict[str, MediaTypeObject] | None = None
+    content: dict[str, "MediaTypeObject"] | None = None  # noqa: UP037
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/v3.1.1.html#parameter-object"
     )
@@ -374,7 +352,7 @@ class MediaTypeObject(GenericObject):
     Validates the OpenAPI Specification media type object - §4.8.14
     """
 
-    schema_: SchemaObject | None = Field(alias="schema", default=None)
+    schema_: "SchemaObject | None" = Field(alias="schema", default=None)  # noqa: UP037
     # FIXME: Define example
     example: Any | None = None
     examples: dict[str, ExampleReferenceType] | None = None
@@ -489,6 +467,28 @@ class SecurityRequirementObject(RootModel[list[_Requirement] | _Requirement]):
     # value must be a list
     _reference_uri: ClassVar[str] = (
         "https://spec.openapis.org/oas/3.1.1.html#security-requirement-object"
+    )
+
+
+@specification_extensions("x-")
+class OperationObject(GenericObject):
+    """Validates the OpenAPI Specification operation object - §4.8.10"""
+
+    tags: list[str] | None = None
+    summary: str | None = None
+    description: str | CommonMark | None = None
+    externalDocs: ExternalDocumentationObject | None = None
+    operationId: str | None = None
+    parameters: list[ParameterReferenceType] | None = None
+    requestBody: RequestBodyReferenceType | None = None
+    responses: ResponsesObject | None = None
+    callbacks: dict[str, CallbackReferenceType] | None = None
+    deprecated: bool | None = False
+    security: list[SecurityRequirementObject] | None = None
+    servers: list[ServerObject] | None = None
+
+    _reference_uri: ClassVar[str] = (
+        "https://spec.openapis.org/oas/v3.1.1.html#operation-object"
     )
 
 
