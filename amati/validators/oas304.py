@@ -25,6 +25,7 @@ from pydantic import (
     RootModel,
     Tag,
     ValidationError,
+    field_serializer,
     field_validator,
     model_validator,
 )
@@ -817,6 +818,15 @@ class OAuthFlowObject(GenericObject):
         conditions={"type": "password"}, consequences={"tokenUrl": mv.UNKNOWN}
     )
 
+    @field_serializer("type", when_used="json")
+    def serialize_type(self, type_value: str) -> str | None:  # noqa: ARG002
+        """
+        Serializes the type field for JSON output only.
+        The Python output is used inside model_validators, so
+        a standard Field(exclude=True) cannot be used.
+        """
+        return None
+
 
 @specification_extensions("-x")
 class OAuthFlowsObject(GenericObject):
@@ -839,16 +849,14 @@ class OAuthFlowsObject(GenericObject):
     @classmethod
     def _push_down_type(cls, data: Any) -> Any:
         """
-        Adds the type of OAuth2 flow, e.g. implicit, password to the child
+        Adds the type of OAuth2 flow, e.g. implicit, password, to the child
         OAuthFlowObject so that additional validation can be done on this object.
         """
 
-        for k, v in data.items():
-            if isinstance(v, OAuthFlowObject):
+        for field, value in data.items():
+            if isinstance(value, OAuthFlowObject):
                 raise NotImplementedError("Must pass a dict")
-
-            if v:
-                data[k]["type"] = k
+            data[field]["type"] = field
 
         return data
 
