@@ -23,10 +23,11 @@ from pydantic import (
     Discriminator,
     Field,
     RootModel,
+    SerializerFunctionWrapHandler,
     Tag,
     ValidationError,
-    field_serializer,
     field_validator,
+    model_serializer,
     model_validator,
 )
 
@@ -818,14 +819,19 @@ class OAuthFlowObject(GenericObject):
         conditions={"type": "password"}, consequences={"tokenUrl": mv.UNKNOWN}
     )
 
-    @field_serializer("type", when_used="json")
-    def serialize_type(self, type_value: str) -> str | None:  # noqa: ARG002
+    @model_serializer(mode="wrap", when_used="json")
+    def serialize_model(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, object]:
         """
         Serializes the type field for JSON output only.
         The Python output is used inside model_validators, so
         a standard Field(exclude=True) cannot be used.
         """
-        return None
+
+        serialized = handler(self)
+        serialized.pop("type", None)
+        return serialized
 
 
 @specification_extensions("-x")
