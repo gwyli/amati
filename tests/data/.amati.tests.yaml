@@ -24,10 +24,10 @@ repos:
   github:
     uri: https://github.com/github/rest-api-description.git
     revision: 23d16a0c0808c8241b1076d63e8d3f2e75cb6632
-    error_file: tests/data/next-api.github.com.yaml.errors.json
+    error_file: tests/data/next-api.github.com.json.errors.json
     licence: MIT
     licence_permalink: https://github.com/github/rest-api-description/blob/23d16a0c0808c8241b1076d63e8d3f2e75cb6632/LICENSE.md
-    spec: descriptions-next/api.github.com/api.github.com.yaml
+    spec: descriptions-next/api.github.com/api.github.com.json
   redocly:
     uri: https://github.com/Redocly/museum-openapi-example.git
     revision: 2770b2b2e59832d245c7b0eb0badf6568d7efb53
