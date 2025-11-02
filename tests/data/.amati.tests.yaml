@@ -1,27 +1,31 @@
 directory: .amati/test-specs
 repos:
   digitalocean:
+    local: digitalocean
     uri: https://github.com/digitalocean/openapi.git
     revision: 765bf60b6d35ce39368c8f2e5186ea6e2810d6e1
     error_file: tests/data/DigitalOcean-public.v2.errors.json
     licence: Apache 2.0
     licence_permalink: https://github.com/digitalocean/openapi/blob/765bf60b6d35ce39368c8f2e5186ea6e2810d6e1/LICENSE
     spec: specification/DigitalOcean-public.v2.yaml
-  github:
+  githubv-v3.0-json:
+    local: github
     uri: https://github.com/github/rest-api-description.git
     revision: 23d16a0c0808c8241b1076d63e8d3f2e75cb6632
     error_file: tests/data/api.github.com.json.errors.json
     licence: MIT
     licence_permalink: https://github.com/github/rest-api-description/blob/23d16a0c0808c8241b1076d63e8d3f2e75cb6632/LICENSE.md
     spec: descriptions/api.github.com/api.github.com.json
-  github:
+  github-v3.0-yaml:
+    local: github
     uri: https://github.com/github/rest-api-description.git
     revision: 23d16a0c0808c8241b1076d63e8d3f2e75cb6632
     error_file: tests/data/api.github.com.yaml.errors.json
     licence: MIT
     licence_permalink: https://github.com/github/rest-api-description/blob/23d16a0c0808c8241b1076d63e8d3f2e75cb6632/LICENSE.md
     spec: descriptions/api.github.com/api.github.com.yaml
-  github:
+  github-v3.1-json:
+    local: github
     uri: https://github.com/github/rest-api-description.git
     revision: 23d16a0c0808c8241b1076d63e8d3f2e75cb6632
     error_file: tests/data/next-api.github.com.json.errors.json
@@ -29,6 +33,7 @@ repos:
     licence_permalink: https://github.com/github/rest-api-description/blob/23d16a0c0808c8241b1076d63e8d3f2e75cb6632/LICENSE.md
     spec: descriptions-next/api.github.com/api.github.com.json
   redocly:
+    local: redocly
     uri: https://github.com/Redocly/museum-openapi-example.git
     revision: 2770b2b2e59832d245c7b0eb0badf6568d7efb53
     error_file:
@@ -36,48 +41,55 @@ repos:
     licence_permalink: https://github.com/Redocly/museum-openapi-example/blob/2770b2b2e59832d245c7b0eb0badf6568d7efb53/LICENSE
     spec: openapi.yaml
   swagger:
+    local: swagger
     uri: https://github.com/swagger-api/swagger-petstore.git
     revision: 0f0761b71b849c96b0425ea3796b8fb3aaa129e6
     error_file: 
     licence: Apache 2
     licence_permalink: https://github.com/swagger-api/swagger-petstore/blob/0f0761b71b849c96b0425ea3796b8fb3aaa129e6/LICENSE
     spec: src/main/resources/openapi.yaml
-  openbanking:
+  openbanking-account-info:
+    local: openbanking
     uri: https://github.com/OpenBankingUK/read-write-api-specs.git
     revision: 2ddb7154032c4a7015c8e00e9b957574a814164f
     error_file:
     licence: MIT
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/account-info-openapi.json
-  openbanking:
+  openbanking-confirmation-funds:
+    local: openbanking
     uri: https://github.com/OpenBankingUK/read-write-api-specs.git
     revision: 2ddb7154032c4a7015c8e00e9b957574a814164f
     error_file:
     licence: MIT
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/confirmation-funds-openapi.json
-  openbanking:
+  openbanking-event-notifications:
+    local: openbanking
     uri: https://github.com/OpenBankingUK/read-write-api-specs.git
     revision: 2ddb7154032c4a7015c8e00e9b957574a814164f
     error_file:
     licence: MIT
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/event-notifications-openapi.json
-  openbanking:
+  openbanking-events:
+    local: openbanking
     uri: https://github.com/OpenBankingUK/read-write-api-specs.git
     revision: 2ddb7154032c4a7015c8e00e9b957574a814164f
     error_file:
     licence: MIT
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/events-openapi.json
-  openbanking:
+  openbanking-payment:
+    local: openbanking
     uri: https://github.com/OpenBankingUK/read-write-api-specs.git
     revision: 2ddb7154032c4a7015c8e00e9b957574a814164f
     error_file:
     licence: MIT
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/payment-initiation-openapi.json
-  openbanking:
+  openbanking-vrp:
+    local: openbanking
     uri: https://github.com/OpenBankingUK/read-write-api-specs.git
     revision: 2ddb7154032c4a7015c8e00e9b957574a814164f
     error_file:
@@ -85,6 +97,7 @@ repos:
     licence:permalink: https://www.openbanking.org.uk/open-licence/
     spec: dist/openapi/vrp-openapi.json
   discourse:
+    local: discourse
     uri: https://github.com/discourse/discourse_api_docs.git
     revision: 11ac69848bdfa50b39ca037361feef87701efe57
     error_file: tests/data/discourse.yml.errors.json
@@ -92,6 +105,7 @@ repos:
     licence_permalink: https://github.com/discourse/discourse_api_docs/blob/11ac69848bdfa50b39ca037361feef87701efe57/LICENSE.txt
     spec: openapi.yml
   elasticsearch:
+    local: elasticsearch
     uri: https://github.com/elastic/elasticsearch-specification.git
     revision: 88ed8664f1c6662d0a277627092255bde3259c5c
     licence: Apache 2.0
