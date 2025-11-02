@@ -62,28 +62,30 @@ def test_specs():
 
     directory = Path(content["directory"])
 
-    for name, repo in content["repos"].items():
-        file: Path = Path(directory) / name / repo["spec"]
+    for _, repo in content["repos"].items():
+        file: Path = Path(directory) / repo["local"] / repo["spec"]
+
         files = determine_file_names(file)
 
         consistency_check = run(
             file_path=file, consistency_check=True, local=True, html_report=True
         )
 
-        if errors := repo.get("error_file"):
-            error_file = get_errors(Path(errors))
+        if files["error_json"].exists():
+            error_file = get_errors(Path(repo.get("error_file")))
 
-            with Path(files["error_json"]).open(encoding="utf-8") as f:
+            with files["error_json"].open(encoding="utf-8") as f:
                 json_encoded = json.loads(f.read())
 
             assert json.dumps(json_encoded, sort_keys=True) == json.dumps(
                 error_file, sort_keys=True
-            )
+            ), "The generated errors match the expected errors."
 
             assert files["error_html"].exists()
 
             # Cleanup
             files["error_json"].unlink()
             files["error_html"].unlink()
+
         else:
-            assert consistency_check
+            assert consistency_check, "The parsed spec is the same as the original."
