@@ -172,6 +172,8 @@
   "modem": "Historical",
   "mongodb": "Provisional",
   "moz": "Provisional",
+  "mqtt": "Provisional",
+  "mqtts": "Provisional",
   "ms-access": "Provisional",
   "ms-appinstaller": "Provisional",
   "ms-browser-extension": "Provisional",
