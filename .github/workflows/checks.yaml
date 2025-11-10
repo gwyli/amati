@@ -77,7 +77,7 @@ jobs:
       - name: Coverage comment
         if: steps.check_changes.outputs.relevant == 'true'
         id: coverage_comment
-        uses: py-cov-action/python-coverage-comment-action@ec68fae007b9843ccfc2bf877386378f67f5eb67 # v3
+        uses: py-cov-action/python-coverage-comment-action@6494290850a5098c2836298dad8f11082b4ceaa9 # v3
         with:
           GITHUB_TOKEN: ${{ secrets.BOT_COMMENT_TOKEN }}
         continue-on-error: true
