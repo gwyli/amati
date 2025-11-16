@@ -1238,6 +1238,17 @@
     "isFsfLibre": true
   },
   {
+    "reference": "https://spdx.org/licenses/Buddy.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Buddy.json",
+    "name": "Buddy License",
+    "licenseId": "Buddy",
+    "seeAlso": [
+      "https://sourceforge.net/p/buddy/gitcode/ci/master/tree/README"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/BUSL-1.1.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BUSL-1.1.json",
@@ -5248,6 +5259,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/MIT-STK.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/MIT-STK.json",
+    "name": "MIT-STK License",
+    "licenseId": "MIT-STK",
+    "seeAlso": [
+      "https://github.com/thestk/stk/blob/6aacd357d76250bb7da2b1ddf675651828784bbc/LICENSE"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/MIT-testregex.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/MIT-testregex.json",
@@ -7934,6 +7956,17 @@
     "licenseId": "X11-distribute-modifications-variant",
     "seeAlso": [
       "https://github.com/mirror/ncurses/blob/master/COPYING"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/X11-no-permit-persons.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/X11-no-permit-persons.json",
+    "name": "X11 no permit persons clause",
+    "licenseId": "X11-no-permit-persons",
+    "seeAlso": [
+      "https://gitlab.freedesktop.org/xorg/lib/libxinerama/-/blob/cc22c2f60c3862482562955116d5455263b443dc/COPYING#L44-66"
     ],
     "isOsiApproved": false
   },

@@ -38,6 +38,8 @@
     "AML",
     "andrew-inset",
     "applefile",
+    "asyncapi+json",
+    "asyncapi+yaml",
     "at+jwt",
     "ATF",
     "ATFX",
