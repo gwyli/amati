@@ -5,6 +5,7 @@ without all its dependencies. This module rebuilds all models in a module.
 
 import inspect
 import sys
+import typing
 from collections import defaultdict
 from types import ModuleType
 
@@ -26,20 +27,46 @@ class ModelDependencyResolver:
         """Register a Pydantic model for dependency analysis."""
         self.models[model.__name__] = model
 
-    def register_models(self, models: list[type[BaseModel]]) -> None:
-        """Register multiple Pydantic models."""
-        for model in models:
-            self.register_model(model)
+    @staticmethod
+    def extract_all_references(annotation: typing.Any, refs: set[str] | None = None):
+        """
+        Recursively extract all ForwardRef and type references from an annotation.
+
+        Args:
+            annotation: A type annotation (potentially deeply nested)
+            refs: Set to accumulate references (used internally for recursion)
+
+        Returns:
+            Set of either ForwardRef objects or actual type/class objects
+        """
+        if refs is None:
+            refs = set()
+
+        # Direct ForwardRef
+        if isinstance(annotation, typing.ForwardRef):
+            refs.add(annotation.__forward_arg__)
+            return refs
+
+        # Direct class reference
+        if isinstance(annotation, type):
+            refs.add(annotation.__name__)
+            return refs
+
+        for origin in typing.get_args(annotation):
+            ModelDependencyResolver.extract_all_references(origin, refs)
+
+        return refs
 
     def _analyze_model_dependencies(self, model: type[BaseModel]) -> set[str]:
         """Analyze a single model's dependencies from its annotations."""
         dependencies: set[str] = set()
 
         for field_info in model.model_fields.values():
-            # Use a magic value that's an invalid class name for getattr so if
-            # there is no __name__ attribute it won't appear in self.models
-            if (name := getattr(field_info.annotation, "__name__", "!")) in self.models:
-                dependencies.update(name)
+            references = ModelDependencyResolver.extract_all_references(
+                field_info.annotation
+            )
+
+            dependencies.update(ref for ref in references if ref in self.models)
 
         return dependencies
 
@@ -48,17 +75,9 @@ class ModelDependencyResolver:
         self.dependencies.clear()
         self.graph.clear()
 
-        # First pass: collect all dependencies
         for model_name, model in self.models.items():
             deps = self._analyze_model_dependencies(model)
             self.dependencies[model_name] = deps
-
-        # Second pass: build directed graph
-        for model_name, deps in self.dependencies.items():
-            for dep in deps:
-                if dep in self.models:
-                    # Build forward graph (dependency -> dependent)
-                    self.graph[dep].append(model_name)
 
     def _tarjan_scc(self) -> list[list[str]]:
         """Find strongly connected components using Tarjan's algorithm."""
@@ -76,13 +95,6 @@ class ModelDependencyResolver:
             stack.append(node)
             on_stack[node] = True
 
-            for successor in self.graph[node]:
-                if successor not in index:
-                    strongconnect(successor)
-                    lowlinks[node] = min(lowlinks[node], lowlinks[successor])
-                elif on_stack[successor]:
-                    lowlinks[node] = min(lowlinks[node], index[successor])
-
             if lowlinks[node] == index[node]:
                 component: list[str] = []
                 while True:
@@ -99,41 +111,6 @@ class ModelDependencyResolver:
 
         return sccs
 
-    def _topological_sort_sccs(self, sccs: list[list[str]]) -> list[list[str]]:
-        """Topologically sort the strongly connected components."""
-        # Map each node to its SCC index
-        node_to_scc = {node: i for i, scc in enumerate(sccs) for node in scc}
-
-        # Find dependencies between SCCs
-        dependencies: set[tuple[int, ...]] = set()
-        for node in self.models:
-            for neighbor in self.graph[node]:
-                src_scc, dst_scc = node_to_scc[node], node_to_scc[neighbor]
-                if src_scc != dst_scc:
-                    dependencies.add((src_scc, dst_scc))
-
-        # Count incoming edges for each SCC
-        in_degree = [0] * len(sccs)
-        for _, dst in dependencies:
-            in_degree[dst] += 1
-
-        # Process SCCs with no dependencies first
-        ready = [i for i, deg in enumerate(in_degree) if deg == 0]
-        result: list[list[str]] = []
-
-        while ready:
-            current = ready.pop()
-            result.append(sccs[current])
-
-            # Remove this SCC and update in-degrees
-            for src, dst in dependencies:
-                if src == current:
-                    in_degree[dst] -= 1
-                    if in_degree[dst] == 0:
-                        ready.append(dst)
-
-        return result
-
     def get_rebuild_order(self) -> list[list[str]]:
         """
         Get the order in which models should be rebuilt.
@@ -141,8 +118,7 @@ class ModelDependencyResolver:
         rebuilt together.
         """
         self.build_dependency_graph()
-        sccs = self._tarjan_scc()
-        return self._topological_sort_sccs(sccs)
+        return self._tarjan_scc()
 
     def rebuild_models(self) -> None:
         """Rebuild all registered models in the correct dependency order."""

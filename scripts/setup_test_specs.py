@@ -50,8 +50,8 @@ def clone(content: dict[str, Any]):
     if not directory.exists():
         directory.mkdir()
 
-    for local, remote in content["repos"].items():
-        local_directory: Path = directory / local
+    for _, repo in content["repos"].items():
+        local_directory: Path = directory / repo["local"]
 
         if local_directory.exists():
             logger.info(f"{local_directory} already exists. Skipping.")
@@ -63,16 +63,16 @@ def clone(content: dict[str, Any]):
             dir=clone_directory.parent, prefix=clone_directory.name
         )
 
-        logger.info(f"Cloning {remote['uri']} into {tmp_directory}")
+        logger.info(f"Cloning {repo['uri']} into {tmp_directory}")
 
         subprocess.run(
             [
                 "git",
                 "clone",
-                remote["uri"],
+                repo["uri"],
                 f"{tmp_directory}",
                 "--depth=1",
-                f"--revision={remote['revision']}",
+                f"--revision={repo['revision']}",
             ],
             check=True,
         )

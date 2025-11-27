@@ -1,14 +1,5 @@
 [
     {
-        "msg": "$ref is not a valid field for ExampleObject.",
-        "type": "value_error",
-        "loc": [
-            "ExampleObject"
-        ],
-        "input": "$ref",
-        "url": "https://spec.openapis.org/oas/v3.0.4.html#example-object"
-    },
-    {
         "msg": "Expected at most one field to have a value, none did",
         "type": "warning",
         "loc": [

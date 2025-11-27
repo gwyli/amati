@@ -13,36 +13,36 @@ type JSONObject = dict[str, "JSONValue"]
 type JSONValue = JSONPrimitive | JSONArray | JSONObject
 
 
-def remove_duplicates(data: list[JSONObject]) -> list[JSONObject]:
-    """
-    Remove duplicates by converting each dict to a JSON string for comparison.
-    """
-    seen: set[str] = set()
-    unique_data: list[JSONObject] = []
+class ErrorHandler:
+    def __init__(self) -> None:
+        self._errors: list[JSONObject] = []
 
-    for item in data:
-        # Convert to JSON string with sorted keys for consistent hashing
-        item_json = json.dumps(item, sort_keys=True, separators=(",", ":"))
-        if item_json not in seen:
-            seen.add(item_json)
-            unique_data.append(item)
+    def register_logs(self, logs: list[Log]):
+        self._errors.extend(cast(list[JSONObject], logs))
 
-    return unique_data
+    def register_log(self, log: Log):
+        self._errors.append(cast(JSONObject, log))
 
+    def register_errors(self, errors: list[JSONObject]):
+        self._errors.extend(errors)
 
-def handle_errors(errors: list[JSONObject] | None, logs: list[Log]) -> list[JSONObject]:
-    """
-    Makes errors and logs consistent for user consumption.
-    """
+    def deduplicate(self):
+        """
+        Remove duplicates by converting each dict to a JSON string for comparison.
+        """
+        seen: set[str] = set()
+        unique_data: list[JSONObject] = []
 
-    result: list[JSONObject] = []
+        item: JSONObject
+        for item in self._errors:
+            # Convert to JSON string with sorted keys for consistent hashing
+            item_json = json.dumps(item, sort_keys=True, separators=(",", ":"))
+            if item_json not in seen:
+                seen.add(item_json)
+                unique_data.append(item)
 
-    if errors:
-        result.extend(errors)
+        self._errors = unique_data
 
-    if logs:
-        result.extend(cast(list[JSONObject], logs))
-
-    result = remove_duplicates(result)
-
-    return result
+    @property
+    def errors(self) -> list[JSONObject]:
+        return self._errors
