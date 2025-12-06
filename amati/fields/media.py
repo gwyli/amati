@@ -8,7 +8,8 @@ from typing import cast
 from abnf import ParseError
 from abnf.grammars import rfc7231
 
-from amati import AmatiValueError, get
+from amati import get
+from amati.exceptions import AmatiValueError
 from amati.fields import Str as _Str
 
 reference_uri = "https://datatracker.ietf.org/doc/html/rfc7231#appendix-D"

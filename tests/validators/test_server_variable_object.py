@@ -9,12 +9,14 @@ from pydantic import ValidationError
 
 from amati._logging import Logger
 from amati.validators.oas311 import ServerVariableObject
-from tests import helpers
+from tests import strategies
 
 
 @st.composite
 def valid_server_variable(draw: st.DrawFn) -> dict[str, list[str] | str]:
-    enum: list[str] = draw(st.lists(helpers.text_excluding_empty_string(), min_size=1))
+    enum: list[str] = draw(
+        st.lists(strategies.text_excluding_empty_string(), min_size=1)
+    )
     default: str = draw(st.sampled_from(enum))
     return {"enum": enum, "default": default, "description": draw(st.text())}
 
@@ -34,7 +36,9 @@ def test_empty_enum(default: str):
 
 @st.composite
 def invalid_server_variable(draw: st.DrawFn) -> tuple[list[str], str]:
-    enum: list[str] = draw(st.lists(helpers.text_excluding_empty_string(), min_size=1))
+    enum: list[str] = draw(
+        st.lists(strategies.text_excluding_empty_string(), min_size=1)
+    )
     default: str = draw(st.text().filter(lambda x: x not in enum and x != ""))
     return enum, default
 

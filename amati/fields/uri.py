@@ -9,7 +9,8 @@ import idna
 from abnf import Node, ParseError, Rule
 from abnf.grammars import rfc3986, rfc3987
 
-from amati import AmatiValueError, get
+from amati import get
+from amati.exceptions import AmatiValueError
 from amati.fields import Str as _Str
 from amati.grammars import rfc6901
 

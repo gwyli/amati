@@ -14,7 +14,7 @@ from amati.fields import URI
 from amati.fields.iso9110 import HTTP_AUTHENTICATION_SCHEMES
 from amati.validators.oas304 import OAuthFlowsObject
 from amati.validators.oas311 import SecuritySchemeObject
-from tests.helpers import text_excluding_empty_string
+from tests.strategies import text_excluding_empty_string
 
 VALID_SECURITY_SCHEME_TYPES: list[str] = list(
     SecuritySchemeObject._SECURITY_SCHEME_TYPES  # type: ignore

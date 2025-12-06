@@ -1,0 +1,1439 @@
+[
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-completed",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-completed"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-completed",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-completed"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-completed",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-completed-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-completed",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-completed-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-created"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-created"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-created-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-created-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-requested-action",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-requested-action"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-requested-action",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-requested-action"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-requested-action",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-requested-action-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-requested-action",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-requested-action-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-rerequested",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-rerequested"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-rerequested",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-rerequested"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-rerequested",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-rerequested-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "check-run-rerequested",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/check-run-rerequested-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "ping",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/ping"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "ping",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/ping"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "ping",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/ping-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "ping",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/ping-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "secret-scanning-alert-location-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/secret-scanning-alert-location-created"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "secret-scanning-alert-location-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/json",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/secret-scanning-alert-location-created"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "secret-scanning-alert-location-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/secret-scanning-alert-location-created-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "webhooks",
+            "secret-scanning-alert-location-created",
+            "post",
+            "requestBody",
+            "other",
+            "content",
+            "application/x-www-form-urlencoded",
+            "examples",
+            "default",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/examples/secret-scanning-alert-location-created-form-encoded"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "validation_failed_simple",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/validation-error-simple"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "validation_failed_simple",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/validation-error-simple"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "not_found",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "not_found",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "bad_request",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "bad_request",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "bad_request",
+            "other",
+            "content",
+            "application/scim+json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/scim-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "bad_request",
+            "other",
+            "content",
+            "application/scim+json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/scim-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "validation_failed",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/validation-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "validation_failed",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/validation-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "requires_authentication",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "requires_authentication",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "forbidden",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "forbidden",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "internal_error",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "internal_error",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "conflict",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "conflict",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "moved_permanently",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "moved_permanently",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "billing_usage_report_org",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/billing-usage-report"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "billing_usage_report_org",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/billing-usage-report"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "usage_metrics_api_disabled",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "usage_metrics_api_disabled",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "gone",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "gone",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "temporary_redirect",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "temporary_redirect",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_forbidden_read",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_forbidden_read",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_forbidden_write",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_forbidden_write",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_bad_request",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_bad_request",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_autofix_create_forbidden",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_autofix_create_forbidden",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "unprocessable_analysis",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "unprocessable_analysis",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_conflict",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "code_scanning_conflict",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "dependency_review_forbidden",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "dependency_review_forbidden",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "porter_maintenance",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "porter_maintenance",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "unacceptable",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "unacceptable",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/basic-error"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "billing_usage_report_user",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "summary"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/billing-usage-report-user"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "type": "missing",
+        "loc": [
+            "components",
+            "responses",
+            "billing_usage_report_user",
+            "other",
+            "content",
+            "application/json",
+            "schema",
+            "ref",
+            "description"
+        ],
+        "msg": "Field required",
+        "input": {
+            "$ref": "#/components/schemas/billing-usage-report-user"
+        },
+        "url": "https://errors.pydantic.dev/2.12/v/missing"
+    },
+    {
+        "msg": "https://spdx.org/licenses/MIT is not a valid SPDX URL",
+        "type": "warning",
+        "loc": [
+            "LicenceObject"
+        ],
+        "input": "https://spdx.org/licenses/MIT",
+        "url": "https://spec.openapis.org/oas/v3.1.1.html#license-object"
+    },
+    {
+        "msg": "Expected at most one field to have a value, none did",
+        "type": "warning",
+        "loc": [
+            "ExampleObject"
+        ],
+        "input": {
+            "value": null,
+            "externalValue": null
+        },
+        "url": "https://spec.openapis.org/oas/v3.0.4.html#example-object"
+    }
+]
