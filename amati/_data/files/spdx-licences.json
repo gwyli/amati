@@ -284,6 +284,15 @@
     "isFsfLibre": false
   },
   {
+    "reference": "https://spdx.org/licenses/ALGLIB-Documentation.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/ALGLIB-Documentation.json",
+    "name": "ALGLIB Documentation License",
+    "licenseId": "ALGLIB-Documentation",
+    "seeAlso": [],
+    "isOsiApproved": true
+  },
+  {
     "reference": "https://spdx.org/licenses/AMD-newlib.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/AMD-newlib.json",
@@ -4354,6 +4363,18 @@
       "https://raw.githubusercontent.com/GNOME/libxml2/4c2e7c651f6c2f0d1a74f350cbda95f7df3e7017/hash.c",
       "https://github.com/GNOME/libxml2/blob/master/dict.c",
       "https://sourceforge.net/p/ctrio/git/ci/master/tree/README"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/ISO-permission.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/ISO-permission.json",
+    "name": "ISO permission notice",
+    "licenseId": "ISO-permission",
+    "seeAlso": [
+      "https://gitlab.com/agmartin/linuxdoc-tools/-/blob/master/iso-entities/COPYING?ref_type=heads",
+      "https://www.itu.int/ITU-T/formal-language/itu-t/t/t173/1997/ISOMHEG-sir.html"
     ],
     "isOsiApproved": false
   },
