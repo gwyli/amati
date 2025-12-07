@@ -5,7 +5,8 @@ Exchange (SPDX) licence list.
 
 from typing import Any, cast
 
-from amati import AmatiValueError, get
+from amati import get
+from amati.exceptions import AmatiValueError
 from amati.fields import Str as _Str
 from amati.fields.uri import URI
 
