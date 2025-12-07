@@ -10,7 +10,7 @@ class AmatiValueError(ValueError):
 
     Attributes:
         message (str): The explanation of why the exception was raised
-        authority (Optional[ReferenceModel]): The reference to the standard that
+        reference_uri (str | None): The reference to the standard that
             explains why the exception was raised
 
     Inherits:

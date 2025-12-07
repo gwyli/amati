@@ -6,7 +6,7 @@ from typing import ClassVar
 
 from abnf import ParseError
 
-from amati import AmatiValueError
+from amati.exceptions import AmatiValueError
 from amati.fields import Str as _Str
 from amati.grammars import oas
 

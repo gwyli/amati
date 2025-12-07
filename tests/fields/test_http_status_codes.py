@@ -10,7 +10,7 @@ from hypothesis.strategies import integers, sampled_from
 
 from amati import AmatiValueError
 from amati.fields.http_status_codes import HTTP_STATUS_CODES, HTTPStatusCode
-from tests import helpers
+from tests import strategies
 
 REGISTERED_HTTP_STATUS_CODES = list(HTTP_STATUS_CODES.keys())
 HTTP_STATUS_CODE_RANGES = ["1XX", "2XX", "3XX", "4XX", "5XX"]
@@ -47,7 +47,7 @@ def test_status_code_range(value: str):
 
 
 @given(
-    helpers.everything_except(int).filter(
+    strategies.everything_except(int).filter(
         lambda x: x not in REGISTERED_HTTP_STATUS_CODES
     )
 )
