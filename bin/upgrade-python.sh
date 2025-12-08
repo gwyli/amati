@@ -9,8 +9,7 @@
 
 deactivate || true
 uv self update
+. .venv/bin/activate
 uv python upgrade "$1"
 uv python pin "$1"
-uv venv
-. .venv/bin/activate
 uv sync --all-groups
