@@ -17,3 +17,7 @@ repos:
   hooks:
     - id: shellcheck
       args: [-x]
+- repo: https://github.com/fpgmaas/deptry.git
+  rev: 0.24.0
+  hooks:
+    - id: deptry
