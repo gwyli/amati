@@ -29,11 +29,11 @@ dependencies = [
     "bs4>=0.0.2",
     "idna>=3.10",
     "jinja2>=3.1.6",
-    "jsonpickle>=4.1.1",
     "jsonschema>=4.24.0",
     "loguru>=0.7.3",
-    "pydantic>=2.11.5",
-    "pyyaml>=6.0.2",
+    "pydantic>=2.12.5",
+    "pydantic-core>=2.41.5",
+    "pyyaml>=6.0.3",
     "requests>=2.32.4",
 ]
 
@@ -50,6 +50,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "deptry>=0.24.0",
     "hypothesis>=6.131.28",
     "pre-commit>=4.2.0",
     "pyright>=1.1.406",
@@ -64,6 +65,22 @@ omit=[
     "tests/*",
     "amati/_data/*",
 ]
+
+[tool.deptry.package_module_name_map]
+abnf="abnf"
+bs4="bs4"
+idna="idna"
+jinja2="jinja2"
+jsonschema="jsonschema"
+loguru="loguru"
+pydantic="pydantic"
+requests="requests"
+hypothesis="hypothesis"
+pre_commit="pre_commit"
+pyright="pyright"
+pytest="pytest"
+pytest-cov="pytest_cov"
+ruff="ruff"
 
 [tool.pyright]
 reportMissingTypeStubs=false
