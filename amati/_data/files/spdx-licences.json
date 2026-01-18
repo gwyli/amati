@@ -4074,6 +4074,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/HPND-sell-variant-critical-systems.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/HPND-sell-variant-critical-systems.json",
+    "name": "HPND - sell variant with safety critical systems clause",
+    "licenseId": "HPND-sell-variant-critical-systems",
+    "seeAlso": [
+      "https://gitlab.freedesktop.org/xorg/driver/xf86-video-voodoo/-/blob/68a5b6d98ae34749cca889f4373b4043d00bfe6a/src/voodoo_dga.c#L12-33"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/HPND-sell-variant-MIT-disclaimer.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/HPND-sell-variant-MIT-disclaimer.json",
@@ -7767,6 +7778,17 @@
     "licenseId": "Unlicense-libwhirlpool",
     "seeAlso": [
       "https://github.com/dfateyev/libwhirlpool/blob/master/README#L27"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/UnRAR.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/UnRAR.json",
+    "name": "UnRAR License",
+    "licenseId": "UnRAR",
+    "seeAlso": [
+      "https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/LICENSES/unRAR.txt"
     ],
     "isOsiApproved": false
   },
