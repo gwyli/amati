@@ -1352,6 +1352,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/CAPEC-tou.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/CAPEC-tou.json",
+    "name": "Common Attack    Pattern Enumeration and Classification License",
+    "licenseId": "CAPEC-tou",
+    "seeAlso": [
+      "https://capec.mitre.org/about/termsofuse.html"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/Catharon.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/Catharon.json",
@@ -5346,6 +5357,18 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/MMPL-1.0.1.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/MMPL-1.0.1.json",
+    "name": "Minecraft Mod Public License v1.0.1",
+    "licenseId": "MMPL-1.0.1",
+    "seeAlso": [
+      "https://github.com/BuildCraft/BuildCraft/blob/623d323b1868712f29f4a8b0979a02e8d1835131/LICENSE",
+      "https://mod-buildcraft.com/MMPL-1.0.txt"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/Motosoto.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/Motosoto.json",
@@ -6346,6 +6369,18 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/OpenMDW-1.0.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/OpenMDW-1.0.json",
+    "name": "OpenMDW License Agreement v1.0",
+    "licenseId": "OpenMDW-1.0",
+    "seeAlso": [
+      "https://raw.githubusercontent.com/OpenMDW/OpenMDW/refs/heads/main/1.0/LICENSE.openmdw",
+      "https://openmdw.ai/license/"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/OpenPBS-2.3.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/OpenPBS-2.3.json",
@@ -6524,6 +6559,18 @@
     "licenseId": "PADL",
     "seeAlso": [
       "https://git.openldap.org/openldap/openldap/-/blob/master/libraries/libldap/os-local.c?ref_type=heads#L19-23"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/ParaType-Free-Font-1.3.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/ParaType-Free-Font-1.3.json",
+    "name": "ParaType Free Font Licensing Agreement v1.3",
+    "licenseId": "ParaType-Free-Font-1.3",
+    "seeAlso": [
+      "https://web.archive.org/web/20161209023955/http://www.paratype.ru/public/pt_openlicense_eng.asp",
+      "https://metadata.ftp-master.debian.org/changelogs//main/f/fonts-paratype/fonts-paratype_20181108-4_copyright"
     ],
     "isOsiApproved": false
   },

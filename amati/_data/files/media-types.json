@@ -408,7 +408,7 @@
     "rlmi+xml",
     "rls-services+xml",
     "rpki-checklist",
-    "rpki-ghostbusters",
+    "rpki-ghostbusters (DEPRECATED)",
     "rpki-manifest",
     "rpki-publication",
     "rpki-roa",
