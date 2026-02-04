@@ -2,7 +2,7 @@
 Validates a URI according to the RFC3986 ABNF grammar
 """
 
-from enum import Enum
+from enum import StrEnum
 from typing import ClassVar, Self, cast
 
 import idna
@@ -65,7 +65,7 @@ class Scheme(_Str):
         self.status = SCHEMES.get(value)
 
 
-class URIType(str, Enum):
+class URIType(StrEnum):
     """Enumeration of URI reference types.
 
     Categorizes different types of URI references as defined in RFC 3986,
