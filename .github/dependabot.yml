@@ -6,6 +6,10 @@ updates:
     # Check the registry for updates every day (weekdays)
     schedule:
       interval: "daily"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     # Workflow files stored in the default location of `.github/workflows`
@@ -16,9 +20,17 @@ updates:
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker"
     # Look for `Dockerfile` in the root directory
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
