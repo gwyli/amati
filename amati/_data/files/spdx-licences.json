@@ -766,6 +766,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/BOLA-1.1.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/BOLA-1.1.json",
+    "name": "Buena Onda License Agreement v1.1",
+    "licenseId": "BOLA-1.1",
+    "seeAlso": [
+      "https://blitiri.com.ar/p/bola/"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/Borceux.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/Borceux.json",
@@ -4796,7 +4807,8 @@
     "licenseId": "LiLiQ-P-1.1",
     "seeAlso": [
       "https://forge.gouv.qc.ca/licence/fr/liliq-v1-1/",
-      "http://opensource.org/licenses/LiLiQ-P-1.1"
+      "http://opensource.org/licenses/LiLiQ-P-1.1",
+      "https://forge.gouv.qc.ca/licence/liliq-p/"
     ],
     "isOsiApproved": true
   },
@@ -4808,7 +4820,8 @@
     "licenseId": "LiLiQ-R-1.1",
     "seeAlso": [
       "https://www.forge.gouv.qc.ca/participez/licence-logicielle/licence-libre-du-quebec-liliq-en-francais/licence-libre-du-quebec-reciprocite-liliq-r-v1-1/",
-      "http://opensource.org/licenses/LiLiQ-R-1.1"
+      "http://opensource.org/licenses/LiLiQ-R-1.1",
+      "https://forge.gouv.qc.ca/licence/liliq-p"
     ],
     "isOsiApproved": true
   },
@@ -4820,7 +4833,8 @@
     "licenseId": "LiLiQ-Rplus-1.1",
     "seeAlso": [
       "https://www.forge.gouv.qc.ca/participez/licence-logicielle/licence-libre-du-quebec-liliq-en-francais/licence-libre-du-quebec-reciprocite-forte-liliq-r-v1-1/",
-      "http://opensource.org/licenses/LiLiQ-Rplus-1.1"
+      "http://opensource.org/licenses/LiLiQ-Rplus-1.1",
+      "https://forge.gouv.qc.ca/licence/liliq-r+/"
     ],
     "isOsiApproved": true
   },
@@ -6467,6 +6481,17 @@
       "https://www.ctan.org/license/opl"
     ],
     "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/OSC-1.0.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/OSC-1.0.json",
+    "name": "OSC License 1.0",
+    "licenseId": "OSC-1.0",
+    "seeAlso": [
+      "https://opensource.org/license/osc-license-1-0"
+    ],
+    "isOsiApproved": true
   },
   {
     "reference": "https://spdx.org/licenses/OSET-PL-2.1.html",

@@ -9,6 +9,7 @@
     "3gpp-media-delivery-metrics-report+json",
     "3gppHal+json",
     "3gppHalForms+json",
+    "aas+zip",
     "A2L",
     "ace-groupcomm+cbor",
     "ace-trl+cbor",
