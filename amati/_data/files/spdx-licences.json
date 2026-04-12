@@ -5194,7 +5194,8 @@
     "licenseId": "MIT",
     "seeAlso": [
       "https://opensource.org/license/mit/",
-      "http://opensource.org/licenses/MIT"
+      "http://opensource.org/licenses/MIT",
+      "https://gitlab.freedesktop.org/xorg/xserver/-/blob/dd5c2595a42d3ff0c4f18d9b53d1f6c3fd934fd4/COPYING#L365-389"
     ],
     "isOsiApproved": true,
     "isFsfLibre": true
@@ -5789,6 +5790,7 @@
     "name": "NIST Software License",
     "licenseId": "NIST-Software",
     "seeAlso": [
+      "https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications",
       "https://github.com/open-quantum-safe/liboqs/blob/40b01fdbb270f8614fde30e65d30e9da18c02393/src/common/rand/rand_nist.c#L1-L15"
     ],
     "isOsiApproved": false
