@@ -810,6 +810,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/Brian-Gladman-3-Clause-no-conversion.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Brian-Gladman-3-Clause-no-conversion.json",
+    "name": "Brian Gladman 3-Clause License (no conversion clause)",
+    "licenseId": "Brian-Gladman-3-Clause-no-conversion",
+    "seeAlso": [
+      "https://github.com/krb5/krb5/blob/kfw-4.0.1-beta1/src/lib/crypto/builtin/aes/aesopt.h"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/BSD-1-Clause.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BSD-1-Clause.json",
@@ -5580,6 +5591,19 @@
     "licenseId": "Mup",
     "seeAlso": [
       "https://fedoraproject.org/wiki/Licensing/Mup"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/MVT-1.1.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/MVT-1.1.json",
+    "name": "MVT License 1.1",
+    "licenseId": "MVT-1.1",
+    "seeAlso": [
+      "https://license.mvt.re/1.1/",
+      "https://docs.mvt.re/en/latest/license/",
+      "https://github.com/mvt-project/mvt/blob/main/LICENSE"
     ],
     "isOsiApproved": false
   },
