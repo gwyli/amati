@@ -91,6 +91,7 @@
     "cid-edhoc+cbor-seq",
     "city+json",
     "city+json-seq",
+    "client-authentication+jwt",
     "clr",
     "clue_info+xml",
     "clue+xml",
