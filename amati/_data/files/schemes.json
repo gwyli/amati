@@ -54,6 +54,7 @@
   "content-type": "Provisional",
   "crid": "Permanent",
   "cstr": "Provisional",
+  "cttps": "Provisional",
   "cvs": "Provisional",
   "dab": "Provisional",
   "dat": "Provisional",
@@ -126,9 +127,9 @@
   "iax": "Permanent",
   "ibi": "Provisional",
   "ibi-": "Provisional",
-  "ilstring": "Provisional",
   "icap": "Permanent",
   "icon": "Provisional",
+  "ilstring": "Provisional",
   "im": "Permanent",
   "imap": "Permanent",
   "info": "Permanent",
@@ -409,5 +410,6 @@
   "ymsgr": "Provisional",
   "z39.50": "Historical",
   "z39.50r": "Permanent",
-  "z39.50s": "Permanent"
+  "z39.50s": "Permanent",
+  "ztdnaid": "Provisional"
 }
