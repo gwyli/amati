@@ -2046,7 +2046,7 @@
       "http://glassfish.java.net/public/CDDL+GPL_1_1.html",
       "https://javaee.github.io/glassfish/LICENSE"
     ],
-    "isOsiApproved": false
+    "isOsiApproved": true
   },
   {
     "reference": "https://spdx.org/licenses/CDL-1.0.html",
