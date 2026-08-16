@@ -617,6 +617,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/atc-game.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/atc-game.json",
+    "name": "atc Game License",
+    "licenseId": "atc-game",
+    "seeAlso": [
+      "https://github.com/vattam/BSDGames/blob/master/atc/extern.c#L36"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/Baekmuk.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/Baekmuk.json",
@@ -1281,6 +1292,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/Bugroff.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Bugroff.json",
+    "name": "Bugroff License",
+    "licenseId": "Bugroff",
+    "seeAlso": [
+      "https://tunes.org/legalese/bugroff.html"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/BUSL-1.1.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BUSL-1.1.json",
@@ -1596,6 +1618,17 @@
     "licenseId": "CC-BY-NC-3.0-DE",
     "seeAlso": [
       "https://creativecommons.org/licenses/by-nc/3.0/de/legalcode"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/CC-BY-NC-3.0-IGO.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/CC-BY-NC-3.0-IGO.json",
+    "name": "Creative Commons Attribution Non Commercial 3.0 IGO",
+    "licenseId": "CC-BY-NC-3.0-IGO",
+    "seeAlso": [
+      "https://creativecommons.org/licenses/by-nc/3.0/igo/legalcode"
     ],
     "isOsiApproved": false
   },
@@ -2957,7 +2990,8 @@
       "https://joinup.ec.europa.eu/sites/default/files/custom-page/attachment/2020-03/EUPL-1.2%20EN.txt",
       "https://joinup.ec.europa.eu/sites/default/files/inline-files/EUPL%20v1_2%20EN(1).txt",
       "http://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017D0863",
-      "https://opensource.org/license/EUPL-1.2"
+      "https://opensource.org/license/EUPL-1.2",
+      "https://interoperable-europe.ec.europa.eu/sites/default/files/inline-files/EUPL%20v1_2%20EN(1).txt"
     ],
     "isOsiApproved": true,
     "isFsfLibre": true
@@ -4300,6 +4334,18 @@
     "licenseId": "Info-ZIP",
     "seeAlso": [
       "http://www.info-zip.org/license.html"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/Informatica.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Informatica.json",
+    "name": "Informatica License",
+    "licenseId": "Informatica",
+    "seeAlso": [
+      "https://raw.githubusercontent.com/landtuna/open-mtools/6c04c2882eca7c4313ec267766ea53ac9bfe129b/msend.c",
+      "https://raw.githubusercontent.com/landtuna/open-mtools/6c04c2882eca7c4313ec267766ea53ac9bfe129b/mdump.c"
     ],
     "isOsiApproved": false
   },
