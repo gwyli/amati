@@ -617,6 +617,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/atc-game.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/atc-game.json",
+    "name": "atc Game License",
+    "licenseId": "atc-game",
+    "seeAlso": [
+      "https://github.com/vattam/BSDGames/blob/master/atc/extern.c#L36"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/Baekmuk.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/Baekmuk.json",
@@ -916,6 +927,20 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/BSD-2-Clause-pos-unchanged.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/BSD-2-Clause-pos-unchanged.json",
+    "name": "BSD 2-Clause - position unchanged variant",
+    "licenseId": "BSD-2-Clause-pos-unchanged",
+    "seeAlso": [
+      "https://scancode-licensedb.aboutcode.org/bsd-unchanged",
+      "https://cgit.freebsd.org/src/tree/usr.bin/sockstat/sockstat.c",
+      "https://github.com/libarchive/libarchive/blob/master/libarchive_fe/line_reader.c",
+      "https://github.com/freebsd/pkg/blob/main/src/add.c"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/BSD-2-Clause-Views.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BSD-2-Clause-Views.json",
@@ -1077,6 +1102,17 @@
     "isOsiApproved": true
   },
   {
+    "reference": "https://spdx.org/licenses/BSD-3-Clause-OpenWebUI.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/BSD-3-Clause-OpenWebUI.json",
+    "name": "BSD 3-Clause - OpenWebUI variant",
+    "licenseId": "BSD-3-Clause-OpenWebUI",
+    "seeAlso": [
+      "https://github.com/open-webui/open-webui/blob/main/LICENSE"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/BSD-3-Clause-Sun.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BSD-3-Clause-Sun.json",
@@ -1169,6 +1205,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/BSD-ask-to-endorse.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/BSD-ask-to-endorse.json",
+    "name": "BSD - ask to endorse",
+    "licenseId": "BSD-ask-to-endorse",
+    "seeAlso": [
+      "https://github.com/sudo-project/sudo/blob/c1307ea9ff340ce0538779f8e456501461fc44b7/plugins/sudoers/redblack.c#L24-L43"
+    ],
+    "isOsiApproved": true
+  },
+  {
     "reference": "https://spdx.org/licenses/BSD-Attribution-HPND-disclaimer.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BSD-Attribution-HPND-disclaimer.json",
@@ -1235,6 +1282,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/BSD-Source-Code-no-disclaimer.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/BSD-Source-Code-no-disclaimer.json",
+    "name": "BSD Source Code Attribution - no disclaimer",
+    "licenseId": "BSD-Source-Code-no-disclaimer",
+    "seeAlso": [
+      "https://github.com/PicoEFI/PicoEFI/blob/2263ac1a2bc98e5534d64a4896d3cfbbae00745a/LICENSES/LicenseRef-scancode-bsd-no-disclaimer-unmodified.txt"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/BSD-Systemics.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/BSD-Systemics.json",
@@ -1277,6 +1335,17 @@
     "licenseId": "Buddy",
     "seeAlso": [
       "https://sourceforge.net/p/buddy/gitcode/ci/master/tree/README"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/Bugroff.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Bugroff.json",
+    "name": "Bugroff License",
+    "licenseId": "Bugroff",
+    "seeAlso": [
+      "https://tunes.org/legalese/bugroff.html"
     ],
     "isOsiApproved": false
   },
@@ -1596,6 +1665,17 @@
     "licenseId": "CC-BY-NC-3.0-DE",
     "seeAlso": [
       "https://creativecommons.org/licenses/by-nc/3.0/de/legalcode"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/CC-BY-NC-3.0-IGO.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/CC-BY-NC-3.0-IGO.json",
+    "name": "Creative Commons Attribution Non Commercial 3.0 IGO",
+    "licenseId": "CC-BY-NC-3.0-IGO",
+    "seeAlso": [
+      "https://creativecommons.org/licenses/by-nc/3.0/igo/legalcode"
     ],
     "isOsiApproved": false
   },
@@ -2516,9 +2596,10 @@
     "name": "curl License",
     "licenseId": "curl",
     "seeAlso": [
-      "https://github.com/bagder/curl/blob/master/COPYING"
+      "https://github.com/bagder/curl/blob/master/COPYING",
+      "https://opensource.org/license/curl"
     ],
-    "isOsiApproved": false
+    "isOsiApproved": true
   },
   {
     "reference": "https://spdx.org/licenses/cve-tou.html",
@@ -2957,7 +3038,8 @@
       "https://joinup.ec.europa.eu/sites/default/files/custom-page/attachment/2020-03/EUPL-1.2%20EN.txt",
       "https://joinup.ec.europa.eu/sites/default/files/inline-files/EUPL%20v1_2%20EN(1).txt",
       "http://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017D0863",
-      "https://opensource.org/license/EUPL-1.2"
+      "https://opensource.org/license/EUPL-1.2",
+      "https://interoperable-europe.ec.europa.eu/sites/default/files/inline-files/EUPL%20v1_2%20EN(1).txt"
     ],
     "isOsiApproved": true,
     "isFsfLibre": true
@@ -3005,6 +3087,17 @@
     "seeAlso": [
       "https://fedoraproject.org/wiki/Licensing/FDK-AAC",
       "https://directory.fsf.org/wiki/License:Fdk"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/FDK-MPEG-H.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/FDK-MPEG-H.json",
+    "name": "Fraunhofer FDK MPEG-H Software",
+    "licenseId": "FDK-MPEG-H",
+    "seeAlso": [
+      "https://github.com/Fraunhofer-IIS/mpeghdec/blob/main/LICENSE.txt"
     ],
     "isOsiApproved": false
   },
@@ -3858,6 +3951,17 @@
     "isOsiApproved": false
   },
   {
+    "reference": "https://spdx.org/licenses/Hippocratic-3.0-core.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Hippocratic-3.0-core.json",
+    "name": "Hippocratic License 3.0",
+    "licenseId": "Hippocratic-3.0-core",
+    "seeAlso": [
+      "https://firstdonoharm.dev/version/3/0/core.txt"
+    ],
+    "isOsiApproved": false
+  },
+  {
     "reference": "https://spdx.org/licenses/HP-1986.html",
     "isDeprecatedLicenseId": false,
     "detailsUrl": "https://spdx.org/licenses/HP-1986.json",
@@ -4300,6 +4404,18 @@
     "licenseId": "Info-ZIP",
     "seeAlso": [
       "http://www.info-zip.org/license.html"
+    ],
+    "isOsiApproved": false
+  },
+  {
+    "reference": "https://spdx.org/licenses/Informatica.html",
+    "isDeprecatedLicenseId": false,
+    "detailsUrl": "https://spdx.org/licenses/Informatica.json",
+    "name": "Informatica License",
+    "licenseId": "Informatica",
+    "seeAlso": [
+      "https://raw.githubusercontent.com/landtuna/open-mtools/6c04c2882eca7c4313ec267766ea53ac9bfe129b/msend.c",
+      "https://raw.githubusercontent.com/landtuna/open-mtools/6c04c2882eca7c4313ec267766ea53ac9bfe129b/mdump.c"
     ],
     "isOsiApproved": false
   },
